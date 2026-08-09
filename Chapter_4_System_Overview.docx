@@ -1,0 +1,150 @@
+Matinao Memorial Cemetery Mapping and Management System
+
+System Overview 
+Software for cemetery management can record burial locations and manage daily operations, plot coordinates and burial records are all tracked in the software. The Matinao Memorial Cemetery Mapping and Management System using GPS-enabled mapping technology that tracks the burial locations of deceased individuals gives accurate coordinates for the plot locations. This system gives a report for the available and occupied plots through the interactive mapping system that displays real-time plot availability and status. Every time a visitor searches for a burial location, the system provides precise GPS coordinates and navigation assistance to guide them to the exact plot location within the cemetery grounds. The admin panel allows administrators to manage burial records, track available plots, process plot reservations, monitor system statistics, and generate operational reports for efficient cemetery management. If a plot is unavailable or already reserved, the system prevents duplicate bookings and alerts administrators of potential conflicts, thereby ensuring efficient utilization of cemetery space and preventing errors in plot assignments.
+
+5.2 System Objective
+	The System aims to have divided system to provide the following objectives:
+1.	To store, access and manage data for burial records and plot locations.
+2.	To allow the admin to update burial records.
+3.	To update the available plots and reservations.
+4.	To analyze the number of available and occupied plots.
+5.	Provide visitors with GPS navigation to locate burial plots.
+
+5.4.4 Software Specification
+PHP
+PHP, which stands for "Hypertext Preprocessor," is a server-side scripting language designed for web development. It is an open-source language that can be embedded directly into HTML code and executed on the server before the page is sent to the client's browser. PHP is widely used for creating dynamic web pages and applications, handling form data, managing sessions, and interacting with databases. It supports various databases including MySQL, PostgreSQL, and SQLite, making it a versatile choice for web development. PHP code is processed by the PHP interpreter on the server, which generates HTML output that is then sent to the client. This server-side execution allows for secure handling of sensitive data and complex business logic before the content reaches the user's browser.
+
+MySQL
+MySQL is an open-source relational database management system (RDBMS) that uses Structured Query Language (SQL) for managing data. Data is arranged into one or more data tables in a relational database, where the data may be connected to one another through relationships. This helps to structure the data efficiently and maintain data integrity. Programmers utilize SQL to govern user access to the database and to create, modify, and retrieve data from relational databases. Apart from relational databases and SQL, an RDBMS such as MySQL integrates with an operating system to establish a relational database in the computer's storage system, controls user access, permits network connectivity, and eases database integrity checks and backup generation. MySQL uses the InnoDB engine for transaction support and foreign key constraints, ensuring data consistency and reliability.
+
+JavaScript
+JavaScript is a high-level, interpreted programming language that is one of the core technologies of the World Wide Web. It is primarily used as a client-side scripting language in web browsers to create interactive and dynamic user interfaces. JavaScript can also be used on the server-side through runtime environments like Node.js. The language supports multiple programming paradigms including object-oriented, imperative, and functional programming styles. JavaScript code is typically embedded within HTML documents and executed by the browser's JavaScript engine. This allows for real-time updates, form validation, animations, and other interactive features without requiring page reloads. Modern JavaScript (ES6+) includes features like arrow functions, template literals, destructuring, and modules, making it more powerful and easier to maintain for complex applications.
+
+Leaflet.js
+Leaflet.js is an open-source JavaScript library for mobile-friendly interactive maps. It is designed to be lightweight, simple, and performant, with a focus on usability and accessibility. Leaflet works efficiently across all major desktop and mobile platforms, utilizing HTML5, CSS3, and modern JavaScript features. The library provides developers with tools to create interactive maps with features like zooming, panning, marker clustering, and custom tile layers. Leaflet supports various map tile providers including OpenStreetMap, Google Maps, and Esri, allowing flexibility in map visualization. The library is extensible through plugins, which add functionality such as routing, geocoding, fullscreen controls, and map rotation. Leaflet uses a modular architecture that keeps the core library small while allowing developers to include only the features they need for their specific application.
+
+5.6 Database Structure
+
+Database Name: cemetery_mapping
+
+Table 1: Admin Users
+Column Name, Datatype, Storage, Description
+id, INT, Primary Key, Auto-increment ID
+username, VARCHAR(50), Not Null, Admin username
+password, VARCHAR(255), Not Null, Hashed password
+email, VARCHAR(255), Null, Admin email address
+created_at, TIMESTAMP, Not Null, Account creation timestamp
+
+Table 1 display the column name, datatype, storage, description of the admin users that can be used to authenticate administrators individually.
+
+Table 2: Visitors
+Column Name, Datatype, Storage, Description
+id, INT, Primary Key, Auto-increment ID
+full_name, VARCHAR(255), Not Null, Visitor full name
+email, VARCHAR(255), Not Null, Visitor email address
+phone, VARCHAR(20), Null, Contact number
+password, VARCHAR(255), Not Null, Hashed password
+is_active, TINYINT(1), Not Null, Account status (1=active)
+last_login, TIMESTAMP, Null, Last login timestamp
+created_at, TIMESTAMP, Not Null, Account creation timestamp
+
+Table 2 display the column name, datatype, storage, description of the visitors that can be used to identify visitors individually.
+
+Table 3: Burial Records
+Column Name, Datatype, Storage, Description
+id, INT, Primary Key, Auto-increment ID
+decedent_name, VARCHAR(255), Not Null, Name of deceased
+birth_date, DATE, Null, Date of birth
+death_date, DATE, Null, Date of death
+barangay, VARCHAR(100), Null, Barangay location
+plot_number, VARCHAR(50), Null, Plot number
+memory_space, TEXT, Null, Memory/dedication text
+latitude, DECIMAL(10,8), Null, GPS latitude coordinate
+longitude, DECIMAL(11,8), Null, GPS longitude coordinate
+is_fenced, TINYINT(1), Not Null, Fenced plot indicator
+family_name, VARCHAR(255), Null, Family name
+photo, VARCHAR(255), Null, Photo file path
+date_added, TIMESTAMP, Not Null, Record creation timestamp
+
+Table 3 display the column name, datatype, storage, description of the burial records that can be used to track burial information individually.
+
+Table 4: Available Plots
+Column Name, Datatype, Storage, Description
+id, INT, Primary Key, Auto-increment ID
+plot_number, VARCHAR(50), Null, Plot number
+latitude, DECIMAL(10,8), Not Null, GPS latitude coordinate
+longitude, DECIMAL(11,8), Not Null, GPS longitude coordinate
+notes, TEXT, Null, Additional notes
+photo, VARCHAR(255), Null, Plot photo file path
+added_by, VARCHAR(50), Null, Admin who added plot
+date_added, TIMESTAMP, Not Null, Plot creation timestamp
+has_grid, TINYINT(1), Not Null, Grid system indicator
+grid_rows, INT, Null, Number of grid rows
+grid_cols, INT, Null, Number of grid columns
+grid_data, TEXT, Null, Grid configuration data
+compartment_count, INT, Not Null, Number of compartments
+
+Table 4 display the column name, datatype, storage, description of the available plots that can be used to manage plot locations individually.
+
+Table 5: Plot Compartments
+Column Name, Datatype, Storage, Description
+id, INT, Primary Key, Auto-increment ID
+plot_id, INT, Not Null, Reference to available_plots
+compartment_number, VARCHAR(20), Not Null, Compartment identifier
+row_index, INT, Not Null, Grid row position
+col_index, INT, Not Null, Grid column position
+is_occupied, TINYINT(1), Not Null, Occupancy status
+record_id, INT, Null, Reference to burial_records
+notes, TEXT, Null, Additional notes
+date_created, TIMESTAMP, Not Null, Compartment creation timestamp
+date_modified, TIMESTAMP, Not Null, Last modification timestamp
+
+Table 5 display the column name, datatype, storage, description of the plot compartments that can be used to manage individual plot spaces.
+
+Table 6: Visitor Activity Log
+Column Name, Datatype, Storage, Description
+id, INT, Primary Key, Auto-increment ID
+visitor_id, INT, Not Null, Reference to visitors
+activity_type, VARCHAR(50), Null, Type of activity
+record_id, INT, Null, Reference to burial_records
+ip_address, VARCHAR(45), Null, Visitor IP address
+user_agent, TEXT, Null, Browser user agent
+created_at, TIMESTAMP, Not Null, Activity timestamp
+
+Table 6 display the column name, datatype, storage, description of the visitor activities that can be used to track user actions individually.
+
+CHAPTER VI
+Design and Implementation
+The design and implementation challenges of Matinao Memorial Cemetery Mapping and Management System for the Matinao community are covered in this chapter. This approach was created by the group to help the cemetery become more efficient with regard to plot management and visitor navigation. The system was created by the organization to specifically address their needs.
+Technology is considered to be extremely important as it provides for faster and efficient daily cemetery operations. There are some cemeteries that are used to secure and manage burial information well. This study was conducted to design a system for exclusive use in Matinao Memorial Cemetery, one of the cemeteries in Matinao, Philippines. It was aimed at developing a system that could be efficient and accessible. The entire process has been organized through the help of the data gathered assisted by the use of specified technology.
+A GPS-enabled Cemetery Mapping System with AI assistant was put into place to address the issue that the cemetery, and particularly the visitors, were having with locating burial plots. Additionally, the system is built with limitations for various users to guarantee that administrators can only view data that is permitted. Additionally, the system will focus on managing burial records and plot locations. The purpose of the study at Matinao Memorial Cemetery was to address concerns about plot location accuracy and reassure visitors about the accessibility of their loved ones' burial sites, whose advancement can be facilitated by the use of suitable technologies.
+
+CHAPTER VII
+Conclusion and Recommendation
+Conclusion
+  The results from Usability Testing show positive feedback from the participants. This research is significant for the cemetery and visitors where the system can help the cemetery to manage burial records by using GPS-enabled mapping to gathered data and information of burial locations. The visitors can also be guided about the burial locations via AI assistant and GPS navigation. All in all, Cemetery Mapping and Management System is a system that is useful for cemetery, visitors, and administrators in managing burial records and locating plot locations.
+Recommendation
+  It is recommended by the group to use this study as a basis or a guide for updating and enhancing other existing system. Although it is costly, it may be more efficient to have further research.
+To other existing programs to determine the uniqueness of developing system. It is also recommended to improve the function of a system.
+
+Gantt Chart for Matinao Memorial Cemetery Mapping and Management System
+
+Tasks                                | JAN | FEB | MAR | APR | MAY | JUN | JUL | AUG | SEP | OCT | NOV | DEC |
+                                     |1234|1234|1234|1234|1234|1234|1234|1234|1234|1234|1234|1234|
+-----------------------------------------------------------------------------------------------------------------
+1. Gathering of information          |    |XXXX|    |    |    |    |    |    |    |    |    |    |
+   a. Brainstorming on system        |    |XXXX|    |    |    |    |    |    |    |    |    |    |
+   b. Preparing survey/interview     |    |    |XXXX|    |    |    |    |    |    |    |    |    |
+   c. Conducting interviews/surveys  |    |    |    |XXXX|    |    |    |    |    |    |    |    |
+2. Organizing and analyzing data     |    |    |    |    |XXXX|XXXX|    |    |    |    |    |    |
+3. Documentation of data             |    |    |    |    |    |    |XXXX|XXXX|    |    |    |    |
+4. System Development                |    |    |    |    |    |    |    |    |    |    |    |    |
+   a. Planning software/hardware     |    |    |    |    |    |XXXX|XXXX|XXXX|    |    |    |    |
+   b. Hardware/Software Spec.        |    |    |    |    |    |    |XXXX|XXXX|XXXX|    |    |    |
+5. Hardware and Software Document    |    |    |    |    |    |    |    |    |XXXX|XXXX|    |    |
+6. Designing and developing Software |    |    |    |    |    |    |    |    |    |    |    |    |
+   a. Creating database              |    |    |    |    |    |    |    |    |    |XXXX|XXXX|    |
+   b. Encoding the Program           |    |    |    |    |    |    |    |    |    |    |XXXX|XXXX|
+7. Software Documentation            |    |    |    |    |    |    |    |    |    |    |    |XXXX|
+8. Finalizing document and program   |    |    |    |    |    |    |    |    |    |    |    |    |XXXX|

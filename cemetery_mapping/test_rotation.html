@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Map Rotation</title>
+    
+    <!-- Leaflet Rotate CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-rotate@0.2.8/dist/leaflet-rotate.css" />
+    
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+        
+        /* Style the rotation control */
+        .leaflet-control-rotate {
+            background: rgba(0, 0, 0, 0.9) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .leaflet-control-rotate a {
+            color: white !important;
+            background: rgba(102, 126, 234, 0.2) !important;
+            border-radius: 6px !important;
+        }
+        
+        .leaflet-control-rotate a:hover {
+            background: rgba(102, 126, 234, 0.4) !important;
+        }
+        
+        #info {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="info">
+        <h3 style="margin: 0 0 10px 0;">Rotation Test</h3>
+        <p style="margin: 5px 0;">Bearing: <span id="bearing">0</span>°</p>
+        <p style="margin: 5px 0; font-size: 12px;">
+            <strong>Controls:</strong><br>
+            • Click compass to rotate<br>
+            • Shift + Drag to rotate<br>
+            • Shift + Arrows to rotate<br>
+            • Click "N" to reset
+        </p>
+    </div>
+    
+    <!-- Load Leaflet first -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Then Leaflet Rotate extension -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
+    
+    <script>
+        console.log('Leaflet version:', L.version);
+        console.log('L.Control.Rotate available:', typeof L.Control !== 'undefined' && typeof L.Control.Rotate !== 'undefined');
+        
+        // Initialize map
+        const map = L.map('map', {
+            center: [6.18344118743717, 125.08457146469357],
+            zoom: 17,
+            rotate: true,
+            touchRotate: true,
+            bearing: 0
+        });
+        
+        console.log('Map created');
+        console.log('Map.setBearing available:', typeof map.setBearing === 'function');
+        console.log('Map.getBearing available:', typeof map.getBearing === 'function');
+        
+        // Add tile layer
+        L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+        
+        // Add rotation control
+        if (typeof L.Control !== 'undefined' && typeof L.Control.Rotate !== 'undefined') {
+            console.log('Adding rotation control...');
+            const rotateControl = L.control.rotate({
+                position: 'topleft',
+                closeOnZeroBearing: false
+            });
+            rotateControl.addTo(map);
+            console.log('Rotation control added!');
+        } else {
+            console.error('L.Control.Rotate NOT available!');
+            document.getElementById('info').innerHTML += '<p style="color: red; margin-top: 10px;">ERROR: Rotation control not available!</p>';
+        }
+        
+        // Update bearing display
+        map.on('rotate', function() {
+            const bearing = map.getBearing();
+            document.getElementById('bearing').textContent = bearing.toFixed(1);
+        });
+        
+        // Add a marker
+        L.marker([6.18344118743717, 125.08457146469357])
+            .bindPopup('Cemetery Center')
+            .addTo(map);
+        
+        console.log('Test page loaded successfully');
+    </script>
+</body>
+</html>

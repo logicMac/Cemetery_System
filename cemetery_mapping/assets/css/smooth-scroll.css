@@ -1,0 +1,78 @@
+/**
+ * Smooth Scroll Styles
+ * Custom smooth scrolling with easeInOutCubic timing
+ */
+
+html {
+    scroll-behavior: auto; /* Disable native smooth scroll, use custom JS */
+}
+
+/* Parallax Container */
+.parallax-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.parallax-layer {
+    transition: transform 0.3s ease-out;
+    will-change: transform;
+}
+
+/* Scroll-triggered animations */
+.fade-in-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-in {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.fade-in.visible {
+    opacity: 1;
+}
+
+/* Smooth anchor scrolling indicator */
+.scroll-indicator {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.scroll-indicator.visible {
+    opacity: 1;
+}
+
+.scroll-indicator svg {
+    width: 30px;
+    height: 30px;
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Disable scroll during navigation */
+body.scrolling {
+    overflow: hidden;
+}

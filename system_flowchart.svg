@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="600" height="800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="600" height="800" fill="white"/>
+  
+  <!-- Title -->
+  <text x="300" y="30" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">System Flowchart - Matinao Memorial Cemetery Mapping System</text>
+  
+  <!-- START -->
+  <ellipse cx="300" cy="70" rx="50" ry="25" fill="#90EE90" stroke="black" stroke-width="2"/>
+  <text x="300" y="75" text-anchor="middle" font-family="Arial" font-size="14">START</text>
+  
+  <!-- Arrow down -->
+  <line x1="300" y1="95" x2="300" y2="120" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- User Login -->
+  <rect x="200" y="120" width="200" height="50" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="300" y="150" text-anchor="middle" font-family="Arial" font-size="14">User Login (Admin/Visitor)</text>
+  
+  <!-- Arrow down -->
+  <line x1="300" y1="170" x2="300" y2="195" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Decision: Admin or Visitor -->
+  <polygon points="300,195 380,235 300,275 220,235" fill="#FFD700" stroke="black" stroke-width="2"/>
+  <text x="300" y="230" text-anchor="middle" font-family="Arial" font-size="12">Admin or</text>
+  <text x="300" y="245" text-anchor="middle" font-family="Arial" font-size="12">Visitor?</text>
+  
+  <!-- Arrow left (Admin) -->
+  <line x1="220" y1="235" x2="150" y2="235" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="185" y="225" text-anchor="middle" font-family="Arial" font-size="11">Admin</text>
+  
+  <!-- Admin Dashboard -->
+  <rect x="50" y="210" width="100" height="50" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="100" y="240" text-anchor="middle" font-family="Arial" font-size="12">Admin Dashboard</text>
+  
+  <!-- Arrow down from Admin -->
+  <line x1="100" y1="260" x2="100" y2="320" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Add/Edit Records -->
+  <rect x="50" y="320" width="100" height="50" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="100" y="350" text-anchor="middle" font-family="Arial" font-size="12">Add/Edit Records</text>
+  
+  <!-- Arrow down -->
+  <line x1="100" y1="370" x2="100" y2="420" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Manage Plots -->
+  <rect x="50" y="420" width="100" height="50" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="100" y="450" text-anchor="middle" font-family="Arial" font-size="12">Manage Plots</text>
+  
+  <!-- Arrow right to join -->
+  <line x1="150" y1="445" x2="250" y2="445" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Arrow right (Visitor) -->
+  <line x1="380" y1="235" x2="450" y2="235" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="415" y="225" text-anchor="middle" font-family="Arial" font-size="11">Visitor</text>
+  
+  <!-- Visitor Dashboard -->
+  <rect x="450" y="210" width="100" height="50" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="500" y="240" text-anchor="middle" font-family="Arial" font-size="12">Visitor Dashboard</text>
+  
+  <!-- Arrow down from Visitor -->
+  <line x1="500" y1="260" x2="500" y2="320" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Search Records -->
+  <rect x="450" y="320" width="100" height="50" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="500" y="350" text-anchor="middle" font-family="Arial" font-size="12">Search Records</text>
+  
+  <!-- Arrow down -->
+  <line x1="500" y1="370" x2="500" y2="420" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- View Map -->
+  <rect x="450" y="420" width="100" height="50" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="500" y="450" text-anchor="middle" font-family="Arial" font-size="12">View Map</text>
+  
+  <!-- Arrow left to join -->
+  <line x1="450" y1="445" x2="350" y2="445" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- GPS Navigation -->
+  <rect x="250" y="420" width="100" height="50" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="300" y="450" text-anchor="middle" font-family="Arial" font-size="12">GPS Navigation</text>
+  
+  <!-- Arrow down -->
+  <line x1="300" y1="470" x2="300" y2="520" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- AI Assistant -->
+  <rect x="200" y="520" width="200" height="50" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="300" y="550" text-anchor="middle" font-family="Arial" font-size="14">AI Assistant Query</text>
+  
+  <!-- Arrow down -->
+  <line x1="300" y1="570" x2="300" y2="620" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Decision: Need Help? -->
+  <polygon points="300,620 380,660 300,700 220,660" fill="#FFD700" stroke="black" stroke-width="2"/>
+  <text x="300" y="655" text-anchor="middle" font-family="Arial" font-size="12">Need Help?</text>
+  <text x="300" y="670" text-anchor="middle" font-family="Arial" font-size="12">(Yes/No)</text>
+  
+  <!-- Arrow right (Yes) -->
+  <line x1="380" y1="660" x2="450" y2="660" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="415" y="650" text-anchor="middle" font-family="Arial" font-size="11">Yes</text>
+  
+  <!-- Get AI Response -->
+  <rect x="450" y="635" width="100" height="50" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="500" y="665" text-anchor="middle" font-family="Arial" font-size="12">Get AI Response</text>
+  
+  <!-- Arrow back to decision -->
+  <line x1="500" y1="685" x2="500" y2="710" stroke="black" stroke-width="2"/>
+  <line x1="500" y1="710" x2="300" y2="710" stroke="black" stroke-width="2"/>
+  <line x1="300" y1="710" x2="300" y2="700" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- Arrow down (No) -->
+  <line x1="300" y1="700" x2="300" y2="745" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="310" y="720" text-anchor="middle" font-family="Arial" font-size="11">No</text>
+  
+  <!-- STOP -->
+  <ellipse cx="300" cy="770" rx="50" ry="25" fill="#FF6B6B" stroke="black" stroke-width="2"/>
+  <text x="300" y="775" text-anchor="middle" font-family="Arial" font-size="14">STOP</text>
+  
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="black"/>
+    </marker>
+  </defs>
+</svg>

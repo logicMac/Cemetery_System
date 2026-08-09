@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1000" height="650" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1000" height="650" fill="white"/>
+  
+  <!-- Title -->
+  <text x="500" y="30" text-anchor="middle" font-family="Arial" font-size="20" font-weight="bold">ENTITY RELATIONSHIP DIAGRAM</text>
+  <text x="500" y="50" text-anchor="middle" font-family="Arial" font-size="14">Matinao Memorial Cemetery Mapping and Management System</text>
+  
+  <!-- Admin Users Entity -->
+  <rect x="50" y="90" width="200" height="100" fill="#E6F3FF" stroke="black" stroke-width="2"/>
+  <rect x="50" y="90" width="200" height="25" fill="#B3D9FF" stroke="black" stroke-width="2"/>
+  <text x="150" y="108" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold">admin_users</text>
+  <text x="60" y="130" font-family="Arial" font-size="10">PK id: INT</text>
+  <text x="60" y="145" font-family="Arial" font-size="10">username: VARCHAR(50)</text>
+  <text x="60" y="160" font-family="Arial" font-size="10">password: VARCHAR(255)</text>
+  <text x="60" y="175" font-family="Arial" font-size="10">email: VARCHAR(255)</text>
+  
+  <!-- Visitors Entity -->
+  <rect x="400" y="90" width="200" height="120" fill="#E6F3FF" stroke="black" stroke-width="2"/>
+  <rect x="400" y="90" width="200" height="25" fill="#B3D9FF" stroke="black" stroke-width="2"/>
+  <text x="500" y="108" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold">visitors</text>
+  <text x="410" y="130" font-family="Arial" font-size="10">PK id: INT</text>
+  <text x="410" y="145" font-family="Arial" font-size="10">full_name: VARCHAR(255)</text>
+  <text x="410" y="160" font-family="Arial" font-size="10">email: VARCHAR(255)</text>
+  <text x="410" y="175" font-family="Arial" font-size="10">phone: VARCHAR(20)</text>
+  <text x="410" y="190" font-family="Arial" font-size="10">is_active: TINYINT</text>
+  <text x="410" y="205" font-family="Arial" font-size="10">password: VARCHAR(255)</text>
+  
+  <!-- Burial Records Entity -->
+  <rect x="50" y="300" width="200" height="180" fill="#E6F3FF" stroke="black" stroke-width="2"/>
+  <rect x="50" y="300" width="200" height="25" fill="#B3D9FF" stroke="black" stroke-width="2"/>
+  <text x="150" y="318" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold">burial_records</text>
+  <text x="60" y="340" font-family="Arial" font-size="10">PK id: INT</text>
+  <text x="60" y="355" font-family="Arial" font-size="10">decedent_name: VARCHAR</text>
+  <text x="60" y="370" font-family="Arial" font-size="10">birth_date: DATE</text>
+  <text x="60" y="385" font-family="Arial" font-size="10">death_date: DATE</text>
+  <text x="60" y="400" font-family="Arial" font-size="10">barangay: VARCHAR(100)</text>
+  <text x="60" y="415" font-family="Arial" font-size="10">plot_number: VARCHAR(50)</text>
+  <text x="60" y="430" font-family="Arial" font-size="10">latitude: DECIMAL</text>
+  <text x="60" y="445" font-family="Arial" font-size="10">longitude: DECIMAL</text>
+  <text x="60" y="460" font-family="Arial" font-size="10">family_name: VARCHAR</text>
+  <text x="60" y="475" font-family="Arial" font-size="10">photo: VARCHAR(255)</text>
+  
+  <!-- Available Plots Entity -->
+  <rect x="400" y="300" width="200" height="180" fill="#E6F3FF" stroke="black" stroke-width="2"/>
+  <rect x="400" y="300" width="200" height="25" fill="#B3D9FF" stroke="black" stroke-width="2"/>
+  <text x="500" y="318" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold">available_plots</text>
+  <text x="410" y="340" font-family="Arial" font-size="10">PK id: INT</text>
+  <text x="410" y="355" font-family="Arial" font-size="10">plot_number: VARCHAR(50)</text>
+  <text x="410" y="370" font-family="Arial" font-size="10">latitude: DECIMAL</text>
+  <text x="410" y="385" font-family="Arial" font-size="10">longitude: DECIMAL</text>
+  <text x="410" y="400" font-family="Arial" font-size="10">notes: TEXT</text>
+  <text x="410" y="415" font-family="Arial" font-size="10">compartment_count: INT</text>
+  <text x="410" y="430" font-family="Arial" font-size="10">has_grid: TINYINT</text>
+  <text x="410" y="445" font-family="Arial" font-size="10">grid_rows: INT</text>
+  <text x="410" y="460" font-family="Arial" font-size="10">grid_cols: INT</text>
+  <text x="410" y="475" font-family="Arial" font-size="10">date_added: TIMESTAMP</text>
+  
+  <!-- Plot Compartments Entity -->
+  <rect x="750" y="300" width="200" height="150" fill="#E6F3FF" stroke="black" stroke-width="2"/>
+  <rect x="750" y="300" width="200" height="25" fill="#B3D9FF" stroke="black" stroke-width="2"/>
+  <text x="850" y="318" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold">plot_compartments</text>
+  <text x="760" y="340" font-family="Arial" font-size="10">PK id: INT</text>
+  <text x="760" y="355" font-family="Arial" font-size="10">FK plot_id: INT</text>
+  <text x="760" y="370" font-family="Arial" font-size="10">FK record_id: INT</text>
+  <text x="760" y="385" font-family="Arial" font-size="10">compartment_number</text>
+  <text x="760" y="400" font-family="Arial" font-size="10">row_index: INT</text>
+  <text x="760" y="415" font-family="Arial" font-size="10">col_index: INT</text>
+  <text x="760" y="430" font-family="Arial" font-size="10">is_occupied: TINYINT</text>
+  
+  <!-- Visitor Activity Log Entity -->
+  <rect x="750" y="90" width="200" height="120" fill="#E6F3FF" stroke="black" stroke-width="2"/>
+  <rect x="750" y="90" width="200" height="25" fill="#B3D9FF" stroke="black" stroke-width="2"/>
+  <text x="850" y="108" text-anchor="middle" font-family="Arial" font-size="12" font-weight="bold">visitor_activity_log</text>
+  <text x="760" y="130" font-family="Arial" font-size="10">PK id: INT</text>
+  <text x="760" y="145" font-family="Arial" font-size="10">FK visitor_id: INT</text>
+  <text x="760" y="160" font-family="Arial" font-size="10">FK record_id: INT</text>
+  <text x="760" y="175" font-family="Arial" font-size="10">activity_type: VARCHAR</text>
+  <text x="760" y="190" font-family="Arial" font-size="10">created_at: TIMESTAMP</text>
+  
+  <!-- Admin Users to Burial Records: 1 to Many -->
+  <polyline points="150,190 150,300" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#crowfoot)"/>
+  <text x="154" y="210" font-family="Arial" font-size="9" fill="black">1</text>
+  <text x="142" y="275" font-family="Arial" font-size="9" fill="black">M</text>
+  
+  <!-- Visitors to Visitor Activity Log: 1 to Many -->
+  <polyline points="600,150 750,150" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#crowfoot)"/>
+  <text x="615" y="145" font-family="Arial" font-size="9" fill="black">1</text>
+  <text x="710" y="145" font-family="Arial" font-size="9" fill="black">M</text>
+  
+  <!-- Burial Records to Available Plots: Many to 1 -->
+  <polyline points="250,390 400,390" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#crowfoot)"/>
+  <text x="265" y="385" font-family="Arial" font-size="9" fill="black">M</text>
+  <text x="370" y="385" font-family="Arial" font-size="9" fill="black">1</text>
+  
+  <!-- Available Plots to Plot Compartments: 1 to Many -->
+  <polyline points="600,390 750,390" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#crowfoot)"/>
+  <text x="615" y="385" font-family="Arial" font-size="9" fill="black">1</text>
+  <text x="710" y="385" font-family="Arial" font-size="9" fill="black">M</text>
+  
+  <!-- Burial Records to Plot Compartments: 1 to Many -->
+  <polyline points="150,480 150,510 850,510 850,450" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#crowfoot)"/>
+  <text x="154" y="465" font-family="Arial" font-size="9" fill="black">1</text>
+  <text x="800" y="465" font-family="Arial" font-size="9" fill="black">M</text>
+  
+  <!-- Visitor Activity Log to Burial Records: Many to 1 -->
+  <polyline points="760,210 760,300" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#crowfoot)"/>
+  <text x="765" y="230" font-family="Arial" font-size="9" fill="black">M</text>
+  <text x="765" y="280" font-family="Arial" font-size="9" fill="black">1</text>
+  
+  <!-- Crow's Foot marker -->
+  <defs>
+    <marker id="crowfoot" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M 0,6 L 10,6" stroke="black" stroke-width="1.5" fill="none"/>
+      <path d="M 10,2 L 10,10" stroke="black" stroke-width="1.5" fill="none"/>
+      <path d="M 10,2 L 4,5" stroke="black" stroke-width="1.5" fill="none"/>
+      <path d="M 10,10 L 4,7" stroke="black" stroke-width="1.5" fill="none"/>
+    </marker>
+  </defs>
+</svg>

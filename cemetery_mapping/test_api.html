@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Endpoints</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .test-section {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .result {
+            background: #000;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .info { color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <h1>API Endpoint Tests</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Get All Burial Records</h2>
+        <button onclick="testBurialRecords()">Test Burial Records API</button>
+        <div id="burialResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 2: Get Available Plots</h2>
+        <button onclick="testAvailablePlots()">Test Available Plots API</button>
+        <div id="plotsResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test 3: Combined Test (What Map View Uses)</h2>
+        <button onclick="testBoth()">Test Both APIs</button>
+        <div id="bothResult" class="result"></div>
+    </div>
+    
+    <script>
+        async function testBurialRecords() {
+            const result = document.getElementById('burialResult');
+            result.innerHTML = '<span class="info">Testing...</span>';
+            
+            try {
+                const response = await fetch('api/get_all_records.php');
+                const data = await response.json();
+                
+                let output = `<span class="success">✓ API Response Received</span>\n\n`;
+                output += `Status: ${response.status} ${response.statusText}\n`;
+                output += `Success: ${data.success}\n`;
+                output += `Count: ${data.count || 0}\n\n`;
+                
+                if (data.success && data.records && data.records.length > 0) {
+                    output += `<span class="success">✓ ${data.records.length} burial records found</span>\n\n`;
+                    output += `First record:\n`;
+                    output += JSON.stringify(data.records[0], null, 2);
+                } else {
+                    output += `<span class="error">✗ No records found or API returned error</span>\n`;
+                    output += `Full response:\n`;
+                    output += JSON.stringify(data, null, 2);
+                }
+                
+                result.innerHTML = output;
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error: ${error.message}</span>\n\nMake sure you're running this from localhost/cemetery_mapping/`;
+            }
+        }
+        
+        async function testAvailablePlots() {
+            const result = document.getElementById('plotsResult');
+            result.innerHTML = '<span class="info">Testing...</span>';
+            
+            try {
+                const response = await fetch('api/get_available_plots.php');
+                const data = await response.json();
+                
+                let output = `<span class="success">✓ API Response Received</span>\n\n`;
+                output += `Status: ${response.status} ${response.statusText}\n`;
+                output += `Success: ${data.success}\n`;
+                output += `Count: ${data.count || 0}\n\n`;
+                
+                if (data.success && data.plots && data.plots.length > 0) {
+                    output += `<span class="success">✓ ${data.plots.length} available plots found</span>\n\n`;
+                    output += `First plot:\n`;
+                    output += JSON.stringify(data.plots[0], null, 2);
+                } else {
+                    output += `<span class="error">✗ No plots found or API returned error</span>\n`;
+                    output += `Full response:\n`;
+                    output += JSON.stringify(data, null, 2);
+                }
+                
+                result.innerHTML = output;
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error: ${error.message}</span>\n\nMake sure you're running this from localhost/cemetery_mapping/`;
+            }
+        }
+        
+        async function testBoth() {
+            const result = document.getElementById('bothResult');
+            result.innerHTML = '<span class="info">Testing both APIs...</span>';
+            
+            try {
+                // Test both in parallel
+                const [burialResponse, plotResponse] = await Promise.all([
+                    fetch('api/get_all_records.php'),
+                    fetch('api/get_available_plots.php')
+                ]);
+                
+                const burialData = await burialResponse.json();
+                const plotData = await plotResponse.json();
+                
+                let output = `<span class="success">✓ Both APIs Responded</span>\n\n`;
+                
+                // Burial records
+                output += `=== BURIAL RECORDS ===\n`;
+                output += `Success: ${burialData.success}\n`;
+                output += `Count: ${burialData.count || 0}\n`;
+                if (burialData.success && burialData.records) {
+                    output += `Records with coordinates: ${burialData.records.filter(r => r.latitude && r.longitude).length}\n`;
+                }
+                output += `\n`;
+                
+                // Available plots
+                output += `=== AVAILABLE PLOTS ===\n`;
+                output += `Success: ${plotData.success}\n`;
+                output += `Count: ${plotData.count || 0}\n`;
+                if (plotData.success && plotData.plots) {
+                    output += `Plots with coordinates: ${plotData.plots.filter(p => p.latitude && p.longitude).length}\n`;
+                }
+                output += `\n`;
+                
+                // Summary
+                const totalMarkers = 
+                    (burialData.records ? burialData.records.length : 0) + 
+                    (plotData.plots ? plotData.plots.length : 0);
+                
+                output += `=== SUMMARY ===\n`;
+                output += `Total markers to show on map: ${totalMarkers}\n\n`;
+                
+                if (totalMarkers === 0) {
+                    output += `<span class="error">⚠ WARNING: No markers will appear on map!</span>\n`;
+                    output += `You need to add burial records and/or available plots first.\n`;
+                } else {
+                    output += `<span class="success">✓ Map should show ${totalMarkers} markers</span>\n`;
+                }
+                
+                result.innerHTML = output;
+            } catch (error) {
+                result.innerHTML = `<span class="error">✗ Error: ${error.message}</span>\n\nMake sure you're running this from localhost/cemetery_mapping/`;
+            }
+        }
+        
+        // Auto-run all tests on load
+        window.onload = function() {
+            console.log('Running automatic API tests...');
+            setTimeout(() => {
+                testBoth();
+            }, 500);
+        };
+    </script>
+</body>
+</html>

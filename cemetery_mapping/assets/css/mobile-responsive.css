@@ -1,0 +1,493 @@
+/**
+ * Mobile Responsive Enhancements
+ * Additional styles for optimal mobile experience
+ */
+
+/* ==============================================
+   MOBILE-FIRST BASE STYLES
+   ============================================== */
+
+/* Prevent horizontal scroll on mobile */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
+/* Better touch scrolling on iOS */
+* {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text size adjustment on orientation change */
+html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* ==============================================
+   TOUCH OPTIMIZATIONS
+   ============================================== */
+
+/* Better tap highlighting */
+a, button, input[type="submit"], input[type="button"] {
+    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
+    tap-highlight-color: rgba(102, 126, 234, 0.2);
+}
+
+/* Remove iOS input styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="number"],
+select,
+textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 8px;
+}
+
+/* Prevent zoom on input focus (iOS Safari) */
+@supports (-webkit-touch-callout: none) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* ==============================================
+   MOBILE BREAKPOINTS
+   ============================================== */
+
+/* Tablets (Portrait) */
+@media (max-width: 768px) {
+    /* Spacing adjustments */
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    /* Typography scaling */
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.6rem; }
+    h3 { font-size: 1.3rem; }
+    h4 { font-size: 1.1rem; }
+    h5 { font-size: 1rem; }
+    
+    /* Button adjustments */
+    .btn,
+    button,
+    input[type="submit"] {
+        min-height: 44px;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+    }
+    
+    /* Form elements */
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+        padding: 12px 14px;
+    }
+    
+    /* Cards and panels */
+    .card,
+    .panel {
+        margin-bottom: 15px;
+        border-radius: 12px;
+    }
+    
+    /* Modal adjustments */
+    .modal {
+        padding: 10px;
+    }
+    
+    .modal-content {
+        max-width: 95%;
+        padding: 20px 15px;
+        border-radius: 16px;
+    }
+}
+
+/* Mobile Phones (Portrait) */
+@media (max-width: 480px) {
+    /* Extra compact spacing */
+    h1 { font-size: 1.6rem; }
+    h2 { font-size: 1.3rem; }
+    h3 { font-size: 1.1rem; }
+    
+    /* Buttons full-width option */
+    .btn-block {
+        width: 100%;
+        display: block;
+    }
+    
+    /* Stack columns */
+    .row {
+        flex-direction: column;
+    }
+    
+    /* Hide on mobile utility class */
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+/* Very Small Devices */
+@media (max-width: 360px) {
+    body {
+        font-size: 14px;
+    }
+    
+    h1 { font-size: 1.4rem; }
+    h2 { font-size: 1.2rem; }
+    
+    .btn,
+    button {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+    }
+}
+
+/* ==============================================
+   LANDSCAPE ORIENTATION
+   ============================================== */
+
+@media (max-height: 600px) and (orientation: landscape) {
+    /* Compact headers */
+    .header,
+    .nav-bar {
+        padding: 8px 15px;
+    }
+    
+    /* Reduce hero sections */
+    .hero-section {
+        min-height: auto;
+        padding: 30px 0;
+    }
+    
+    /* Scrollable modals */
+    .modal-content {
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+}
+
+/* ==============================================
+   SPECIFIC COMPONENT MOBILE STYLES
+   ============================================== */
+
+/* Navigation Menu Mobile */
+@media (max-width: 768px) {
+    .nav-menu {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .nav-item {
+        width: 100%;
+        text-align: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .nav-item:last-child {
+        border-bottom: none;
+    }
+}
+
+/* Tables - Responsive */
+@media (max-width: 768px) {
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Stack table rows on mobile */
+    .table-responsive {
+        display: block;
+    }
+    
+    .table-responsive thead {
+        display: none;
+    }
+    
+    .table-responsive tbody,
+    .table-responsive tr,
+    .table-responsive td {
+        display: block;
+        width: 100%;
+    }
+    
+    .table-responsive tr {
+        margin-bottom: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px;
+    }
+    
+    .table-responsive td {
+        text-align: right;
+        padding: 8px;
+        position: relative;
+        padding-left: 50%;
+    }
+    
+    .table-responsive td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        font-weight: bold;
+        text-align: left;
+    }
+}
+
+/* Grid System Mobile */
+@media (max-width: 768px) {
+    .grid-2,
+    .grid-3,
+    .grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .flex-row {
+        flex-direction: column;
+    }
+    
+    .flex-row > * {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+/* ==============================================
+   MAP SPECIFIC MOBILE ENHANCEMENTS
+   ============================================== */
+
+@media (max-width: 768px) {
+    /* Map Container */
+    #map {
+        height: 100vh;
+        height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    }
+    
+    /* Leaflet controls positioning */
+    .leaflet-top,
+    .leaflet-bottom {
+        z-index: 999;
+    }
+    
+    /* Compact map controls */
+    .leaflet-control {
+        margin: 5px;
+    }
+    
+    .leaflet-control-zoom,
+    .leaflet-control-layers {
+        font-size: 0.9rem;
+    }
+    
+    /* Map popups */
+    .leaflet-popup {
+        max-width: calc(100vw - 40px) !important;
+    }
+    
+    .leaflet-popup-content {
+        font-size: 0.85rem;
+        margin: 12px;
+    }
+    
+    /* Marker clusters */
+    .marker-cluster {
+        font-size: 0.85rem;
+    }
+}
+
+/* ==============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================== */
+
+/* Reduce animations on low-end devices */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* GPU acceleration for smooth scrolling */
+.scroll-container {
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+/* ==============================================
+   UTILITY CLASSES
+   ============================================== */
+
+/* Show/Hide on different screen sizes */
+.show-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .hide-mobile {
+        display: none !important;
+    }
+    
+    .show-mobile {
+        display: block !important;
+    }
+    
+    .show-mobile-flex {
+        display: flex !important;
+    }
+    
+    .show-mobile-inline {
+        display: inline !important;
+    }
+}
+
+/* Mobile spacing utilities */
+@media (max-width: 768px) {
+    .mt-mobile-0 { margin-top: 0 !important; }
+    .mt-mobile-1 { margin-top: 0.5rem !important; }
+    .mt-mobile-2 { margin-top: 1rem !important; }
+    .mt-mobile-3 { margin-top: 1.5rem !important; }
+    
+    .mb-mobile-0 { margin-bottom: 0 !important; }
+    .mb-mobile-1 { margin-bottom: 0.5rem !important; }
+    .mb-mobile-2 { margin-bottom: 1rem !important; }
+    .mb-mobile-3 { margin-bottom: 1.5rem !important; }
+    
+    .p-mobile-0 { padding: 0 !important; }
+    .p-mobile-1 { padding: 0.5rem !important; }
+    .p-mobile-2 { padding: 1rem !important; }
+    .p-mobile-3 { padding: 1.5rem !important; }
+}
+
+/* Mobile text alignment */
+@media (max-width: 768px) {
+    .text-mobile-center { text-align: center !important; }
+    .text-mobile-left { text-align: left !important; }
+    .text-mobile-right { text-align: right !important; }
+}
+
+/* ==============================================
+   ACCESSIBILITY IMPROVEMENTS
+   ============================================== */
+
+/* Ensure minimum touch target size (WCAG 2.5.5) */
+@media (hover: none) and (pointer: coarse) {
+    button,
+    a,
+    input[type="button"],
+    input[type="submit"],
+    input[type="checkbox"],
+    input[type="radio"],
+    select {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    /* Better focus indicators for touch */
+    button:focus,
+    a:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline: 3px solid rgba(102, 126, 234, 0.5);
+        outline-offset: 2px;
+    }
+}
+
+/* ==============================================
+   PRINT STYLES
+   ============================================== */
+
+@media print {
+    /* Hide non-essential elements */
+    .no-print,
+    .chat-container,
+    .chat-toggle,
+    .map-controls,
+    nav,
+    .nav-bar,
+    button {
+        display: none !important;
+    }
+    
+    /* Optimize for print */
+    body {
+        background: white;
+        color: black;
+    }
+    
+    a {
+        text-decoration: underline;
+    }
+    
+    /* Show URLs after links */
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+    }
+}
+
+/* ==============================================
+   DEVICE-SPECIFIC FIXES
+   ============================================== */
+
+/* iOS Safari specific */
+@supports (-webkit-touch-callout: none) {
+    /* Fix for iOS Safari bottom bar overlap */
+    body {
+        min-height: -webkit-fill-available;
+    }
+    
+    /* Fix fixed positioning on iOS */
+    .fixed-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .fixed-top {
+        padding-top: env(safe-area-inset-top);
+    }
+}
+
+/* Android Chrome specific */
+@media screen and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: 0.001dpcm) {
+    /* Android-specific fixes if needed */
+}
+
+/* ==============================================
+   PROGRESSIVE WEB APP SUPPORT
+   ============================================== */
+
+/* Standalone mode (when installed as PWA) */
+@media (display-mode: standalone) {
+    /* Add top padding for devices with notch */
+    body {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    /* Hide install prompts when already installed */
+    .pwa-install-prompt {
+        display: none;
+    }
+}

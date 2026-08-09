@@ -1,0 +1,800 @@
+/**
+ * Visitor Portal Styles
+ * Public-facing interface styling
+ */
+
+/* Landing Page */
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-content {
+    text-align: center;
+    z-index: 10;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--zinc-400);
+    margin-bottom: 40px;
+}
+
+/* Authentication Forms */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 450px;
+    width: 100%;
+}
+
+.auth-logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.auth-logo h2 {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.password-strength {
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.password-strength-bar {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.password-strength-bar.weak {
+    width: 33%;
+    background-color: #ef4444;
+}
+
+.password-strength-bar.medium {
+    width: 66%;
+    background-color: #fbbf24;
+}
+
+.password-strength-bar.strong {
+    width: 100%;
+    background-color: #22c55e;
+}
+
+.password-strength-text {
+    font-size: 12px;
+    margin-top: 4px;
+    color: var(--zinc-400);
+}
+
+/* Map Container */
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Map Controls */
+.map-controls {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.control-button {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    color: var(--white);
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.control-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Search Panel */
+.search-panel {
+    position: absolute;
+    top: 80px;
+    right: 20px;
+    z-index: 1000;
+    width: 320px;
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.search-box {
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--white);
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+}
+
+.search-input::placeholder {
+    color: var(--zinc-400);
+}
+
+.search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.search-result-item {
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.search-result-item:hover {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(102, 126, 234, 0.3);
+}
+
+/* Legend */
+.map-legend {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+    min-width: 180px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.legend-item:last-child {
+    margin-bottom: 0;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+/* AI Assistant Chat */
+.chat-container {
+    position: absolute;
+    bottom: 100px;
+    right: 20px;
+    z-index: 1000;
+    width: 380px;
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 140px);
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.chat-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    max-height: 350px;
+}
+
+.chat-message {
+    margin-bottom: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-message.user {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin-left: 20px;
+}
+
+.chat-message.assistant {
+    background: rgba(255, 255, 255, 0.05);
+    margin-right: 20px;
+}
+
+.chat-input-container {
+    padding: 16px;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--white);
+    padding: 10px;
+    border-radius: 8px;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+}
+
+.chat-toggle {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.5);
+    transition: all 0.3s ease;
+}
+
+.chat-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 40px rgba(102, 126, 234, 0.7);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    /* Hero Section - Tablets */
+    .hero-title {
+        font-size: 3rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    /* Auth Cards */
+    .auth-card {
+        padding: 40px 30px;
+        max-width: 90%;
+    }
+    
+    /* Map Controls */
+    .search-panel {
+        width: 320px;
+        max-width: calc(100vw - 30px);
+    }
+    
+    .chat-container {
+        width: 340px;
+        max-width: calc(100vw - 30px);
+    }
+}
+
+@media (max-width: 768px) {
+    /* Typography */
+    .hero-title {
+        font-size: 2.2rem;
+        margin-bottom: 16px;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 30px;
+    }
+    
+    .hero-content {
+        padding: 20px 15px;
+    }
+    
+    /* Auth Forms */
+    .auth-container {
+        padding: 15px;
+        min-height: 100vh;
+        align-items: flex-start;
+        padding-top: 40px;
+    }
+    
+    .auth-card {
+        padding: 30px 20px;
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    .auth-logo h2 {
+        font-size: 1.5rem;
+    }
+    
+    .logo-icon {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .input-field-enhanced {
+        padding: 12px 14px 12px 44px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .btn-login,
+    .btn-register {
+        padding: 14px;
+        font-size: 0.95rem;
+    }
+    
+    /* Map Layout */
+    .search-panel {
+        width: calc(100vw - 20px);
+        right: 10px;
+        left: 10px;
+        top: auto;
+        bottom: 90px;
+        max-height: 50vh;
+    }
+    
+    .chat-container {
+        width: calc(100vw - 20px);
+        right: 10px;
+        left: 10px;
+        bottom: 80px;
+        max-height: 60vh;
+    }
+    
+    .chat-messages {
+        max-height: 250px;
+    }
+    
+    .chat-toggle {
+        bottom: 10px;
+        right: 10px;
+        width: 56px;
+        height: 56px;
+    }
+    
+    .map-legend {
+        bottom: 10px;
+        left: 10px;
+        padding: 12px;
+        font-size: 0.85rem;
+        min-width: 140px;
+    }
+    
+    .legend-item {
+        margin-bottom: 6px;
+        font-size: 0.85rem;
+    }
+    
+    .legend-color {
+        width: 16px;
+        height: 16px;
+    }
+    
+    /* Map Controls - Reduce size for mobile */
+    .map-controls {
+        top: 10px;
+        left: 10px;
+        gap: 8px;
+    }
+    
+    .control-button {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+    
+    /* Form Groups */
+    .form-group {
+        margin-bottom: 18px;
+    }
+    
+    .form-group label {
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 12px 14px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}
+
+@media (max-width: 480px) {
+    /* Extra small devices - Phones */
+    .hero-title {
+        font-size: 1.8rem;
+        line-height: 1.3;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    /* Hero Logo */
+    .hero-logo {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 20px;
+    }
+    
+    /* Auth Cards - Very compact */
+    .auth-card {
+        padding: 25px 15px;
+        border-radius: 20px;
+    }
+    
+    .logo-icon {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .auth-logo h2 {
+        font-size: 1.3rem;
+    }
+    
+    .auth-logo p {
+        font-size: 0.85rem;
+    }
+    
+    /* Input fields */
+    .input-group {
+        margin-bottom: 16px;
+    }
+    
+    .input-field-enhanced {
+        padding: 11px 12px 11px 40px;
+    }
+    
+    .input-icon {
+        left: 12px;
+    }
+    
+    .input-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+    
+    /* Buttons */
+    .btn-login,
+    .btn-register {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+    
+    .btn-hero {
+        padding: 12px 24px;
+        font-size: 0.95rem;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Alerts */
+    .alert-enhanced {
+        padding: 12px 14px;
+        font-size: 0.85rem;
+    }
+    
+    /* Chat Interface */
+    .chat-container {
+        width: calc(100vw - 10px);
+        right: 5px;
+        left: 5px;
+        bottom: 70px;
+        max-height: 55vh;
+        border-radius: 12px;
+    }
+    
+    .chat-header {
+        padding: 12px;
+    }
+    
+    .chat-header h3 {
+        font-size: 0.95rem;
+    }
+    
+    .chat-messages {
+        padding: 12px;
+        max-height: 200px;
+    }
+    
+    .chat-message {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+    
+    .chat-input-container {
+        padding: 12px;
+        gap: 8px;
+    }
+    
+    .chat-input {
+        padding: 8px;
+        font-size: 14px;
+    }
+    
+    .chat-toggle {
+        width: 50px;
+        height: 50px;
+        bottom: 8px;
+        right: 8px;
+    }
+    
+    .chat-toggle img {
+        width: 28px;
+        height: 28px;
+    }
+    
+    /* Map Legend - Compact */
+    .map-legend {
+        padding: 10px;
+        font-size: 0.8rem;
+        min-width: 120px;
+        border-radius: 10px;
+    }
+    
+    .map-legend h4 {
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+    
+    .legend-item {
+        gap: 6px;
+        margin-bottom: 5px;
+    }
+    
+    .legend-color {
+        width: 14px;
+        height: 14px;
+    }
+    
+    /* Search Panel - Optimized for small screens */
+    .search-panel {
+        width: calc(100vw - 10px);
+        right: 5px;
+        left: 5px;
+        bottom: 80px;
+        max-height: 45vh;
+        padding: 12px;
+        border-radius: 12px;
+    }
+    
+    .search-box {
+        padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 10px;
+    }
+    
+    .search-input {
+        font-size: 14px;
+        padding: 2px;
+    }
+    
+    .search-result-item {
+        padding: 12px;
+        border-radius: 10px;
+    }
+    
+    .search-result-item h4 {
+        font-size: 0.95rem;
+    }
+    
+    .search-result-item p {
+        font-size: 0.8rem;
+    }
+    
+    /* Password Strength */
+    .password-strength {
+        height: 3px;
+        margin-top: 6px;
+    }
+    
+    .password-strength-text {
+        font-size: 0.75rem;
+    }
+    
+    /* Form spacing */
+    small {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 360px) {
+    /* Very small devices - Old phones */
+    .hero-title {
+        font-size: 1.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 0.85rem;
+    }
+    
+    .auth-card {
+        padding: 20px 12px;
+    }
+    
+    .input-field-enhanced {
+        padding: 10px 10px 10px 38px;
+        font-size: 14px;
+    }
+    
+    .btn-login,
+    .btn-register,
+    .btn-hero {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+    }
+    
+    .chat-container {
+        max-height: 50vh;
+    }
+    
+    .search-panel {
+        max-height: 40vh;
+    }
+}
+
+/* Landscape orientation for mobile devices */
+@media (max-height: 600px) and (orientation: landscape) {
+    .auth-container {
+        padding: 20px 15px;
+    }
+    
+    .auth-card {
+        padding: 20px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .logo-icon {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 15px;
+    }
+    
+    .auth-logo h2 {
+        font-size: 1.2rem;
+        margin-bottom: 5px;
+    }
+    
+    .input-group {
+        margin-bottom: 14px;
+    }
+    
+    .chat-container {
+        max-height: 70vh;
+    }
+    
+    .search-panel {
+        max-height: 60vh;
+    }
+}
+
+/* Touch-friendly sizing */
+@media (hover: none) and (pointer: coarse) {
+    /* Ensure all clickable elements are at least 44x44px (Apple HIG) */
+    .control-button,
+    .btn,
+    button,
+    a {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Larger tap targets for checkboxes and radio buttons */
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-width: 24px;
+        min-height: 24px;
+    }
+}
+
+/* High DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Sharper borders and shadows on retina displays */
+    .auth-card,
+    .chat-container,
+    .search-panel,
+    .map-legend {
+        border-width: 0.5px;
+    }
+}

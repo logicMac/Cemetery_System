@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="650" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="650" fill="white"/>
+  
+  <!-- Title -->
+  <text x="400" y="25" text-anchor="middle" font-family="Arial" font-size="18" font-weight="bold">DATA FLOW DIAGRAM CHART</text>
+  <text x="400" y="45" text-anchor="middle" font-family="Arial" font-size="12">Matinao Memorial Cemetery Mapping System</text>
+  
+  <!-- Administrator -->
+  <rect x="40" y="80" width="120" height="50" fill="#FFE4B5" stroke="black" stroke-width="2"/>
+  <text x="100" y="110" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold">Administrator</text>
+  
+  <!-- Visitor -->
+  <rect x="640" y="80" width="120" height="50" fill="#FFE4B5" stroke="black" stroke-width="2"/>
+  <text x="700" y="110" text-anchor="middle" font-family="Arial" font-size="13" font-weight="bold">Visitor</text>
+  
+  <!-- Login -->
+  <rect x="300" y="160" width="200" height="45" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="400" y="188" text-anchor="middle" font-family="Arial" font-size="14">Login</text>
+  
+  <!-- Admin to Login -->
+  <polyline points="160,105 160,182 300,182" fill="none" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="230" y="155" text-anchor="middle" font-family="Arial" font-size="10">Credentials</text>
+  
+  <!-- Visitor to Login -->
+  <polyline points="640,105 640,182 500,182" fill="none" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="570" y="155" text-anchor="middle" font-family="Arial" font-size="10">Credentials</text>
+  
+  <!-- Manage Burial Records -->
+  <rect x="60" y="280" width="160" height="45" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="140" y="307" text-anchor="middle" font-family="Arial" font-size="12">Manage Burial Records</text>
+  
+  <!-- Login to Manage Burial Records -->
+  <polyline points="300,205 220,205 220,280" fill="none" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="260" y="198" text-anchor="middle" font-family="Arial" font-size="10">Admin Access</text>
+  
+  <!-- Manage Available Plots -->
+  <rect x="580" y="280" width="160" height="45" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="660" y="307" text-anchor="middle" font-family="Arial" font-size="12">Manage Available Plots</text>
+  
+  <!-- Login to Manage Available Plots -->
+  <polyline points="500,205 580,205 580,280" fill="none" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="540" y="198" text-anchor="middle" font-family="Arial" font-size="10">Admin Access</text>
+  
+  <!-- GPS Mapping -->
+  <rect x="300" y="360" width="200" height="45" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="400" y="388" text-anchor="middle" font-family="Arial" font-size="14">GPS Mapping</text>
+  
+  <!-- Burial Records to GPS Mapping -->
+  <polyline points="220,325 220,383 300,383" fill="none" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="260" y="355" text-anchor="middle" font-family="Arial" font-size="10">Plot Data</text>
+  
+  <!-- Available Plots to GPS Mapping -->
+  <polyline points="580,325 580,383 500,383" fill="none" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="540" y="355" text-anchor="middle" font-family="Arial" font-size="10">Plot Coordinates</text>
+  
+  <!-- Visitor to GPS Mapping -->
+  <polyline points="700,130 700,383 500,383" fill="none" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="600" y="320" text-anchor="middle" font-family="Arial" font-size="10">Search Request</text>
+  
+  <!-- AI Assistant -->
+  <rect x="300" y="470" width="200" height="45" fill="#87CEEB" stroke="black" stroke-width="2"/>
+  <text x="400" y="498" text-anchor="middle" font-family="Arial" font-size="14">AI Assistant</text>
+  
+  <!-- GPS Mapping to AI Assistant -->
+  <line x1="400" y1="405" x2="400" y2="470" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="410" y="438" text-anchor="middle" font-family="Arial" font-size="10">Location Query</text>
+  
+  <!-- AI Assistant to Visitor -->
+  <polyline points="500,493 700,493 700,130" fill="none" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="600" y="485" text-anchor="middle" font-family="Arial" font-size="10">Navigation Info</text>
+  
+  <!-- Database -->
+  <path d="M 80 560 L 80 610 L 180 610 L 180 560" fill="#E6E6FA" stroke="black" stroke-width="2"/>
+  <path d="M 80 560 L 180 560" fill="none" stroke="black" stroke-width="2"/>
+  <text x="130" y="590" text-anchor="middle" font-family="Arial" font-size="12">Database</text>
+  
+  <!-- Burial Records to Database -->
+  <line x1="140" y1="325" x2="140" y2="560" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="150" y="440" text-anchor="middle" font-family="Arial" font-size="10">Store/Retrieve</text>
+  
+  <!-- Available Plots to Database -->
+  <polyline points="660,325 660,585 180,585" fill="none" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="420" y="575" text-anchor="middle" font-family="Arial" font-size="10">Store/Retrieve</text>
+  
+  <!-- GPS Data -->
+  <path d="M 620 560 L 620 610 L 720 610 L 720 560" fill="#E6E6FA" stroke="black" stroke-width="2"/>
+  <path d="M 620 560 L 720 560" fill="none" stroke="black" stroke-width="2"/>
+  <text x="670" y="590" text-anchor="middle" font-family="Arial" font-size="12">GPS Data</text>
+  
+  <!-- GPS Mapping to GPS Data -->
+  <polyline points="500,383 670,383 670,560" fill="none" stroke="black" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="585" y="375" text-anchor="middle" font-family="Arial" font-size="10">Coordinates</text>
+  
+  <!-- Arrow marker -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="black"/>
+    </marker>
+  </defs>
+</svg>

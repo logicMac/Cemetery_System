@@ -1,0 +1,10 @@
+# Local secrets - never commit
+cemetery_mapping/config/groq_key.local.php
+
+# Uploads
+cemetery_mapping/uploads/*
+!cemetery_mapping/uploads/.gitkeep
+
+# IDE
+.vscode/
+*.log

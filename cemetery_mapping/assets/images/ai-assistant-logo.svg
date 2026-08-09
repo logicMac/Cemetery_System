@@ -1,0 +1,64 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:0.3" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Outer Circle Background -->
+  <circle cx="60" cy="60" r="58" fill="url(#glowGradient)" opacity="0.2"/>
+  
+  <!-- Main Circle -->
+  <circle cx="60" cy="60" r="50" fill="url(#mainGradient)" filter="url(#glow)"/>
+  
+  <!-- AI Brain Icon -->
+  <!-- Head Shape -->
+  <path d="M 45 40 Q 45 30 55 28 Q 65 26 68 30 Q 70 28 72 30 Q 75 26 85 28 Q 95 30 95 40 L 95 55 Q 95 65 85 68 L 80 68 L 80 75 Q 80 80 70 80 Q 60 80 60 75 L 60 68 L 55 68 Q 45 65 45 55 Z" 
+        fill="white" opacity="0.95"/>
+  
+  <!-- Neural Network Lines -->
+  <g stroke="url(#mainGradient)" stroke-width="2" fill="none" opacity="0.8">
+    <line x1="55" y1="40" x2="65" y2="45"/>
+    <line x1="65" y1="45" x2="75" y2="40"/>
+    <line x1="55" y1="50" x2="70" y2="55"/>
+    <line x1="70" y1="55" x2="85" y2="50"/>
+    <line x1="60" y1="55" x2="70" y2="62"/>
+    <line x1="55" y1="40" x2="55" y2="50"/>
+    <line x1="85" y1="40" x2="85" y2="50"/>
+  </g>
+  
+  <!-- Neural Nodes -->
+  <circle cx="55" cy="40" r="3" fill="url(#mainGradient)"/>
+  <circle cx="65" cy="45" r="3" fill="url(#mainGradient)"/>
+  <circle cx="75" cy="40" r="3" fill="url(#mainGradient)"/>
+  <circle cx="55" cy="50" r="3" fill="url(#mainGradient)"/>
+  <circle cx="70" cy="55" r="3" fill="url(#mainGradient)"/>
+  <circle cx="85" cy="50" r="3" fill="url(#mainGradient)"/>
+  <circle cx="60" cy="55" r="3" fill="url(#mainGradient)"/>
+  <circle cx="70" cy="62" r="3" fill="url(#mainGradient)"/>
+  
+  <!-- Chat Bubble Bottom -->
+  <circle cx="35" cy="75" r="8" fill="white" opacity="0.9"/>
+  <circle cx="50" cy="82" r="6" fill="white" opacity="0.9"/>
+  <circle cx="90" cy="75" r="8" fill="white" opacity="0.9"/>
+  
+  <!-- Sparkle Effects -->
+  <g fill="white" opacity="0.8">
+    <path d="M 25 30 L 26 33 L 29 34 L 26 35 L 25 38 L 24 35 L 21 34 L 24 33 Z"/>
+    <path d="M 95 55 L 96 57 L 98 58 L 96 59 L 95 61 L 94 59 L 92 58 L 94 57 Z"/>
+    <path d="M 30 90 L 31 92 L 33 93 L 31 94 L 30 96 L 29 94 L 27 93 L 29 92 Z"/>
+  </g>
+</svg>
