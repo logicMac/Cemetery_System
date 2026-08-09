@@ -1,15 +1,77 @@
 <?php
 session_start();
 require_once 'includes/header.php';
+require_once '../config/database.php';
 
 $target_lat = $_GET['lat'] ?? 6.18344118743717;
 $target_lng = $_GET['lng'] ?? 125.08457146469357;
 $zoom = $_GET['zoom'] ?? 17;
 ?>
 
+<?php require_once 'includes/sidebar.php'; ?>
+
+<!-- Sidebar Collapse Toggle (desktop only) -->
+<button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Toggle sidebar">
+    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
+    </svg>
+</button>
+<script>
+function toggleSidebarCollapse() {
+    document.body.classList.toggle('sidebar-collapsed');
+    setTimeout(() => { if (map) map.invalidateSize(); }, 300);
+}
+</script>
+
 <style>
-    body { margin: 0; padding: 0; overflow: hidden; }
-    #adminMap { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+    #adminMap { position: relative; width: 100%; height: calc(100vh - 80px); }
+
+    /* Sidebar collapse toggle */
+    .sidebar-collapse-btn {
+        position: fixed;
+        top: 20px;
+        left: 288px;
+        z-index: 1001;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        transition: left 0.3s ease;
+        color: white;
+    }
+    .sidebar-collapse-btn:hover {
+        transform: scale(1.1);
+    }
+    .sidebar-collapse-btn svg {
+        width: 18px;
+        height: 18px;
+        transition: transform 0.3s ease;
+    }
+
+    /* Collapsed state */
+    body.sidebar-collapsed .admin-sidebar {
+        transform: translateX(-100%);
+    }
+    body.sidebar-collapsed .admin-main {
+        margin-left: 0;
+    }
+    body.sidebar-collapsed .sidebar-collapse-btn {
+        left: 20px;
+    }
+    body.sidebar-collapsed .sidebar-collapse-btn svg {
+        transform: rotate(180deg);
+    }
+
+    @media (max-width: 1024px) {
+        .sidebar-collapse-btn { display: none; }
+    }
+
     .map-overlay {
         position: absolute;
         top: 20px;
@@ -543,5 +605,6 @@ $zoom = $_GET['zoom'] ?? 17;
     
     // Don't call loadAllData here - it's called in initializeMap()
 </script>
+</main>
 </body>
 </html>
