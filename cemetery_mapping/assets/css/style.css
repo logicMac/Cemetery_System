@@ -24,7 +24,7 @@
     font-size: 3.5rem;
     font-weight: 700;
     margin-bottom: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -62,7 +62,7 @@
 
 .auth-logo h2 {
     font-size: 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -93,12 +93,12 @@
 
 .password-strength-bar.medium {
     width: 66%;
-    background-color: #fbbf24;
+    background-color: #00e676;
 }
 
 .password-strength-bar.strong {
     width: 100%;
-    background-color: #22c55e;
+    background-color: #00c853;
 }
 
 .password-strength-text {
@@ -201,10 +201,10 @@
 }
 
 .search-result-item:hover {
-    background: rgba(102, 126, 234, 0.2);
-    border-color: rgba(102, 126, 234, 0.4);
+    background: rgba(0, 230, 118, 0.2);
+    border-color: rgba(0, 230, 118, 0.4);
     transform: translateY(-2px);
-    box-shadow: 0 6px 30px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 6px 30px rgba(0, 230, 118, 0.3);
 }
 
 /* Legend */
@@ -292,7 +292,7 @@
 }
 
 .chat-message.user {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
     margin-left: 20px;
 }
 
@@ -327,19 +327,19 @@
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 230, 118, 0.5);
     transition: all 0.3s ease;
 }
 
 .chat-toggle:hover {
     transform: scale(1.1);
-    box-shadow: 0 8px 40px rgba(102, 126, 234, 0.7);
+    box-shadow: 0 8px 40px rgba(0, 230, 118, 0.7);
 }
 
 /* Responsive Design */

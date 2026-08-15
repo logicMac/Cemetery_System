@@ -18,7 +18,7 @@ header('Content-Type: text/html; charset=utf-8');
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
-            background: #1a1a2e;
+            background: #0a0a0a;
             color: white;
         }
         .section {
@@ -38,11 +38,11 @@ header('Content-Type: text/html; charset=utf-8');
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         th {
-            background: rgba(102, 126, 234, 0.3);
+            background: rgba(0, 230, 118, 0.3);
         }
-        .success { color: #22c55e; }
-        .error { color: #ef4444; }
-        .warning { color: #fbbf24; }
+        .success { color: #5a9b6f; }
+        .error { color: #b55a5a; }
+        .warning { color: #c9a86c; }
     </style>
 </head>
 <body>
@@ -185,11 +185,11 @@ header('Content-Type: text/html; charset=utf-8');
     
     <div class="section">
         <h2>Quick Actions</h2>
-        <p><a href="admin/dashboard.php" style="color: #667eea;">→ Go to Admin Dashboard</a></p>
-        <p><a href="admin/records.php" style="color: #667eea;">→ Manage Records</a></p>
-        <p><a href="admin/available-plots.php" style="color: #667eea;">→ Manage Available Plots</a></p>
-        <p><a href="admin/map-view.php" style="color: #667eea;">→ View Map</a></p>
-        <p><a href="test_api.html" style="color: #667eea;">→ Test APIs</a></p>
+        <p><a href="admin/dashboard.php" style="color: #00c853;">→ Go to Admin Dashboard</a></p>
+        <p><a href="admin/records.php" style="color: #00c853;">→ Manage Records</a></p>
+        <p><a href="admin/available-plots.php" style="color: #00c853;">→ Manage Available Plots</a></p>
+        <p><a href="admin/map-view.php" style="color: #00c853;">→ View Map</a></p>
+        <p><a href="test_api.html" style="color: #00c853;">→ Test APIs</a></p>
     </div>
 </body>
 </html>

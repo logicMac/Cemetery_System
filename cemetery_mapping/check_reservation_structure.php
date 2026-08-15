@@ -11,13 +11,13 @@ header('Content-Type: text/html; charset=utf-8');
 <head>
     <title>Check Reservation Structure</title>
     <style>
-        body { font-family: monospace; background: #1a1a2e; color: white; padding: 20px; }
+        body { font-family: monospace; background: #0a0a0a; color: white; padding: 20px; }
         table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-        th, td { border: 1px solid #667eea; padding: 10px; text-align: left; }
-        th { background: #667eea; }
-        .success { color: #22c55e; }
-        .error { color: #ef4444; }
-        .warning { color: #fbbf24; }
+        th, td { border: 1px solid #00c853; padding: 10px; text-align: left; }
+        th { background: #00c853; }
+        .success { color: #5a9b6f; }
+        .error { color: #b55a5a; }
+        .warning { color: #c9a86c; }
         pre { background: rgba(0,0,0,0.5); padding: 15px; border-radius: 8px; overflow-x: auto; }
     </style>
 </head>
@@ -131,7 +131,7 @@ header('Content-Type: text/html; charset=utf-8');
     }
     ?>
     
-    <hr style="margin: 40px 0; border-color: #667eea;">
-    <p><a href="admin/reservations.php" style="color: #667eea;">← Back to Reservations</a></p>
+    <hr style="margin: 40px 0; border-color: #00c853;">
+    <p><a href="admin/reservations.php" style="color: #00c853;">← Back to Reservations</a></p>
 </body>
 </html>

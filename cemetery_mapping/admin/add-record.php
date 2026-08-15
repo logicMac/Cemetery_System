@@ -9,99 +9,159 @@ $barangays = ['Matinao', 'Poblacion', 'San Isidro', 'San Jose', 'San Miguel', 'S
 
 <?php require_once 'includes/sidebar.php'; ?>
 
-<div class="glass-card">
-    <h2 style="margin-bottom: 24px;">Add New Burial Record</h2>
-    
-    <form id="addRecordForm" enctype="multipart/form-data">
-        <div class="form-grid">
-            <div>
-                <label for="decedent_name">Decedent Name *</label>
-                <input type="text" id="decedent_name" name="decedent_name" class="input-field" required>
+<style>
+.admin-layout { background: #ffffff; }
+.admin-layout::after { display: none; }
+button svg, a svg, button i, a i { pointer-events: none; }
+</style>
+
+<div class="max-w-5xl mx-auto space-y-6">
+    <!-- Page intro -->
+    <div class="flex items-center gap-3 animate-[fadeUp_0.5s_ease]">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+            <i data-lucide="user-plus" class="w-5 h-5"></i>
+        </div>
+        <div>
+            <h2 class="text-xl font-bold text-slate-900">Add New Burial Record</h2>
+            <p class="text-sm text-slate-500">Fill in the decedent details, plot info, and location</p>
+        </div>
+    </div>
+
+    <form id="addRecordForm" enctype="multipart/form-data" class="space-y-6">
+        <!-- Decedent details card -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 animate-[fadeUp_0.6s_ease]">
+            <div class="flex items-center gap-2 mb-5">
+                <i data-lucide="user" class="w-4 h-4 text-emerald-600"></i>
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700">Decedent Details</h3>
             </div>
-            
-            <div>
-                <label for="family_name">Family Name</label>
-                <input type="text" id="family_name" name="family_name" class="input-field">
-            </div>
-            
-            <div>
-                <label for="birth_date">Birth Date</label>
-                <input type="date" id="birth_date" name="birth_date" class="input-field">
-            </div>
-            
-            <div>
-                <label for="death_date">Death Date</label>
-                <input type="date" id="death_date" name="death_date" class="input-field">
-            </div>
-            
-            <div>
-                <label for="plot_number">Plot Number</label>
-                <input type="text" id="plot_number" name="plot_number" class="input-field">
-            </div>
-            
-            <div>
-                <label for="barangay">Barangay</label>
-                <select id="barangay" name="barangay" class="input-field">
-                    <option value="">Select Barangay</option>
-                    <?php foreach ($barangays as $barangay): ?>
-                        <option value="<?php echo $barangay; ?>"><?php echo $barangay; ?></option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div>
-                <label>
-                    <input type="checkbox" id="is_fenced" name="is_fenced" value="1" style="margin-right: 8px;">
-                    Premium/Fenced Plot
-                </label>
-            </div>
-            
-            <div class="form-grid-full">
-                <label for="memory_space">Memory/Biography</label>
-                <textarea id="memory_space" name="memory_space" class="input-field" rows="4" placeholder="Share memories or biographical information..."></textarea>
-            </div>
-            
-            <div class="form-grid-full">
-                <label for="photo">Photo</label>
-                <div class="file-upload" onclick="document.getElementById('photo').click()">
-                    <svg style="width: 48px; height: 48px; margin: 0 auto 12px; color: var(--zinc-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <p style="color: var(--zinc-400);">Click to upload photo (max 5MB)</p>
-                    <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/jpg" style="display: none;" onchange="previewPhoto(this)">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label for="decedent_name" class="block text-sm font-medium text-slate-700 mb-1.5">Decedent Name <span class="text-rose-500">*</span></label>
+                    <input type="text" id="decedent_name" name="decedent_name" required
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
                 </div>
-                <div id="photoPreview" class="file-preview" style="display: none;"></div>
+                <div>
+                    <label for="family_name" class="block text-sm font-medium text-slate-700 mb-1.5">Family Name</label>
+                    <input type="text" id="family_name" name="family_name"
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+                </div>
+                <div>
+                    <label for="birth_date" class="block text-sm font-medium text-slate-700 mb-1.5">Birth Date</label>
+                    <input type="date" id="birth_date" name="birth_date"
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+                </div>
+                <div>
+                    <label for="death_date" class="block text-sm font-medium text-slate-700 mb-1.5">Death Date</label>
+                    <input type="date" id="death_date" name="death_date"
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+                </div>
             </div>
-        </div>
-        
-        <h3 style="margin: 30px 0 20px 0;">Location Coordinates</h3>
-        <p style="color: var(--zinc-400); margin-bottom: 20px;">Click on the map to set the burial location</p>
-        
-        <div class="form-grid">
-            <div>
-                <label for="latitude">Latitude *</label>
-                <input type="number" id="latitude" name="latitude" class="input-field" step="0.00000001" required readonly>
+        </section>
+
+        <!-- Plot info card -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 animate-[fadeUp_0.7s_ease]">
+            <div class="flex items-center gap-2 mb-5">
+                <i data-lucide="map-pin" class="w-4 h-4 text-emerald-600"></i>
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700">Plot Information</h3>
             </div>
-            
-            <div>
-                <label for="longitude">Longitude *</label>
-                <input type="number" id="longitude" name="longitude" class="input-field" step="0.00000001" required readonly>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label for="plot_number" class="block text-sm font-medium text-slate-700 mb-1.5">Plot Number</label>
+                    <input type="text" id="plot_number" name="plot_number"
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+                </div>
+                <div>
+                    <label for="barangay" class="block text-sm font-medium text-slate-700 mb-1.5">Barangay</label>
+                    <select id="barangay" name="barangay"
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition bg-white">
+                        <option value="">Select Barangay</option>
+                        <?php foreach ($barangays as $barangay): ?>
+                            <option value="<?php echo $barangay; ?>"><?php echo $barangay; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="flex items-center gap-3 cursor-pointer select-none">
+                        <input type="checkbox" id="is_fenced" name="is_fenced" value="1"
+                            class="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-100">
+                        <span class="text-sm font-medium text-slate-700">Premium / Fenced Plot</span>
+                    </label>
+                </div>
             </div>
-        </div>
-        
-        <div id="mapPicker" class="map-picker"></div>
-        
-        <div style="display: flex; gap: 15px; margin-top: 30px;">
-            <button type="submit" class="btn-primary">
-                <svg style="display: inline-block; width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
+        </section>
+
+        <!-- Memory & photo card -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 animate-[fadeUp_0.8s_ease]">
+            <div class="flex items-center gap-2 mb-5">
+                <i data-lucide="book-open" class="w-4 h-4 text-emerald-600"></i>
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700">Memory & Photo</h3>
+            </div>
+            <div class="space-y-5">
+                <div>
+                    <label for="memory_space" class="block text-sm font-medium text-slate-700 mb-1.5">Memory / Biography</label>
+                    <textarea id="memory_space" name="memory_space" rows="4" placeholder="Share memories or biographical information..."
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition resize-y"></textarea>
+                </div>
+                <div>
+                    <label for="photo" class="block text-sm font-medium text-slate-700 mb-1.5">Photo</label>
+                    <div onclick="document.getElementById('photo').click()"
+                        class="cursor-pointer rounded-xl border-2 border-dashed border-slate-300 hover:border-emerald-400 hover:bg-emerald-50/40 transition p-8 text-center">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                            <i data-lucide="image" class="w-6 h-6"></i>
+                        </div>
+                        <p class="text-sm text-slate-500">Click to upload photo <span class="text-slate-400">(max 5MB)</span></p>
+                        <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/jpg" class="hidden" onchange="previewPhoto(this)">
+                    </div>
+                    <div id="photoPreview" class="mt-4 hidden">
+                        <img src="" alt="Preview" class="max-h-48 rounded-lg border border-slate-200 object-cover">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Location card -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 animate-[fadeUp_0.9s_ease]">
+            <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="navigation" class="w-4 h-4 text-emerald-600"></i>
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700">Location Coordinates</h3>
+            </div>
+            <p class="text-sm text-slate-500 mb-5">Click on the map to set the burial location</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+                <div>
+                    <label for="latitude" class="block text-sm font-medium text-slate-700 mb-1.5">Latitude <span class="text-rose-500">*</span></label>
+                    <input type="number" id="latitude" name="latitude" step="0.00000001" required readonly
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 bg-slate-50 focus:outline-none">
+                </div>
+                <div>
+                    <label for="longitude" class="block text-sm font-medium text-slate-700 mb-1.5">Longitude <span class="text-rose-500">*</span></label>
+                    <input type="number" id="longitude" name="longitude" step="0.00000001" required readonly
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 bg-slate-50 focus:outline-none">
+                </div>
+            </div>
+            <div id="mapPicker" class="map-picker rounded-xl overflow-hidden border border-slate-200" style="height: 380px;"></div>
+        </section>
+
+        <!-- Action bar -->
+        <div class="flex items-center gap-3 pt-2 animate-[fadeUp_1s_ease]">
+            <button type="submit"
+                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-2.5 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-emerald-200">
+                <i data-lucide="check" class="w-4 h-4"></i>
                 Save Record
             </button>
-            <a href="records.php" class="btn-secondary">Cancel</a>
+            <a href="records.php"
+                class="inline-flex items-center gap-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold px-5 py-2.5 transition">
+                Cancel
+            </a>
         </div>
     </form>
 </div>
+
+<style>
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+</style>
 
         </main>
     </div>
@@ -126,7 +186,7 @@ $barangays = ['Matinao', 'Poblacion', 'San Isidro', 'San Jose', 'San Miguel', 'S
         
         // Draw cemetery boundary
         L.rectangle(CEMETERY_BOUNDS, {
-            color: '#ef4444',
+            color: '#b55a5a',
             weight: 2,
             fillOpacity: 0,
             dashArray: '5, 10'
@@ -148,7 +208,7 @@ $barangays = ['Matinao', 'Poblacion', 'San Isidro', 'San Jose', 'San Miguel', 'S
                 marker = L.marker(e.latlng, {
                     icon: L.divIcon({
                         className: 'custom-marker',
-                        html: '<div style="background: #667eea; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(102, 126, 234, 0.5);"></div>',
+                        html: '<div style="background: #22c55e; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(74, 222, 128, 0.5);"></div>',
                         iconSize: [16, 16],
                         iconAnchor: [8, 8]
                     })
@@ -159,13 +219,14 @@ $barangays = ['Matinao', 'Poblacion', 'San Isidro', 'San Jose', 'San Miguel', 'S
         // Photo preview
         function previewPhoto(input) {
             const preview = document.getElementById('photoPreview');
+            const img = preview.querySelector('img');
             
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 
                 reader.onload = function(e) {
-                    preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
-                    preview.style.display = 'block';
+                    img.src = e.target.result;
+                    preview.classList.remove('hidden');
                 };
                 
                 reader.readAsDataURL(input.files[0]);
@@ -179,7 +240,7 @@ $barangays = ['Matinao', 'Poblacion', 'San Isidro', 'San Jose', 'San Miguel', 'S
             const formData = new FormData(this);
             
             try {
-                themeUtils.showLoading(document.querySelector('.glass-card'));
+                themeUtils.showLoading(document.getElementById('addRecordForm'));
                 
                 const response = await fetch('../api/add_record.php', {
                     method: 'POST',
@@ -203,6 +264,11 @@ $barangays = ['Matinao', 'Poblacion', 'San Isidro', 'San Jose', 'San Miguel', 'S
                 themeUtils.showAlert('An error occurred', 'error');
             }
         });
+
+        // Initialize Lucide icons
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
     </script>
 </body>
 </html>

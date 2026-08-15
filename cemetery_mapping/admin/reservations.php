@@ -24,12 +24,12 @@ require_once '../config/database.php';
     }
     
     .filter-tab.active {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #22c55e 0%, #059669 100%);
         border-color: transparent;
     }
     
     .filter-tab:hover {
-        border-color: rgba(102, 126, 234, 0.4);
+        border-color: rgba(74, 222, 128, 0.4);
     }
     
     .reservation-card {
@@ -58,21 +58,21 @@ require_once '../config/database.php';
     }
     
     .status-pending {
-        background: rgba(251, 191, 36, 0.2);
-        color: #fbbf24;
-        border: 1px solid rgba(251, 191, 36, 0.3);
+        background: rgba(201, 168, 108, 0.2);
+        color: #c9a86c;
+        border: 1px solid rgba(201, 168, 108, 0.3);
     }
     
     .status-approved {
         background: rgba(34, 197, 94, 0.2);
-        color: #22c55e;
+        color: #5a9b6f;
         border: 1px solid rgba(34, 197, 94, 0.3);
     }
     
     .status-rejected {
-        background: rgba(239, 68, 68, 0.2);
-        color: #ef4444;
-        border: 1px solid rgba(239, 68, 68, 0.3);
+        background: rgba(181, 90, 90, 0.2);
+        color: #b55a5a;
+        border: 1px solid rgba(181, 90, 90, 0.3);
     }
     
     .reservation-details {
@@ -106,7 +106,7 @@ require_once '../config/database.php';
     
     .btn-approve {
         padding: 8px 16px;
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        background: linear-gradient(135deg, #5a9b6f 0%, #059669 100%);
         color: white;
         border: none;
         border-radius: 8px;
@@ -122,9 +122,9 @@ require_once '../config/database.php';
     
     .btn-reject {
         padding: 8px 16px;
-        background: rgba(239, 68, 68, 0.2);
-        color: #ef4444;
-        border: 1px solid rgba(239, 68, 68, 0.3);
+        background: rgba(181, 90, 90, 0.2);
+        color: #b55a5a;
+        border: 1px solid rgba(181, 90, 90, 0.3);
         border-radius: 8px;
         cursor: pointer;
         font-weight: 500;
@@ -132,12 +132,12 @@ require_once '../config/database.php';
     }
     
     .btn-reject:hover {
-        background: rgba(239, 68, 68, 0.3);
+        background: rgba(181, 90, 90, 0.3);
     }
     
     .btn-verify {
         padding: 6px 12px;
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        background: linear-gradient(135deg, #5a87a8 0%, #3e6a9c 100%);
         color: white;
         border: none;
         border-radius: 6px;
@@ -172,7 +172,7 @@ require_once '../config/database.php';
     }
     
     .modal-content {
-        background: #1a1a2e;
+        background: #0a0a0a;
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 16px;
         padding: 30px;
@@ -184,8 +184,8 @@ require_once '../config/database.php';
 <h1>Plot Reservations Management</h1>
 
 <!-- DEBUG: Test Button -->
-<div class="glass-card" style="margin-bottom: 20px; padding: 20px; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3);">
-    <h3 style="margin: 0 0 10px 0; color: #fbbf24;">🔧 DEBUG MODE</h3>
+<div class="glass-card" style="margin-bottom: 20px; padding: 20px; background: rgba(201, 168, 108, 0.1); border: 1px solid rgba(201, 168, 108, 0.3);">
+    <h3 style="margin: 0 0 10px 0; color: #c9a86c;">🔧 DEBUG MODE</h3>
     <p style="margin: 0 0 15px 0; font-size: 0.9rem; color: rgba(255,255,255,0.7);">Test if JavaScript is working:</p>
     <button onclick="alert('JavaScript is working!'); console.log('Test button clicked');" class="btn-primary">
         Test JavaScript
@@ -364,8 +364,8 @@ require_once '../config/database.php';
                     ` : ''}
                     
                     ${res.rejection_reason ? `
-                        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 12px; margin-top: 12px;">
-                            <strong style="color: #ef4444;">Rejection Reason:</strong>
+                        <div style="background: rgba(181, 90, 90, 0.1); border: 1px solid rgba(181, 90, 90, 0.3); border-radius: 8px; padding: 12px; margin-top: 12px;">
+                            <strong style="color: #b55a5a;">Rejection Reason:</strong>
                             <p style="margin: 4px 0 0 0;">${res.rejection_reason}</p>
                         </div>
                     ` : ''}
@@ -391,7 +391,7 @@ require_once '../config/database.php';
                                     <div style="font-size: 0.85rem; color: var(--zinc-400);">
                                         Submitted: ${new Date(payment.payment_date).toLocaleString()}
                                         ${payment.verified_by_name ? `<br>Verified by: ${payment.verified_by_name}` : ''}
-                                        ${payment.proof_of_payment ? `<br><a href="../uploads/payments/${payment.proof_of_payment}" target="_blank" style="color: #667eea;">View Proof</a>` : ''}
+                                        ${payment.proof_of_payment ? `<br><a href="../uploads/payments/${payment.proof_of_payment}" target="_blank" style="color: #22c55e;">View Proof</a>` : ''}
                                     </div>
                                 </div>
                             `).join('')}
@@ -464,7 +464,7 @@ require_once '../config/database.php';
                         if (testData.message === 'Unauthorized') {
                             themeUtils.showAlert('ERROR: You are not logged in as admin! Please login first.', 'error');
                             setTimeout(() => {
-                                window.location.href = 'login.php';
+                                window.location.href = '../login.php?role=admin';
                             }, 2000);
                             return;
                         }
@@ -561,7 +561,7 @@ require_once '../config/database.php';
                     <p><strong>Amount:</strong> ₱${parseFloat(payment.amount).toFixed(2)}</p>
                     <p><strong>Method:</strong> ${payment.payment_method}</p>
                     ${payment.reference_number ? `<p><strong>Reference:</strong> ${payment.reference_number}</p>` : ''}
-                    ${payment.proof_of_payment ? `<p><a href="../uploads/payments/${payment.proof_of_payment}" target="_blank" style="color: #667eea;">View Proof of Payment</a></p>` : ''}
+                    ${payment.proof_of_payment ? `<p><a href="../uploads/payments/${payment.proof_of_payment}" target="_blank" style="color: #22c55e;">View Proof of Payment</a></p>` : ''}
                     ${payment.notes ? `<p><strong>Notes:</strong> ${payment.notes}</p>` : ''}
                 </div>
             `;
@@ -604,7 +604,7 @@ require_once '../config/database.php';
         
         function showError(message) {
             document.getElementById('reservationsContainer').innerHTML = 
-                `<p style="text-align: center; color: #ef4444; padding: 40px;">${message}</p>`;
+                `<p style="text-align: center; color: #b55a5a; padding: 40px;">${message}</p>`;
         }
         
         // Load reservations on page load

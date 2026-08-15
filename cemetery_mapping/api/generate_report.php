@@ -148,7 +148,7 @@ function exportPDF($data, $headers, $filename) {
         h1 { color: #333; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
-        th { background-color: #667eea; color: white; }
+        th { background-color: #00c853; color: white; }
         tr:nth-child(even) { background-color: #f2f2f2; }
         .footer { margin-top: 30px; font-size: 10px; color: #666; }
     </style>

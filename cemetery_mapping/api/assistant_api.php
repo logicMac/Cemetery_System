@@ -93,14 +93,21 @@ $messages = [
 $apiResponse = sendGroqRequest($messages, 0.7, 1024);
 
 if (!$apiResponse['success']) {
+    error_log('Groq API error: ' . ($apiResponse['error'] ?? 'Unknown'));
+    if (isset($apiResponse['response'])) {
+        error_log('Groq API raw response: ' . substr($apiResponse['response'], 0, 500));
+    }
     echo json_encode([
         'success' => false,
-        'error' => 'AI service unavailable',
-        'response' => 'I apologize, but I\'m having trouble processing your request. Here are the current statistics:\n\n' .
-                     "Total Records: {$totalRecords}\n" .
-                     "Available Plots: {$totalPlots}\n" .
-                     "Premium Plots: {$premiumPlots}\n" .
-                     "This Month: {$thisMonth}"
+        'error' => $apiResponse['error'] ?? 'AI service unavailable',
+        'response' => "I apologize, but I'm having trouble reaching the AI service right now. However, here are the current statistics:\n\n" .
+                     "**Total Records:** {$totalRecords}\n" .
+                     "**Available Plots:** {$totalPlots}\n" .
+                     "**Premium/Fenced Plots:** {$premiumPlots}\n" .
+                     "**Standard Plots:** " . ($totalRecords - $premiumPlots) . "\n" .
+                     "**Records Added This Month:** {$thisMonth}\n\n" .
+                     "Please try again in a moment. If the issue persists, check the Groq API configuration.",
+        'chart_data' => null
     ]);
     exit;
 }

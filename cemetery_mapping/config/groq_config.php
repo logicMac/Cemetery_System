@@ -5,7 +5,7 @@
  */
 
 // Groq API Configuration
-define('GROQ_API_KEY', 'your_groq_api_key_here'); // Replace with actual API key
+define('GROQ_API_KEY', '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'); // Replace with actual API key
 define('GROQ_API_URL', 'https://api.groq.com/openai/v1/chat/completions');
 define('GROQ_MODEL', 'llama-3.3-70b-versatile'); // Updated to newer model
 

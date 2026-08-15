@@ -10,155 +10,88 @@ $zoom = $_GET['zoom'] ?? 17;
 
 <?php require_once 'includes/sidebar.php'; ?>
 
-<!-- Sidebar Collapse Toggle (desktop only) -->
-<button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Toggle sidebar">
-    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path>
-    </svg>
-</button>
-<script>
-function toggleSidebarCollapse() {
-    document.body.classList.toggle('sidebar-collapsed');
-    setTimeout(() => { if (map) map.invalidateSize(); }, 300);
-}
-</script>
-
 <style>
-    #adminMap { position: relative; width: 100%; height: calc(100vh - 80px); }
-
-    /* Sidebar collapse toggle */
-    .sidebar-collapse-btn {
-        position: fixed;
-        top: 20px;
-        left: 288px;
-        z-index: 1001;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        border-radius: 8px;
-        width: 32px;
-        height: 32px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        transition: left 0.3s ease;
-        color: white;
-    }
-    .sidebar-collapse-btn:hover {
-        transform: scale(1.1);
-    }
-    .sidebar-collapse-btn svg {
-        width: 18px;
-        height: 18px;
-        transition: transform 0.3s ease;
-    }
-
-    /* Collapsed state */
-    body.sidebar-collapsed .admin-sidebar {
-        transform: translateX(-100%);
-    }
-    body.sidebar-collapsed .admin-main {
-        margin-left: 0;
-    }
-    body.sidebar-collapsed .sidebar-collapse-btn {
-        left: 20px;
-    }
-    body.sidebar-collapsed .sidebar-collapse-btn svg {
-        transform: rotate(180deg);
-    }
-
-    @media (max-width: 1024px) {
-        .sidebar-collapse-btn { display: none; }
-    }
-
-    .map-overlay {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        z-index: 1000;
-        background: var(--glass-bg);
-        backdrop-filter: blur(10px);
-        border: 1px solid var(--glass-border);
-        border-radius: 12px;
-        padding: 20px;
-        max-width: 300px;
-    }
-    .leaflet-popup-content-wrapper {
-        background: rgba(0, 0, 0, 0.9);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .leaflet-popup-content { color: white; }
-    .leaflet-popup-tip { background: rgba(0, 0, 0, 0.9); }
+.admin-layout { background: #ffffff; }
+.admin-layout::after { display: none; }
+#adminMap { position: relative; width: 100%; height: calc(100vh - 110px); border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; }
+.leaflet-popup-content-wrapper { background: #ffffff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); border: 1px solid #e2e8f0; }
+.leaflet-popup-content { color: #0f172a; }
+.leaflet-popup-tip { background: #ffffff; }
+button svg, a svg, button i, a i { pointer-events: none; }
 </style>
 
-<div id="adminMap"></div>
+<div class="relative">
+    <div id="adminMap"></div>
 
-<!-- Control Panel -->
-<div class="map-overlay">
-    <h3 style="margin: 0 0 16px 0;">Map Controls</h3>
-    
-    <div style="margin-bottom: 16px;">
-        <label style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Rotation</label>
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
-            <button onclick="rotateMap(-15)" class="btn-secondary" style="padding: 8px; font-size: 0.85rem;" title="Rotate 15° Left">
-                <svg style="width: 16px; height: 16px; transform: rotate(180deg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-            </button>
-            <button onclick="resetRotation()" class="btn-primary" style="padding: 8px; font-size: 0.85rem;" title="Reset to North">
-                <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                </svg>
-                N
-            </button>
-            <button onclick="rotateMap(15)" class="btn-secondary" style="padding: 8px; font-size: 0.85rem;" title="Rotate 15° Right">
-                <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-            </button>
+    <!-- Map Controls Panel -->
+    <div class="absolute top-5 right-5 z-[1000] bg-white rounded-2xl border border-slate-200 shadow-lg p-5 w-72 max-w-[calc(100vw-40px)]">
+        <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
+                <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+            </div>
+            <h3 class="text-sm font-bold text-slate-900">Map Controls</h3>
         </div>
-        <div style="text-align: center;">
-            <span id="bearingDisplay" style="font-size: 0.85rem; color: var(--zinc-400);">Bearing: 0°</span>
+
+        <!-- Rotation -->
+        <div class="mb-4">
+            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Rotation</label>
+            <div class="grid grid-cols-3 gap-2 mb-2">
+                <button onclick="rotateMap(-15)" title="Rotate 15° Left" class="flex items-center justify-center py-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-emerald-50 hover:border-emerald-200 text-slate-600 transition">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                </button>
+                <button onclick="resetRotation()" title="Reset to North" class="flex items-center justify-center gap-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">
+                    <i data-lucide="navigation" class="w-3.5 h-3.5"></i> N
+                </button>
+                <button onclick="rotateMap(15)" title="Rotate 15° Right" class="flex items-center justify-center py-2 rounded-lg bg-slate-50 border border-slate-200 hover:bg-emerald-50 hover:border-emerald-200 text-slate-600 transition">
+                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="text-center text-xs text-slate-400" id="bearingDisplay">Bearing: 0°</div>
         </div>
-    </div>
-    
-    <div style="margin-bottom: 16px;">
-        <label style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Filter</label>
-        <select id="filterType" class="input-field" onchange="filterMarkers()">
-            <option value="all">Show All</option>
-            <option value="burials">Burials Only</option>
-            <option value="available">Available Plots Only</option>
-            <option value="premium">Premium Only</option>
-        </select>
-    </div>
-    
-    <div style="margin-bottom: 16px;">
-        <label style="display: block; margin-bottom: 8px; font-size: 0.9rem;">Search</label>
-        <input type="text" id="mapSearch" class="input-field" placeholder="Search name or plot..." onkeyup="searchOnMap()">
-    </div>
-    
-    <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button onclick="resetView()" class="btn-secondary" style="width: 100%;">
-            <svg style="display: inline-block; width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-            Reset View
-        </button>
-        <a href="dashboard.php" class="btn-secondary" style="width: 100%; text-align: center;">
-            <svg style="display: inline-block; width: 16px; height: 16px; margin-right: 8px; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Back to Dashboard
-        </a>
-    </div>
-    
-    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--glass-border);">
-        <p style="font-size: 0.85rem; color: var(--zinc-400); margin: 0;">
-            <strong>Total Records:</strong> <span id="totalCount">0</span><br>
-            <strong>Visible:</strong> <span id="visibleCount">0</span>
-        </p>
+
+        <!-- Filter -->
+        <div class="mb-4">
+            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Filter</label>
+            <select id="filterType" onchange="filterMarkers()" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+                <option value="all">Show All</option>
+                <option value="burials">Burials Only</option>
+                <option value="available">Available Plots Only</option>
+                <option value="premium">Premium Only</option>
+            </select>
+        </div>
+
+        <!-- Search -->
+        <div class="mb-4">
+            <label class="block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">Search</label>
+            <div class="relative">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="mapSearch" placeholder="Name or plot..." onkeyup="searchOnMap()" class="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col gap-2 mb-4">
+            <button onclick="resetView()" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 text-sm font-medium transition">
+                <i data-lucide="locate-fixed" class="w-4 h-4"></i> Reset View
+            </button>
+            <a href="dashboard.php" class="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 text-sm font-medium transition">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="pt-4 border-t border-slate-100">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-50 rounded-lg p-3 text-center">
+                    <div class="text-lg font-bold text-slate-900" id="totalCount">0</div>
+                    <div class="text-xs text-slate-400">Total</div>
+                </div>
+                <div class="bg-emerald-50 rounded-lg p-3 text-center">
+                    <div class="text-lg font-bold text-emerald-600" id="visibleCount">0</div>
+                    <div class="text-xs text-slate-400">Visible</div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -185,6 +118,7 @@ function toggleSidebarCollapse() {
     
     // Wait for DOM and Leaflet to be ready
     document.addEventListener('DOMContentLoaded', function() {
+        if (typeof lucide !== 'undefined') lucide.createIcons();
         initializeMap();
     });
     
@@ -252,7 +186,7 @@ function toggleSidebarCollapse() {
         
         // Cemetery boundary
         L.rectangle(CEMETERY_BOUNDS, {
-            color: '#ef4444',
+            color: '#b55a5a',
             weight: 2,
             fillOpacity: 0,
             dashArray: '5, 10'
@@ -302,7 +236,7 @@ function toggleSidebarCollapse() {
             if (burialData.success) {
                 burialData.records.forEach(record => {
                     if (record.latitude && record.longitude) {
-                        const color = record.is_fenced == 1 ? '#fbbf24' : '#3b82f6';
+                        const color = record.is_fenced == 1 ? '#c9a86c' : '#5a87a8';
                         const marker = L.marker([record.latitude, record.longitude], {
                             icon: L.divIcon({
                                 className: 'custom-marker',
@@ -332,7 +266,7 @@ function toggleSidebarCollapse() {
                     const marker = L.marker([plot.latitude, plot.longitude], {
                         icon: L.divIcon({
                             className: 'custom-marker',
-                            html: '<div style="background: #22c55e; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
+                            html: '<div style="background: #5a9b6f; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>',
                             iconSize: [14, 14],
                             iconAnchor: [7, 7]
                         })
@@ -411,17 +345,17 @@ function toggleSidebarCollapse() {
                 
                 // Create rotated polygon instead of rectangle
                 const cell = L.polygon(latLngs, {
-                    color: '#22c55e',
+                    color: '#10b981',
                     weight: 2,
-                    fillColor: '#22c55e',
+                    fillColor: '#10b981',
                     fillOpacity: 0.1
                 }).bindPopup(`
-                    <div style="min-width: 150px;">
-                        <h4 style="margin: 0 0 8px 0;">Compartment ${cellLabel}</h4>
-                        <p style="margin: 0; font-size: 0.85rem;">
-                            <strong>Plot:</strong> ${plot.plot_number || 'N/A'}<br>
-                            <strong>Status:</strong> Available
-                        </p>
+                    <div style="min-width:160px;">
+                        <h4 style="margin:0 0 6px 0;font-size:0.9rem;font-weight:700;color:#0f172a;">Compartment ${cellLabel}</h4>
+                        <div style="font-size:0.8rem;color:#64748b;">
+                            <div><strong style="color:#0f172a;">Plot:</strong> ${plot.plot_number || 'N/A'}</div>
+                            <div><strong style="color:#0f172a;">Status:</strong> <span style="color:#10b981;font-weight:600;">Available</span></div>
+                        </div>
                     </div>
                 `);
                 
@@ -435,7 +369,7 @@ function toggleSidebarCollapse() {
                 // Add label marker at center of cell
                 const labelIcon = L.divIcon({
                     className: 'grid-label',
-                    html: `<div style="font-size: 10px; font-weight: bold; color: #22c55e; text-shadow: 0 0 3px #000, 0 0 3px #000;">${cellLabel}</div>`,
+                    html: `<div style="font-size: 10px; font-weight: bold; color: #5a9b6f; text-shadow: 0 0 3px #000, 0 0 3px #000;">${cellLabel}</div>`,
                     iconSize: [20, 20],
                     iconAnchor: [10, 10]
                 });
@@ -451,35 +385,41 @@ function toggleSidebarCollapse() {
     }
     
     function createBurialPopup(record) {
-        const photoHtml = record.photo 
-            ? `<img src="../uploads/photos/${record.photo}" style="width: 100%; max-height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;">`
+        const photoHtml = record.photo
+            ? `<img src="../uploads/photos/${record.photo}" style="width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-bottom:10px;">`
             : '';
-        
+        const badge = record.is_fenced == 1
+            ? '<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:0.7rem;font-weight:600;background:#fef3c7;color:#92400e;">Premium</span>'
+            : '<span style="display:inline-block;padding:2px 8px;border-radius:999px;font-size:0.7rem;font-weight:600;background:#d1fae5;color:#065f46;">Standard</span>';
+
         return `
-            <div style="min-width: 200px;">
+            <div style="min-width:220px;">
                 ${photoHtml}
-                <h4 style="margin: 0 0 8px 0;">${record.decedent_name}</h4>
-                <p style="margin: 4px 0; font-size: 0.85rem;">
-                    <strong>Plot:</strong> ${record.plot_number || 'N/A'}<br>
-                    <strong>Type:</strong> ${record.is_fenced == 1 ? 'Premium' : 'Standard'}<br>
-                    <strong>Barangay:</strong> ${record.barangay || 'N/A'}
-                </p>
-                <button onclick="window.location.href='records.php?id=${record.id}'" class="btn-primary" style="width: 100%; margin-top: 8px; padding: 6px;">
-                    View Details
-                </button>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <h4 style="margin:0;font-size:1rem;font-weight:700;color:#0f172a;">${record.decedent_name}</h4>
+                    ${badge}
+                </div>
+                <div style="font-size:0.8rem;color:#64748b;line-height:1.6;margin-bottom:10px;">
+                    <div><strong style="color:#0f172a;">Plot:</strong> ${record.plot_number || 'N/A'}</div>
+                    <div><strong style="color:#0f172a;">Barangay:</strong> ${record.barangay || 'N/A'}</div>
+                </div>
+                <button onclick="window.location.href='records.php?id=${record.id}'" style="width:100%;padding:7px;border:none;border-radius:8px;background:#10b981;color:#fff;font-size:0.8rem;font-weight:600;cursor:pointer;">View Details</button>
             </div>
         `;
     }
-    
+
     function createPlotPopup(plot) {
         return `
-            <div style="min-width: 200px;">
-                <h4 style="margin: 0 0 8px 0; color: #22c55e;">Available Plot</h4>
-                <p style="margin: 4px 0; font-size: 0.85rem;">
-                    <strong>Plot:</strong> ${plot.plot_number || 'N/A'}<br>
-                    ${plot.has_grid == 1 ? `<strong>Grid:</strong> ${plot.grid_rows} × ${plot.grid_cols}<br>` : ''}
-                    ${plot.notes ? `<strong>Notes:</strong> ${plot.notes}` : ''}
-                </p>
+            <div style="min-width:200px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                    <div style="width:8px;height:8px;border-radius:50%;background:#10b981;"></div>
+                    <h4 style="margin:0;font-size:0.95rem;font-weight:700;color:#0f172a;">Available Plot</h4>
+                </div>
+                <div style="font-size:0.8rem;color:#64748b;line-height:1.6;">
+                    <div><strong style="color:#0f172a;">Plot:</strong> ${plot.plot_number || 'N/A'}</div>
+                    ${plot.has_grid == 1 ? `<div><strong style="color:#0f172a;">Grid:</strong> ${plot.grid_rows} × ${plot.grid_cols}</div>` : ''}
+                    ${plot.notes ? `<div style="margin-top:4px;"><strong style="color:#0f172a;">Notes:</strong> ${plot.notes}</div>` : ''}
+                </div>
             </div>
         `;
     }

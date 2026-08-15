@@ -32,8 +32,8 @@ html {
 
 /* Better tap highlighting */
 a, button, input[type="submit"], input[type="button"] {
-    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
-    tap-highlight-color: rgba(102, 126, 234, 0.2);
+    -webkit-tap-highlight-color: rgba(0, 230, 118, 0.2);
+    tap-highlight-color: rgba(0, 230, 118, 0.2);
 }
 
 /* Remove iOS input styling */
@@ -410,7 +410,7 @@ textarea {
     input:focus,
     select:focus,
     textarea:focus {
-        outline: 3px solid rgba(102, 126, 234, 0.5);
+        outline: 3px solid rgba(0, 230, 118, 0.5);
         outline-offset: 2px;
     }
 }

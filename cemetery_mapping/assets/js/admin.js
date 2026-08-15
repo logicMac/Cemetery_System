@@ -56,7 +56,7 @@ function validateForm(form) {
     
     requiredFields.forEach(field => {
         if (!field.value.trim()) {
-            field.style.borderColor = '#ef4444';
+            field.style.borderColor = '#b55a5a';
             isValid = false;
         } else {
             field.style.borderColor = '';
@@ -240,7 +240,7 @@ function initAdminMap(containerId, options = {}) {
     
     // Draw cemetery boundary
     L.rectangle(CEMETERY_BOUNDS, {
-        color: '#ef4444',
+        color: '#b55a5a',
         weight: 2,
         fillOpacity: 0,
         dashArray: '5, 10'
@@ -293,7 +293,7 @@ function initSessionMonitor() {
         sessionTimeout = setTimeout(() => {
             themeUtils.showAlert('Session expired. Redirecting to login...', 'error');
             setTimeout(() => {
-                window.location.href = 'login.php?timeout=1';
+                window.location.href = '../login.php?role=admin&timeout=1';
             }, 2000);
         }, TIMEOUT);
     }

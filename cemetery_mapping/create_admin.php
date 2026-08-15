@@ -14,7 +14,7 @@ $email = 'admin@gmail.com';
 
 // Hash the password using bcrypt
 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
+    
 try {
     // Check if admin already exists
     $checkStmt = $pdo->prepare("SELECT id FROM admin_users WHERE username = ?");
@@ -57,7 +57,7 @@ try {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -83,9 +83,9 @@ try {
             justify-content: center;
             font-size: 40px;
         }
-        .icon.success { background: #d1fae5; color: #10b981; }
-        .icon.warning { background: #fef3c7; color: #f59e0b; }
-        .icon.error { background: #fee2e2; color: #ef4444; }
+        .icon.success { background: #d1fae5; color: #00c853; }
+        .icon.warning { background: #fef3c7; color: #a68b52; }
+        .icon.error { background: #fee2e2; color: #b55a5a; }
         h1 { color: #1f2937; margin-bottom: 10px; font-size: 1.8rem; }
         .message {
             padding: 20px;
@@ -106,14 +106,14 @@ try {
         .credentials h3 { color: #374151; margin-bottom: 15px; }
         .credentials p { 
             margin: 8px 0; 
-            color: #6b7280;
+            color: #00e676;
             font-family: 'Courier New', monospace;
         }
         .credentials strong { color: #1f2937; }
         .btn {
             display: inline-block;
             padding: 14px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             color: white;
             text-decoration: none;
             border-radius: 10px;
@@ -123,11 +123,11 @@ try {
         }
         .btn:hover { transform: translateY(-2px); }
         .btn-secondary {
-            background: #6b7280;
+            background: #00e676;
         }
         .warning-box {
             background: #fef3c7;
-            border-left: 4px solid #f59e0b;
+            border-left: 4px solid #a68b52;
             padding: 15px;
             border-radius: 8px;
             margin: 20px 0;
@@ -173,12 +173,12 @@ try {
         </div>
         
         <div>
-            <a href="admin/login.php" class="btn">Go to Admin Login</a>
+            <a href="login.php?role=admin" class="btn">Go to Admin Login</a>
             <a href="index.php" class="btn btn-secondary">Back to Home</a>
         </div>
         
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-            <p style="color: #6b7280; font-size: 0.85rem;">
+            <p style="color: #00e676; font-size: 0.85rem;">
                 Matinao Memorial Cemetery Management System
             </p>
         </div>

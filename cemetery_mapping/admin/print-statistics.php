@@ -4,7 +4,7 @@ require_once '../config/database.php';
 
 // Check if admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
+    header('Location: ../login.php?role=admin');
     exit;
 }
 
@@ -62,12 +62,12 @@ try {
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 15px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #22c55e;
         }
         
         .report-header h1 {
             font-size: 24px;
-            color: #667eea;
+            color: #22c55e;
             margin-bottom: 5px;
         }
         
@@ -98,7 +98,7 @@ try {
         .summary-card .value {
             font-size: 28px;
             font-weight: bold;
-            color: #667eea;
+            color: #22c55e;
             margin: 5px 0;
         }
         
@@ -114,7 +114,7 @@ try {
             font-weight: bold;
             margin: 25px 0 10px 0;
             color: #333;
-            border-bottom: 2px solid #667eea;
+            border-bottom: 2px solid #22c55e;
             padding-bottom: 5px;
         }
         
@@ -132,7 +132,7 @@ try {
         }
         
         th {
-            background: #667eea;
+            background: #22c55e;
             color: white;
             padding: 10px;
             text-align: left;
@@ -168,7 +168,7 @@ try {
         
         .bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(90deg, #22c55e 0%, #059669 100%);
         }
         
         .percentage-value {
@@ -190,7 +190,7 @@ try {
             position: fixed;
             top: 10px;
             right: 10px;
-            background: #667eea;
+            background: #22c55e;
             color: white;
             border: none;
             padding: 10px 20px;

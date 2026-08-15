@@ -4,7 +4,7 @@ require_once '../config/database.php';
 
 // Check if admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
+    header('Location: ../login.php?role=admin');
     exit;
 }
 
@@ -58,12 +58,12 @@ try {
             text-align: center;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #22c55e;
         }
         
         .report-header h1 {
             font-size: 20px;
-            color: #667eea;
+            color: #22c55e;
             margin-bottom: 3px;
         }
         
@@ -80,7 +80,7 @@ try {
         
         .summary-box {
             background: #f9fafb;
-            border: 2px solid #667eea;
+            border: 2px solid #22c55e;
             padding: 12px;
             margin-bottom: 15px;
             border-radius: 6px;
@@ -90,7 +90,7 @@ try {
         .summary-box .count {
             font-size: 24px;
             font-weight: bold;
-            color: #667eea;
+            color: #22c55e;
         }
         
         table {
@@ -100,7 +100,7 @@ try {
         }
         
         th {
-            background: #667eea;
+            background: #22c55e;
             color: white;
             padding: 8px 4px;
             text-align: left;
@@ -152,7 +152,7 @@ try {
             position: fixed;
             top: 10px;
             right: 10px;
-            background: #667eea;
+            background: #22c55e;
             color: white;
             border: none;
             padding: 10px 20px;

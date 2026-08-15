@@ -3,7 +3,7 @@ session_start();
 
 // Check if visitor is logged in
 if (!isset($_SESSION['visitor_id'])) {
-    header('Location: login.php');
+    header('Location: ../login.php?role=visitor');
     exit;
 }
 
@@ -11,7 +11,7 @@ if (!isset($_SESSION['visitor_id'])) {
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
     session_unset();
     session_destroy();
-    header('Location: login.php?timeout=1');
+    header('Location: ../login.php?role=visitor&timeout=1');
     exit;
 }
 
@@ -51,7 +51,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
     <style>
         body { margin: 0; padding: 0; overflow: hidden; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; }
-        .leaflet-popup-content-wrapper { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .leaflet-popup-content-wrapper { background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(0, 230, 118, 0.15); }
         .leaflet-popup-content { color: white; margin: 16px; }
         .leaflet-popup-tip { background: rgba(0, 0, 0, 0.9); }
         
@@ -59,10 +59,10 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         .user-location-marker { 
             width: 20px; 
             height: 20px; 
-            background: #3b82f6; 
+            background: #5a87a8; 
             border: 3px solid white; 
             border-radius: 50%; 
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); 
+            box-shadow: 0 0 10px rgba(90, 135, 168, 0.5); 
             animation: pulse 2s infinite; 
         }
         
@@ -101,7 +101,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             overflow-y: auto !important;
             background: rgba(0, 0, 0, 0.9) !important;
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(0, 230, 118, 0.15) !important;
             border-radius: 16px !important;
             padding: 16px !important;
             color: white !important;
@@ -119,12 +119,12 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         }
         
         .leaflet-routing-container::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.5);
+            background: rgba(0, 230, 118, 0.5);
             border-radius: 3px;
         }
         
         .leaflet-routing-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(102, 126, 234, 0.7);
+            background: rgba(0, 230, 118, 0.7);
         }
         
         /* Hide routing geocoder inputs */
@@ -137,14 +137,14 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             color: white !important;
             font-size: 1rem !important;
             margin: 0 0 12px 0 !important;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         
         .leaflet-routing-alt {
             background: rgba(255, 255, 255, 0.05) !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(0, 230, 118, 0.15) !important;
             border-radius: 12px !important;
             padding: 12px !important;
             margin: 8px 0 !important;
@@ -161,7 +161,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         
         /* Minimize routing panel button */
         .leaflet-routing-collapse-btn {
-            background: rgba(102, 126, 234, 0.3) !important;
+            background: rgba(0, 230, 118, 0.3) !important;
             border-radius: 8px !important;
             color: white !important;
             padding: 4px 8px !important;
@@ -169,7 +169,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         }
         
         .leaflet-routing-collapse-btn:hover {
-            background: rgba(102, 126, 234, 0.5) !important;
+            background: rgba(0, 230, 118, 0.5) !important;
         }
         
         /* Widget Organization - Prevent Overlaps */
@@ -182,7 +182,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             z-index: 1001;
             background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.15);
             border-radius: 12px;
             padding: 12px 24px;
             display: flex;
@@ -201,8 +201,8 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         }
         
         .toggle-nav-btn {
-            background: rgba(102, 126, 234, 0.2);
-            border: 1px solid rgba(102, 126, 234, 0.3);
+            background: rgba(0, 230, 118, 0.2);
+            border: 1px solid rgba(0, 230, 118, 0.3);
             border-radius: 8px;
             padding: 6px 10px;
             cursor: pointer;
@@ -214,7 +214,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         }
         
         .toggle-nav-btn:hover {
-            background: rgba(102, 126, 234, 0.3);
+            background: rgba(0, 230, 118, 0.3);
         }
         
         /* SEARCH BAR - Separate div below navigation, also centered */
@@ -224,23 +224,29 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             left: 50%;
             transform: translateX(-50%);
             z-index: 1001;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(0, 230, 118, 0.25);
+            border-radius: 16px;
+            padding: 10px 14px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             display: flex;
             align-items: center;
-            gap: 8px;
-            min-width: 400px;
-            max-width: 600px;
+            gap: 10px;
+            min-width: 420px;
+            max-width: 620px;
             transition: all 0.3s ease;
+        }
+        
+        .search-bar-container:focus-within {
+            border-color: rgba(0, 230, 118, 0.6);
+            box-shadow: 0 8px 32px rgba(0, 230, 118, 0.2);
         }
         
         .search-bar-container.collapsed {
             padding: 8px 12px;
             min-width: auto;
+            border-color: rgba(0, 230, 118, 0.15);
         }
         
         .search-bar-container.collapsed > *:not(.toggle-search-btn) {
@@ -248,28 +254,30 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         }
         
         .toggle-search-btn {
-            background: rgba(102, 126, 234, 0.2);
-            border: 1px solid rgba(102, 126, 234, 0.3);
-            border-radius: 8px;
-            padding: 6px 10px;
+            background: rgba(0, 230, 118, 0.15);
+            border: 1px solid rgba(0, 230, 118, 0.25);
+            border-radius: 10px;
+            padding: 8px 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            color: white;
+            color: #00c853;
             display: flex;
             align-items: center;
             gap: 6px;
         }
         
         .toggle-search-btn:hover {
-            background: rgba(102, 126, 234, 0.3);
+            background: rgba(0, 230, 118, 0.3);
+            color: white;
+            transform: translateY(-1px);
         }
         
         .search-bar-container input {
             flex: 1;
             padding: 10px 16px;
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
             color: white;
             font-size: 0.95rem;
             transition: all 0.3s ease;
@@ -277,7 +285,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         
         .search-bar-container input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: rgba(0, 230, 118, 0.5);
             background: rgba(255, 255, 255, 0.08);
         }
         
@@ -287,7 +295,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         
         .search-bar-container button {
             padding: 10px 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -299,10 +307,10 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         
         .search-bar-container button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 230, 118, 0.4);
         }
         
-        /* Leaflet Zoom Control - Move to top right with spacing below layer control */
+        /* Leaflet Zoom Control - Top right corner */
         .leaflet-top.leaflet-left {
             top: 20px !important;
             right: 20px !important;
@@ -312,14 +320,14 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         .leaflet-control-zoom {
             background: rgba(0, 0, 0, 0.9) !important;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(0, 230, 118, 0.15) !important;
             border-radius: 8px !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-            margin-top: 60px !important; /* Add spacing below layer control */
+            margin-top: 0 !important;
         }
         
         .leaflet-control-zoom a {
-            background: rgba(102, 126, 234, 0.2) !important;
+            background: rgba(0, 230, 118, 0.2) !important;
             color: white !important;
             width: 36px !important;
             height: 36px !important;
@@ -329,7 +337,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         }
         
         .leaflet-control-zoom a:hover {
-            background: rgba(102, 126, 234, 0.4) !important;
+            background: rgba(0, 230, 118, 0.4) !important;
             color: white !important;
         }
         
@@ -345,7 +353,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         .leaflet-control-rotate {
             background: rgba(0, 0, 0, 0.9) !important;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(0, 230, 118, 0.15) !important;
             border-radius: 8px !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
             margin-top: 8px !important; /* Space below zoom control */
@@ -353,14 +361,14 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         
         .leaflet-control-rotate a {
             color: white !important;
-            background: rgba(102, 126, 234, 0.2) !important;
+            background: rgba(0, 230, 118, 0.2) !important;
             border-radius: 6px !important;
             transition: all 0.3s ease !important;
             border: none !important;
         }
         
         .leaflet-control-rotate a:hover {
-            background: rgba(102, 126, 234, 0.4) !important;
+            background: rgba(0, 230, 118, 0.4) !important;
             color: white !important;
         }
         
@@ -396,38 +404,27 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             top: 20px;
             left: 20px;
             z-index: 1000;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 12px 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(0, 230, 118, 0.2);
+            border-radius: 16px;
+            padding: 14px 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 18px;
         }
         
         .filter-panel.collapsed {
-            padding: 8px 12px;
+            padding: 10px 14px;
         }
         
         .filter-panel.collapsed .filter-content {
             display: none;
         }
         
-        /* Rotation Panel - Same styling as filter panel */
-        .rotation-panel.collapsed {
-            padding: 8px 12px;
-        }
-        
-        .rotation-panel.collapsed .rotation-content {
-            display: none;
-        }
-        
-        .rotation-toggle-btn:hover {
-            background: rgba(102, 126, 234, 0.3) !important;
-        }
+        /* Rotation Panel - Compact bar, no collapse needed */
         
         .filter-header {
             display: flex;
@@ -439,7 +436,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         .filter-header h4 {
             margin: 0;
             font-size: 1rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             white-space: nowrap;
@@ -455,23 +452,26 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 12px;
+            padding: 8px 14px;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             white-space: nowrap;
         }
         
         .filter-option:hover {
-            background: rgba(102, 126, 234, 0.2);
+            background: rgba(0, 230, 118, 0.2);
+            border-color: rgba(0, 230, 118, 0.3);
+            transform: translateY(-1px);
         }
         
         .filter-option input[type="checkbox"] {
             width: 18px;
             height: 18px;
             cursor: pointer;
-            accent-color: #667eea;
+            accent-color: #00c853;
         }
         
         .filter-option label {
@@ -479,14 +479,17 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             color: white;
             font-size: 0.9rem;
             margin: 0;
+            font-weight: 500;
         }
         
         .filter-count {
-            background: rgba(102, 126, 234, 0.3);
-            padding: 2px 8px;
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
+            padding: 3px 10px;
             border-radius: 12px;
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            color: white;
+            margin-left: 4px;
         }
         
         /* SEARCH RESULTS - Right side, below search bar */
@@ -495,17 +498,17 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             top: 140px;
             right: 20px;
             z-index: 1000;
-            width: 320px;
+            width: 340px;
             max-width: calc(100vw - 40px);
             max-height: calc(100vh - 170px);
             overflow-y: auto;
-            display: none; /* Hidden by default, shown when search has results */
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(0, 230, 118, 0.2);
             border-radius: 16px;
             padding: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
         
         .search-panel.active {
@@ -522,12 +525,12 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         }
         
         .search-panel::-webkit-scrollbar-thumb {
-            background: rgba(102, 126, 234, 0.5);
+            background: rgba(0, 230, 118, 0.5);
             border-radius: 3px;
         }
         
         .search-panel::-webkit-scrollbar-thumb:hover {
-            background: rgba(102, 126, 234, 0.7);
+            background: rgba(0, 230, 118, 0.7);
         }
         
         /* MAP LEGEND - Bottom left */
@@ -538,7 +541,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             z-index: 1000;
             background: rgba(0, 0, 0, 0.9);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.15);
             border-radius: 12px;
             padding: 16px;
             min-width: 180px;
@@ -551,13 +554,13 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             bottom: 20px;
             left: 20px;
             z-index: 1000;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 16px;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(0, 230, 118, 0.2);
+            border-radius: 16px;
+            padding: 18px;
             min-width: 180px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
         
         /* AI CHAT TOGGLE - Bottom right */
@@ -569,19 +572,19 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             width: 64px;
             height: 64px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             border: none;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 230, 118, 0.5);
             transition: all 0.3s ease;
         }
         
         .chat-toggle:hover {
             transform: scale(1.1);
-            box-shadow: 0 8px 40px rgba(102, 126, 234, 0.7);
+            box-shadow: 0 8px 40px rgba(0, 230, 118, 0.7);
         }
         
         .chat-toggle img {
@@ -610,7 +613,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             flex-direction: column;
             background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(0, 230, 118, 0.15);
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
@@ -644,7 +647,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             overflow-y: auto !important;
             background: rgba(0, 0, 0, 0.9) !important;
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(0, 230, 118, 0.15) !important;
             border-radius: 16px !important;
             padding: 16px !important;
             color: white !important;
@@ -796,34 +799,32 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
                 padding: 1px 5px;
             }
             
-            /* Rotation Panel - Below filter panel, default collapsed */
+            /* Rotation Panel - Compact at top left, below filter */
             .rotation-panel {
-                top: 130px !important;
+                top: 120px !important;
                 left: 10px !important;
-                padding: 8px 12px !important;
-                max-width: 160px;
+                right: auto !important;
+                padding: 4px !important;
+                gap: 3px !important;
             }
             
-            .rotation-panel h4 {
-                font-size: 0.8rem !important;
+            .rotation-panel button {
+                padding: 4px !important;
             }
             
-            .rotation-toggle-btn {
-                padding: 2px 6px !important;
-            }
-            
-            .rotation-content button {
-                padding: 6px !important;
-                font-size: 0.75rem !important;
-            }
-            
-            .rotation-content button svg {
+            .rotation-panel button svg {
                 width: 14px !important;
                 height: 14px !important;
             }
             
             #bearingDisplay {
-                font-size: 0.7rem !important;
+                font-size: 0.65rem !important;
+                padding: 0 4px !important;
+            }
+            
+            .leaflet-top.leaflet-left {
+                top: 10px !important;
+                right: 10px !important;
             }
             
             /* Search Bar - Move to bottom, above chat */
@@ -1302,13 +1303,13 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
             </svg>
         </button>
         <h3 style="margin: 0; font-size: 1.1rem; color: white; white-space: nowrap;">Welcome, <?php echo $visitor_name; ?></h3>
-        <a href="my-reservations.php" style="padding: 8px 16px; font-size: 0.9rem; text-decoration: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.3s ease; white-space: nowrap;">
+        <a href="my-reservations.php" style="padding: 8px 16px; font-size: 0.9rem; text-decoration: none; background: linear-gradient(135deg, #00c853 0%, #059669 100%); color: white; border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.3s ease; white-space: nowrap;">
             <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
             </svg>
             Reservations
         </a>
-        <a href="logout.php" style="padding: 8px 16px; font-size: 0.9rem; text-decoration: none; background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.3s ease; white-space: nowrap;">
+        <a href="logout.php" style="padding: 8px 16px; font-size: 0.9rem; text-decoration: none; background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid rgba(0, 230, 118, 0.15); border-radius: 8px; font-weight: 500; display: flex; align-items: center; gap: 6px; transition: all 0.3s ease; white-space: nowrap;">
             <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
             </svg>
@@ -1323,41 +1324,58 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
         </button>
-        <input type="text" id="searchInput" placeholder="Search by name, plot, or family..." onkeypress="if(event.key === 'Enter') performSearch()">
-        <button onclick="performSearch()" title="Search">
-            <svg style="width: 20px; height: 20px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-        </button>
+        <input type="text" id="searchInput" placeholder="Search by name, plot, or family...">
     </div>
     
     <!-- Success Modal -->
     <div id="successModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 3000; align-items: center; justify-content: center;">
-        <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 20px; padding: 40px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); text-align: center;">
-            <div id="successIcon" style="width: 80px; height: 80px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+        <div style="background: linear-gradient(135deg, #0a0a0a 0%, #050505 100%); border: 1px solid rgba(0, 200, 83, 0.3); border-radius: 20px; padding: 40px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); text-align: center;">
+            <div id="successIcon" style="width: 80px; height: 80px; background: linear-gradient(135deg, #5a9b6f 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
                 <svg style="width: 48px; height: 48px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                 </svg>
             </div>
-            <h2 id="successTitle" style="margin: 0 0 16px 0; font-size: 1.8rem; color: #22c55e;">Reservation Successful!</h2>
+            <h2 id="successTitle" style="margin: 0 0 16px 0; font-size: 1.8rem; color: #5a9b6f;">Reservation Successful!</h2>
             <div id="successMessage" style="color: rgba(255,255,255,0.8); line-height: 1.8; margin-bottom: 24px;"></div>
-            <button onclick="closeSuccessModal()" style="padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;">
+            <button onclick="closeSuccessModal()" style="padding: 14px 32px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease;">
                 Got it!
             </button>
         </div>
     </div>
 
     <!-- Reservation Modal -->
-    <div id="reservationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 2000; align-items: center; justify-content: center;">
-        <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 20px; padding: 40px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+    <div id="reservationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 2000; align-items: center; justify-content: center;">
+        <div style="background: linear-gradient(135deg, #0a0a0a 0%, #050505 100%); border: 1px solid rgba(0, 230, 118, 0.35); border-radius: 24px; padding: 36px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 80px rgba(0,0,0,0.6); position: relative;">
             <style>
                 #reservationForm input:focus,
                 #reservationForm select:focus,
                 #reservationForm textarea:focus {
                     outline: none;
-                    border-color: #667eea !important;
+                    border-color: #00c853 !important;
                     background: rgba(255,255,255,0.08) !important;
-                    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2) !important;
+                    box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.2) !important;
+                }
+                
+                .modal-close-btn {
+                    position: absolute;
+                    top: 18px;
+                    right: 18px;
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    border-radius: 10px;
+                    padding: 8px;
+                    cursor: pointer;
+                    color: rgba(255,255,255,0.6);
+                    transition: all 0.2s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                
+                .modal-close-btn:hover {
+                    background: rgba(181, 90, 90, 0.15);
+                    border-color: rgba(181, 90, 90, 0.3);
+                    color: #b55a5a;
                 }
                 
                 #reservationForm select {
@@ -1373,14 +1391,14 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
                 }
                 
                 #reservationForm select option {
-                    background: #1a1a2e;
+                    background: #0a0a0a;
                     color: white;
                     padding: 12px;
                 }
                 
                 #reservationForm button[type="submit"]:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+                    box-shadow: 0 8px 25px rgba(0, 230, 118, 0.5);
                 }
                 
                 #reservationForm button[type="button"]:hover {
@@ -1400,7 +1418,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
                 .compartment-cell {
                     padding: 16px 12px;
                     background: rgba(255,255,255,0.08);
-                    border: 3px solid rgba(102, 126, 234, 0.4);
+                    border: 3px solid rgba(0, 230, 118, 0.4);
                     border-radius: 10px;
                     cursor: pointer;
                     transition: all 0.3s ease;
@@ -1411,23 +1429,23 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
                 }
                 
                 .compartment-cell:hover {
-                    background: rgba(102, 126, 234, 0.3);
-                    border-color: #667eea;
+                    background: rgba(0, 230, 118, 0.3);
+                    border-color: #00c853;
                     transform: scale(1.08);
-                    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+                    box-shadow: 0 4px 16px rgba(0, 230, 118, 0.4);
                 }
                 
                 .compartment-cell.selected {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    border-color: #667eea;
+                    background: linear-gradient(135deg, #00c853 0%, #059669 100%);
+                    border-color: #00c853;
                     border-width: 4px;
-                    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+                    box-shadow: 0 6px 20px rgba(0, 230, 118, 0.6);
                     transform: scale(1.05);
                 }
                 
                 .compartment-cell.reserved {
-                    background: rgba(239, 68, 68, 0.25);
-                    border-color: #ef4444;
+                    background: rgba(181, 90, 90, 0.25);
+                    border-color: #b55a5a;
                     border-width: 3px;
                     cursor: not-allowed;
                     opacity: 0.6;
@@ -1440,7 +1458,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
                     left: 50%;
                     transform: translate(-50%, -50%);
                     font-size: 2rem;
-                    color: rgba(239, 68, 68, 0.8);
+                    color: rgba(181, 90, 90, 0.8);
                     font-weight: bold;
                 }
                 
@@ -1453,35 +1471,40 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
                 .compartment-cell-overlay {
                     stroke-dasharray: 5, 5 !important;
                     stroke-width: 3 !important;
-                    stroke: #667eea !important;
+                    stroke: #00c853 !important;
                     stroke-opacity: 0.9 !important;
-                    fill: #667eea !important;
+                    fill: #00c853 !important;
                     fill-opacity: 0.35 !important;
                     transition: all 0.3s ease;
                 }
                 
                 .compartment-cell-overlay:hover {
-                    stroke: #764ba2 !important;
+                    stroke: #059669 !important;
                     stroke-width: 4 !important;
                     fill-opacity: 0.6 !important;
                 }
             </style>
+            <button type="button" class="modal-close-btn" onclick="closeReservationModal()" aria-label="Close modal">
+                <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
-                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                     <svg style="width: 28px; height: 28px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                     </svg>
                 </div>
-                <h2 style="margin: 0; font-size: 1.8rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Reserve This Plot</h2>
+                <h2 style="margin: 0; font-size: 1.8rem; background: linear-gradient(135deg, #00c853 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Reserve This Plot</h2>
             </div>
             
             <form id="reservationForm">
                 <input type="hidden" id="plot_id" name="plot_id">
                 <input type="hidden" id="compartment_id" name="compartment_id">
                 
-                <div style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <div style="background: rgba(0, 230, 118, 0.1); border: 1px solid rgba(0, 230, 118, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                        <svg style="width: 20px; height: 20px; color: #667eea;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg style="width: 20px; height: 20px; color: #00c853;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         </svg>
                         <h3 style="margin: 0; font-size: 1.1rem;">Plot Information</h3>
@@ -1494,8 +1517,8 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
                         <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: var(--zinc-300);">Select Compartment:</h4>
                         <div id="compartmentGrid" class="compartment-grid"></div>
                         <p style="margin: 8px 0 0 0; font-size: 0.85rem; color: rgba(255,255,255,0.5); text-align: center;">
-                            <span style="color: #ef4444;">● Reserved</span> | 
-                            <span style="color: #667eea;">● Available</span>
+                            <span style="color: #b55a5a;">● Reserved</span> | 
+                            <span style="color: #00c853;">● Available</span>
                         </p>
                     </div>
                 </div>
@@ -1510,7 +1533,7 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
                     <select name="reservation_type" id="reservation_type" required style="width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 1rem; transition: all 0.2s ease;">
                         <option value="">Select Type</option>
                     </select>
-                    <div id="priceDisplay" style="margin-top: 10px; padding: 12px; background: rgba(102, 126, 234, 0.05); border: 1px solid rgba(102, 126, 234, 0.2); border-radius: 8px; color: #667eea; font-weight: 600; display: none;"></div>
+                    <div id="priceDisplay" style="margin-top: 10px; padding: 12px; background: rgba(0, 230, 118, 0.05); border: 1px solid rgba(0, 230, 118, 0.2); border-radius: 8px; color: #00c853; font-weight: 600; display: none;"></div>
                 </div>
                 
                 <div style="margin-bottom: 24px;">
@@ -1543,19 +1566,19 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
                     <input type="tel" name="contact_number" required placeholder="09XX XXX XXXX" style="width: 100%; padding: 14px 16px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: white; font-size: 1rem; transition: all 0.2s ease;">
                 </div>
                 
-                <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                <div style="background: rgba(201, 168, 108, 0.1); border: 1px solid rgba(201, 168, 108, 0.3); border-radius: 12px; padding: 16px; margin-bottom: 24px;">
                     <div style="display: flex; gap: 12px;">
-                        <svg style="width: 24px; height: 24px; color: #fbbf24; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg style="width: 24px; height: 24px; color: #c9a86c; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                         </svg>
-                        <p style="margin: 0; font-size: 0.95rem; color: #fbbf24; line-height: 1.5;">
+                        <p style="margin: 0; font-size: 0.95rem; color: #c9a86c; line-height: 1.5;">
                             Your reservation will be pending until approved by the administrator. You can submit payment after approval.
                         </p>
                     </div>
                 </div>
                 
                 <div style="display: flex; gap: 12px;">
-                    <button type="submit" style="flex: 1; padding: 14px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <button type="submit" style="flex: 1; padding: 14px 24px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;">
                         <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
@@ -1586,19 +1609,19 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
     <div class="map-legend">
         <h4 style="margin-bottom: 12px; font-size: 0.9rem;">Legend</h4>
         <div class="legend-item">
-            <div class="legend-color" style="background: #3b82f6;"></div>
+            <div class="legend-color" style="background: #5a87a8;"></div>
             <span style="font-size: 0.85rem;">Standard Burial</span>    
         </div>
         <div class="legend-item">
-            <div class="legend-color" style="background: #fbbf24;"></div>
+            <div class="legend-color" style="background: #c9a86c;"></div>
             <span style="font-size: 0.85rem;">Premium/Fenced</span>
         </div>
         <div class="legend-item">
-            <div class="legend-color" style="background: #22c55e;"></div>
+            <div class="legend-color" style="background: #5a9b6f;"></div>
             <span style="font-size: 0.85rem;">Available Plot</span>
         </div>
         <div class="legend-item">
-            <div class="legend-color" style="background: #ef4444;"></div>
+            <div class="legend-color" style="background: #b55a5a;"></div>
             <span style="font-size: 0.85rem;">Search Result</span>
         </div>
     </div>
@@ -1627,44 +1650,25 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
         </div>
     </div>
     
-    <!-- Rotation Control Panel -->
-    <div class="rotation-panel" id="rotationPanel" style="position: absolute; top: 90px; left: 20px; z-index: 1000; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px 16px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); transition: all 0.3s ease;">
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <svg style="width: 18px; height: 18px; color: #667eea;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                <h4 style="margin: 0; font-size: 0.9rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Rotate Map</h4>
-            </div>
-            <button class="rotation-toggle-btn" onclick="toggleRotationPanel()" title="Collapse/Expand" style="background: rgba(102, 126, 234, 0.2); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 6px; padding: 4px 8px; cursor: pointer; transition: all 0.3s ease; color: white; display: flex; align-items: center;">
-                <svg id="rotationToggleIcon" style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                </svg>
-            </button>
-        </div>
-        <div class="rotation-content" id="rotationContent">
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px;">
-                <button onclick="rotateMap(-15)" class="btn-secondary" style="padding: 8px; font-size: 0.8rem;" title="Rotate 15° Left">
-                    <svg style="width: 16px; height: 16px; transform: rotate(180deg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                </button>
-                <button onclick="resetRotation()" class="btn-primary" style="padding: 8px; font-size: 0.8rem;" title="Reset to North">
-                    <svg style="width: 14px; height: 14px; display: inline-block;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                    </svg>
-                    N
-                </button>
-                <button onclick="rotateMap(15)" class="btn-secondary" style="padding: 8px; font-size: 0.8rem;" title="Rotate 15° Right">
-                    <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                    </svg>
-                </button>
-            </div>
-            <div style="text-align: center;">
-                <span id="bearingDisplay" style="font-size: 0.8rem; color: rgba(255, 255, 255, 0.6);">Bearing: 0°</span>
-            </div>
-        </div>
+    <!-- Rotation Control - Compact bar at top left, below filter panel -->
+    <div class="rotation-panel" id="rotationPanel" style="position: absolute; top: 65px; left: 20px; z-index: 1000; background: rgba(0, 0, 0, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(0, 230, 118, 0.15); border-radius: 10px; padding: 6px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); transition: all 0.3s ease; display: flex; align-items: center; gap: 4px;">
+        <button onclick="rotateMap(-15)" title="Rotate 15° Left" style="background: rgba(0, 230, 118, 0.2); border: none; border-radius: 6px; padding: 6px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+            <svg style="width: 16px; height: 16px; transform: rotate(180deg);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+        </button>
+        <button onclick="resetRotation()" title="Reset to North" style="background: linear-gradient(135deg, #00c853 0%, #059669 100%); border: none; border-radius: 6px; padding: 6px 8px; cursor: pointer; color: white; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 3px; transition: all 0.3s ease;">
+            <svg style="width: 12px; height: 12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+            </svg>
+            N
+        </button>
+        <button onclick="rotateMap(15)" title="Rotate 15° Right" style="background: rgba(0, 230, 118, 0.2); border: none; border-radius: 6px; padding: 6px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+            <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+        </button>
+        <span id="bearingDisplay" style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.6); padding: 0 6px; white-space: nowrap;">0°</span>
     </div>
     
     <!-- AI Assistant Toggle -->
@@ -1732,6 +1736,6 @@ $visitor_name = htmlspecialchars($_SESSION['visitor_name'], ENT_QUOTES, 'UTF-8')
     <script src="../assets/js/theme.js"></script>
     
     <!-- Visitor map functionality -->
-    <script src="../assets/js/visitor.js"></script>
+    <script src="../assets/js/visitor.js?v=5"></script>
 </body>
 </html>

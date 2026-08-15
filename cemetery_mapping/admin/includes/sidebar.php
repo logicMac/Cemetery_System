@@ -1,125 +1,124 @@
-        <!-- Mobile Menu Toggle Button -->
-        <button class="mobile-menu-toggle" id="mobileMenuToggle" onclick="toggleMobileMenu()" style="display: none;">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </button>
-        
         <!-- Sidebar Overlay for Mobile -->
         <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
         
         <aside class="admin-sidebar" id="adminSidebar">
             <div class="sidebar-logo">
-                <img src="../assets/images/matinao-logo.png" alt="Matinao Memorial Logo" style="width: 100px; height: 100px; margin: 0 auto 16px; display: block; border-radius: 50%; object-fit: cover;">
-                <h2>Matinao Memorial</h2>
-                <p style="color: var(--zinc-400); font-size: 0.85rem; margin-top: 4px;">Admin Panel</p>
+                <img src="../assets/images/matinao-logo.png" alt="Matinao Memorial Logo">
+                <div class="sidebar-logo-text">
+                    <h2>Matinao Memorial</h2>
+                    <p>Admin Panel</p>
+                </div>
+                <button type="button" class="sidebar-collapse" id="sidebarCollapse" onclick="toggleSidebarCollapse()" aria-label="Collapse sidebar">
+                    <i data-lucide="menu" width="18" height="18" class="sidebar-collapse-icon"></i>
+                </button>
             </div>
+
+            <?php
+            $groups = [
+                'Main' => [
+                    'icon' => 'home',
+                    'items' => [
+                        ['dashboard.php', 'dashboard', 'Dashboard', 'layout-dashboard'],
+                    ],
+                ],
+                'Records' => [
+                    'icon' => 'file-plus',
+                    'items' => [
+                        ['add-record.php', 'add-record', 'Add Record', 'plus-circle'],
+                        ['records.php', 'records', 'All Records', 'file-text'],
+                    ],
+                ],
+                'Cemetery Map' => [
+                    'icon' => 'map',
+                    'items' => [
+                        ['map-view.php', 'map-view', 'Map View', 'map'],
+                        ['available-plots.php', 'available-plots', 'Available Plots', 'map-pin'],
+                    ],
+                ],
+                'Reservations' => [
+                    'icon' => 'calendar',
+                    'items' => [
+                        ['reservations_simple.php', 'reservations_simple', 'Reservations', 'calendar-check'],
+                    ],
+                ],
+                'Analytics' => [
+                    'icon' => 'bar-chart-2',
+                    'items' => [
+                        ['statistics.php', 'statistics', 'Statistics', 'bar-chart-3'],
+                        ['reports.php', 'reports', 'Reports', 'pie-chart'],
+                    ],
+                ],
+                'Tools' => [
+                    'icon' => 'bot',
+                    'items' => [
+                        ['assistant.php', 'assistant', 'AI Assistant', 'bot'],
+                    ],
+                ],
+                'System' => [
+                    'icon' => 'settings',
+                    'items' => [
+                        ['settings.php', 'settings', 'Settings', 'settings'],
+                    ],
+                ],
+            ];
+            ?>
             
-            <ul class="sidebar-nav">
-                <li>
-                    <a href="dashboard.php" class="<?php echo $current_page === 'dashboard' ? 'active' : ''; ?>">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
-                        Dashboard
-                    </a>
+            <ul class="sidebar-nav" id="sidebarNav">
+                <?php foreach ($groups as $groupName => $group): 
+                    $groupIcon = $group['icon'];
+                    $items = $group['items'];
+                    $hasActive = false;
+                    foreach ($items as $item) {
+                        if ($current_page === $item[1]) {
+                            $hasActive = true;
+                            break;
+                        }
+                    }
+                ?>
+                <li class="sidebar-group <?php echo $hasActive ? 'is-open' : ''; ?>">
+                    <button type="button" class="sidebar-group-toggle" aria-expanded="<?php echo $hasActive ? 'true' : 'false'; ?>">
+                        <span class="sidebar-group-left">
+                            <i data-lucide="<?php echo $groupIcon; ?>" width="18" height="18"></i>
+                            <span class="sidebar-group-title"><?php echo $groupName; ?></span>
+                        </span>
+                        <i data-lucide="chevron-down" class="sidebar-chevron" width="16" height="16"></i>
+                    </button>
+                    <ul class="sidebar-group-menu">
+                        <?php foreach ($items as $item): 
+                            $href = $item[0];
+                            $page = $item[1];
+                            $label = $item[2];
+                            $icon = $item[3];
+                            $isActive = $current_page === $page;
+                        ?>
+                        <li>
+                            <a href="<?php echo $href; ?>" class="<?php echo $isActive ? 'active' : ''; ?>">
+                                <i data-lucide="<?php echo $icon; ?>" width="18" height="18"></i>
+                                <?php echo $label; ?>
+                                <?php if ($page === 'assistant'): ?>
+                                    <span style="position: absolute; top: 8px; right: 12px; background: #10b981; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; font-weight: 700;">AI</span>
+                                <?php endif; ?>
+                            </a>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </li>
-                <li>
-                    <a href="add-record.php" class="<?php echo $current_page === 'add-record' ? 'active' : ''; ?>">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Add Record
-                    </a>
-                </li>
-                <li>
-                    <a href="records.php" class="<?php echo $current_page === 'records' ? 'active' : ''; ?>">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        All Records
-                    </a>
-                </li>
-                <li>
-                    <a href="map-view.php" class="<?php echo $current_page === 'map-view' ? 'active' : ''; ?>">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
-                        </svg>
-                        Map View
-                    </a>
-                </li>
-                <li>
-                    <a href="available-plots.php" class="<?php echo $current_page === 'available-plots' ? 'active' : ''; ?>">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        Available Plots
-                    </a>
-                </li>
-                <li>
-                    <a href="statistics.php" class="<?php echo $current_page === 'statistics' ? 'active' : ''; ?>">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                        Statistics
-                    </a>
-                </li>
-                <li>
-                    <a href="reports.php" class="<?php echo $current_page === 'reports' ? 'active' : ''; ?>">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        Reports
-                    </a>
-                </li>
-                <li>
-                    <a href="reservations_simple.php" class="<?php echo $current_page === 'reservations_simple' || $current_page === 'reservations' ? 'active' : ''; ?>">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                        </svg>
-                        Reservations
-                    </a>
-                </li>
-                <li>
-                    <a href="assistant.php" class="<?php echo $current_page === 'assistant' ? 'active' : ''; ?>" style="position: relative;">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                        </svg>
-                        AI Assistant
-                        <span style="position: absolute; top: 8px; right: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 8px; font-weight: 600;">AI</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="settings.php" class="<?php echo $current_page === 'settings' ? 'active' : ''; ?>">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        Settings
-                    </a>
-                </li>
-                <li style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
-                    <a href="logout.php">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                        </svg>
-                        Logout
-                    </a>
-                </li>
+                <?php endforeach; ?>
             </ul>
-        </aside>
-        
-        <main class="admin-main">
-            <div class="admin-header">
-                <h1><?php echo ucfirst(str_replace('-', ' ', $current_page)); ?></h1>
-                <div class="admin-user">
-                    <div class="admin-user-avatar">
-                        <?php echo strtoupper(substr($admin_username, 0, 1)); ?>
-                    </div>
-                    <span><?php echo $admin_username; ?></span>
+
+            <div class="sidebar-user">
+                <div class="sidebar-user-avatar">
+                    <?php echo strtoupper(substr($admin_username, 0, 1)); ?>
+                </div>
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name"><?php echo $admin_username; ?></span>
+                    <span class="sidebar-user-role">Administrator</span>
                 </div>
             </div>
+        </aside>
+
+        <main class="admin-main">
+            <?php require_once 'topbar.php'; ?>
             
             <script>
             // Mobile Menu Toggle Function
@@ -138,9 +137,67 @@
                 }
             }
             
-            // Close menu when clicking on a link
+            // Sidebar collapse/expand on desktop
+            function toggleSidebarCollapse() {
+                const layout = document.querySelector('.admin-layout');
+                layout.classList.toggle('collapsed');
+                
+                // Re-calculate open menus after transition so they don't get cut off
+                window.setTimeout(() => {
+                    document.querySelectorAll('.sidebar-group.is-open .sidebar-group-menu').forEach(menu => {
+                        menu.style.maxHeight = menu.scrollHeight + 'px';
+                    });
+                }, 360);
+            }
+            
+            // Sidebar Accordion
             document.addEventListener('DOMContentLoaded', function() {
-                const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+                const toggles = document.querySelectorAll('.sidebar-group-toggle');
+                
+                toggles.forEach(toggle => {
+                    const group = toggle.closest('.sidebar-group');
+                    const menu = group.querySelector('.sidebar-group-menu');
+                    
+                    // Set initial height
+                    if (group.classList.contains('is-open')) {
+                        menu.style.maxHeight = menu.scrollHeight + 'px';
+                        menu.style.opacity = '1';
+                    } else {
+                        menu.style.maxHeight = '0';
+                        menu.style.opacity = '0';
+                    }
+                    
+                    toggle.addEventListener('click', function() {
+                        const isOpen = group.classList.contains('is-open');
+                        
+                        // Optional: close others (accordion behavior)
+                        // If you want multiple open, remove this block
+                        document.querySelectorAll('.sidebar-group.is-open').forEach(openGroup => {
+                            if (openGroup !== group) {
+                                openGroup.classList.remove('is-open');
+                                const openMenu = openGroup.querySelector('.sidebar-group-menu');
+                                openMenu.style.maxHeight = '0';
+                                openMenu.style.opacity = '0';
+                                openGroup.querySelector('.sidebar-group-toggle').setAttribute('aria-expanded', 'false');
+                            }
+                        });
+                        
+                        if (isOpen) {
+                            group.classList.remove('is-open');
+                            menu.style.maxHeight = '0';
+                            menu.style.opacity = '0';
+                            toggle.setAttribute('aria-expanded', 'false');
+                        } else {
+                            group.classList.add('is-open');
+                            menu.style.maxHeight = menu.scrollHeight + 'px';
+                            menu.style.opacity = '1';
+                            toggle.setAttribute('aria-expanded', 'true');
+                        }
+                    });
+                });
+                
+                // Close menu when clicking on a link
+                const sidebarLinks = document.querySelectorAll('.sidebar-group-menu a');
                 sidebarLinks.forEach(link => {
                     link.addEventListener('click', function() {
                         if (window.innerWidth <= 1024) {
@@ -149,14 +206,18 @@
                     });
                 });
                 
-                // Show mobile menu toggle on small screens
+                // Show mobile hamburger on small screens
                 function updateMenuToggle() {
                     const toggleBtn = document.getElementById('mobileMenuToggle');
+                    const collapseBtn = document.getElementById('sidebarCollapse');
                     if (window.innerWidth <= 1024) {
-                        toggleBtn.style.display = 'block';
+                        toggleBtn.style.display = 'flex';
+                        if (collapseBtn) collapseBtn.style.display = 'none';
+                        // Remove collapsed on mobile so it takes full width
+                        document.querySelector('.admin-layout').classList.remove('collapsed');
                     } else {
                         toggleBtn.style.display = 'none';
-                        // Ensure sidebar is visible on desktop
+                        if (collapseBtn) collapseBtn.style.display = 'flex';
                         document.getElementById('adminSidebar').classList.remove('open');
                         document.getElementById('sidebarOverlay').classList.remove('active');
                         document.body.style.overflow = '';
@@ -165,6 +226,11 @@
                 
                 updateMenuToggle();
                 window.addEventListener('resize', updateMenuToggle);
+                
+                // Initialize Lucide icons
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
             });
             </script>
 

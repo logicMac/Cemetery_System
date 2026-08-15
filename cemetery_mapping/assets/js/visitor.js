@@ -108,7 +108,7 @@ function initMap() {
     
     // Draw cemetery boundary
     L.rectangle(CEMETERY_BOUNDS, {
-        color: '#ef4444',
+        color: '#b55a5a',
         weight: 2,
         fillOpacity: 0,
         dashArray: '5, 10'
@@ -146,7 +146,7 @@ function displayBurialMarkers(records) {
     
     records.forEach(record => {
         if (record.latitude && record.longitude) {
-            const iconColor = record.is_fenced == 1 ? '#fbbf24' : '#3b82f6';
+            const iconColor = record.is_fenced == 1 ? '#c9a86c' : '#5a87a8';
             
             const icon = L.divIcon({
                 className: 'custom-marker',
@@ -179,9 +179,9 @@ function displayBurialMarkers(records) {
                 
                 // Draw the fence rectangle
                 const fenceBox = L.rectangle(bounds, {
-                    color: '#fbbf24',
+                    color: '#c9a86c',
                     weight: 2,
-                    fillColor: '#fbbf24',
+                    fillColor: '#c9a86c',
                     fillOpacity: 0.1,
                     dashArray: '4, 4'
                 }).bindPopup(createBurialPopup(record));
@@ -196,7 +196,7 @@ function displayBurialMarkers(records) {
 function createBurialPopup(record) {
     const photoHtml = record.photo 
         ? `<img src="../uploads/photos/${record.photo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" />`
-        : `<div style="width: 100%; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center;">
+        : `<div style="width: 100%; height: 200px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center;">
             <svg style="width: 80px; height: 80px; color: rgba(255,255,255,0.5);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
@@ -235,7 +235,7 @@ function createBurialPopup(record) {
                     <div style="grid-column: 1 / -1;">
                         <p style="margin: 0; color: rgba(255,255,255,0.5); font-size: 0.75rem;">TYPE</p>
                         <p style="margin: 2px 0 0 0;">
-                            <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; ${record.is_fenced == 1 ? 'background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #000;' : 'background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;'}">
+                            <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; ${record.is_fenced == 1 ? 'background: linear-gradient(135deg, #c9a86c 0%, #a68b52 100%); color: #000;' : 'background: linear-gradient(135deg, #5a87a8 0%, #3e6a9c 100%); color: white;'}">
                                 ${record.is_fenced == 1 ? 'Premium / Fenced' : 'Standard'}
                             </span>
                         </p>
@@ -244,13 +244,13 @@ function createBurialPopup(record) {
             </div>
             
             ${record.memory_space ? `
-                <div style="background: rgba(102, 126, 234, 0.1); border-left: 3px solid #667eea; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+                <div style="background: rgba(0, 230, 118, 0.1); border-left: 3px solid #00c853; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
                     <p style="margin: 0; font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px;">Memory</p>
                     <p style="margin: 6px 0 0 0; font-size: 0.9rem; font-style: italic; line-height: 1.5;">${record.memory_space}</p>
                 </div>
             ` : ''}
             
-            <button onclick="window.navigateToLocation(${record.latitude}, ${record.longitude}, '${escapedName}')" class="btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); cursor: pointer; border: none; border-radius: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; transition: all 0.3s ease;">
+            <button onclick="window.navigateToLocation(${record.latitude}, ${record.longitude}, '${escapedName}')" class="btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 230, 118, 0.4); cursor: pointer; border: none; border-radius: 12px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); color: white; font-weight: 600; transition: all 0.3s ease;">
                 <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
                 </svg>
@@ -277,13 +277,25 @@ async function loadAvailablePlots() {
 }
 
 // Display available plot markers
-function displayAvailablePlots(plots) {
+async function displayAvailablePlots(plots) {
     markers.available.clearLayers();
     
-    plots.forEach(plot => {
+    for (const plot of plots) {
+        const resStatus = plot.reservation_status;
+        let markerColor = '#5a9b6f';
+        let markerLabel = 'Available';
+        
+        if (resStatus === 'approved') {
+            markerColor = '#b55a5a';
+            markerLabel = 'Reserved';
+        } else if (resStatus === 'pending') {
+            markerColor = '#c9a86c';
+            markerLabel = 'Pending';
+        }
+        
         const icon = L.divIcon({
             className: 'custom-marker',
-            html: `<div style="background: #22c55e; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
+            html: `<div style="background: ${markerColor}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
             iconSize: [14, 14],
             iconAnchor: [7, 7]
         });
@@ -294,11 +306,11 @@ function displayAvailablePlots(plots) {
         marker.plotData = plot;
         markers.available.addLayer(marker);
         
-        // Draw grid if available
+        // Draw grid if available (await to ensure reserved compartments are styled)
         if (plot.has_grid == 1 && plot.grid_rows && plot.grid_cols) {
-            drawPlotGrid(plot);
+            await drawPlotGrid(plot);
         }
-    });
+    }
 }
 
 // Create available plot popup
@@ -307,19 +319,61 @@ function createPlotPopup(plot) {
         ? `<img src="../uploads/plots/${plot.photo}" style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 12px;" />`
         : '';
     
+    const resStatus = plot.reservation_status;
+    let statusBadge = '';
+    let headerColor = '#5a9b6f';
+    let headerText = 'Available Plot';
+    let headerSub = 'Ready for reservation';
+    let reserveBtnHtml = '';
+    
+    if (resStatus === 'approved') {
+        headerColor = '#b55a5a';
+        headerText = 'Reserved Plot';
+        headerSub = 'Already reserved';
+        statusBadge = `<span style="background: rgba(181, 90, 90, 0.2); color: #b55a5a; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(181, 90, 90, 0.3);">RESERVED</span>`;
+        reserveBtnHtml = `<div style="flex: 1; padding: 10px; background: rgba(181, 90, 90, 0.1); color: rgba(181, 90, 90, 0.5); border: 1px solid rgba(181, 90, 90, 0.2); border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: not-allowed; opacity: 0.6;">
+            <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            Reserved
+        </div>`;
+    } else if (resStatus === 'pending') {
+        headerColor = '#c9a86c';
+        headerText = 'Pending Reservation';
+        headerSub = 'Awaiting approval';
+        statusBadge = `<span style="background: rgba(201, 168, 108, 0.2); color: #c9a86c; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(201, 168, 108, 0.3);">PENDING</span>`;
+        reserveBtnHtml = `<div style="flex: 1; padding: 10px; background: rgba(201, 168, 108, 0.1); color: rgba(201, 168, 108, 0.5); border: 1px solid rgba(201, 168, 108, 0.2); border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: not-allowed; opacity: 0.6;">
+            <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Pending Approval
+        </div>`;
+    } else {
+        reserveBtnHtml = `<button onclick="openReservationModal(${plot.id}, '${(plot.plot_number || '').replace(/'/g, "\\'")}');" 
+            style="flex: 1; padding: 10px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px;"
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 230, 118, 0.4)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+            <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            Reserve Plot
+        </button>`;
+    }
+    
     return `
         <div style="min-width: 280px; padding: 8px;">
             ${photoHtml}
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, ${headerColor} 0%, ${headerColor}dd 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
                     <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                     </svg>
                 </div>
-                <div>
-                    <h3 style="margin: 0; font-size: 1.1rem; color: #22c55e;">Available Plot</h3>
-                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: var(--zinc-400);">Ready for reservation</p>
+                <div style="flex: 1;">
+                    <h3 style="margin: 0; font-size: 1.1rem; color: ${headerColor};">${headerText}</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: var(--zinc-400);">${headerSub}</p>
                 </div>
+                ${statusBadge}
             </div>
             
             <div style="margin-bottom: 12px;">
@@ -348,15 +402,7 @@ function createPlotPopup(plot) {
             ` : ''}
             
             <div style="display: flex; gap: 8px;">
-                <button onclick="openReservationModal(${plot.id}, '${(plot.plot_number || '').replace(/'/g, "\\'")}');" 
-                    style="flex: 1; padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px;"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                    <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                    Reserve Plot
-                </button>
+                ${reserveBtnHtml}
                 <button onclick="navigateToLocation(${plot.latitude}, ${plot.longitude})" 
                     style="padding: 10px 14px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;"
                     onmouseover="this.style.background='rgba(255,255,255,0.1)';"
@@ -371,12 +417,26 @@ function createPlotPopup(plot) {
 }
 
 // Draw plot grid overlay
-function drawPlotGrid(plot) {
+async function drawPlotGrid(plot) {
     const rows = parseInt(plot.grid_rows);
     const cols = parseInt(plot.grid_cols);
     const centerLat = parseFloat(plot.latitude);
     const centerLng = parseFloat(plot.longitude);
     const cellSize = 2; // 2 meters per cell
+    
+    // Get reserved compartments for this plot
+    let reservedCompartments = [];
+    try {
+        const response = await fetch(`../api/get_reserved_compartments.php?plot_id=${plot.id}`);
+        const data = await response.json();
+        console.log('Reserved API for plot', plot.id, plot.plot_number, ':', data);
+        if (data.success) {
+            reservedCompartments = data.reserved || [];
+            console.log('Reserved compartment numbers:', reservedCompartments);
+        }
+    } catch (error) {
+        console.error('Error fetching reserved compartments:', error);
+    }
     
     // Cemetery orientation angle - adjust to match real cemetery layout
     const rotationAngle = 45; // Degrees
@@ -418,19 +478,43 @@ function drawPlotGrid(plot) {
             const cellLabel = String.fromCharCode(65 + row) + (col + 1);
             const compartmentNum = row * cols + col + 1;
             
-            // Create rotated polygon with enhanced visibility
-            const cell = L.polygon(latLngs, {
-                color: '#667eea',
-                weight: 3, // Increased from 1 to 3 for better visibility
-                opacity: 0.9, // Added opacity for border
-                fillColor: '#667eea',
-                fillOpacity: 0.35, // Increased from 0.2 to 0.35
-                dashArray: '5, 5', // Added dashed border pattern for distinction
+            // Check if this compartment is reserved
+            const isReserved = reservedCompartments.includes(compartmentNum);
+            
+            if (isReserved) {
+                console.log('Marking compartment', compartmentNum, 'as reserved for plot', plot.id);
+            }
+            
+            // Style based on reservation status
+            const cellStyle = isReserved ? {
+                color: '#ff0000',
+                weight: 5,
+                opacity: 1,
+                fillColor: '#ff0000',
+                fillOpacity: 0.7,
+                dashArray: null,
+                className: 'compartment-cell-overlay reserved'
+            } : {
+                color: '#00c853',
+                weight: 3,
+                opacity: 0.9,
+                fillColor: '#00c853',
+                fillOpacity: 0.35,
+                dashArray: '5, 5',
                 className: 'compartment-cell-overlay'
-            }).bindPopup(`
+            };
+            
+            const statusText = isReserved ? 'Reserved' : 'Available';
+            const statusColor = isReserved ? '#b55a5a' : '#00c853';
+            
+            // Create rotated polygon with enhanced visibility
+            const cell = L.polygon(latLngs, cellStyle).bindPopup(`
                 <div style="text-align: center; padding: 8px;">
-                    <strong style="font-size: 1.1rem; color: #667eea; display: block; margin-bottom: 6px;">Compartment ${cellLabel}</strong>
+                    <strong style="font-size: 1.1rem; color: ${statusColor}; display: block; margin-bottom: 6px;">Compartment ${cellLabel}</strong>
                     <span style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">Number: #${compartmentNum}</span>
+                    <div style="margin-top: 6px; padding: 4px 10px; background: ${isReserved ? 'rgba(181, 90, 90, 0.2)' : 'rgba(0, 230, 118, 0.2)'}; border-radius: 12px; display: inline-block; font-size: 0.8rem; font-weight: 600; color: ${statusColor}; border: 1px solid ${isReserved ? 'rgba(181, 90, 90, 0.3)' : 'rgba(0, 230, 118, 0.3)'};">
+                        ${statusText}
+                    </div>
                 </div>
             `);
             
@@ -439,16 +523,12 @@ function drawPlotGrid(plot) {
                 this.setStyle({
                     fillOpacity: 0.6,
                     weight: 4,
-                    color: '#764ba2'
+                    color: isReserved ? '#dc2626' : '#059669'
                 });
             });
             
             cell.on('mouseout', function() {
-                this.setStyle({
-                    fillOpacity: 0.35,
-                    weight: 3,
-                    color: '#667eea'
-                });
+                this.setStyle(cellStyle);
             });
             
             markers.available.addLayer(cell);
@@ -496,7 +576,7 @@ function displaySearchResults(results) {
     container.innerHTML = results.map(result => {
         const photoHtml = result.photo 
             ? `<img src="../uploads/photos/${result.photo}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 12px;" />`
-            : `<div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; margin-right: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            : `<div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); border-radius: 8px; margin-right: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                 <svg style="width: 30px; height: 30px; color: rgba(255,255,255,0.7);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                 </svg>
@@ -517,7 +597,7 @@ function displaySearchResults(results) {
                         ${result.barangay || 'N/A'} ${result.family_name ? '• ' + result.family_name : ''}
                     </p>
                 </div>
-                <svg style="width: 20px; height: 20px; color: #667eea; flex-shrink: 0; margin-left: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg style="width: 20px; height: 20px; color: #00c853; flex-shrink: 0; margin-left: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </div>
@@ -535,7 +615,7 @@ window.showSearchResult = function(lat, lng, recordId) {
     // Create red marker
     const icon = L.divIcon({
         className: 'custom-marker',
-        html: `<div style="background: #ef4444; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(239, 68, 68, 0.5);"></div>`,
+        html: `<div style="background: #b55a5a; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(181, 90, 90, 0.5);"></div>`,
         iconSize: [16, 16],
         iconAnchor: [8, 8]
     });
@@ -708,9 +788,9 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination') 
                             const closeBtn = document.createElement('button');
                             closeBtn.className = 'routing-close-btn';
                             closeBtn.innerHTML = '×';
-                            closeBtn.style.cssText = 'position: absolute; top: 8px; right: 8px; background: rgba(239, 68, 68, 0.8); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 20px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; z-index: 10000;';
-                            closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(239, 68, 68, 1)';
-                            closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(239, 68, 68, 0.8)';
+                            closeBtn.style.cssText = 'position: absolute; top: 8px; right: 8px; background: rgba(181, 90, 90, 0.8); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-size: 20px; line-height: 1; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; z-index: 10000;';
+                            closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(181, 90, 90, 1)';
+                            closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(181, 90, 90, 0.8)';
                             closeBtn.onclick = () => {
                                 if (routingControl) {
                                     map.removeControl(routingControl);
@@ -985,10 +1065,30 @@ function addChatMessage(text, sender) {
 }
 
 // Search on Enter key
+let searchDebounceTimer;
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('searchInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') performSearch();
-    });
+    const searchInput = document.getElementById('searchInput');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchDebounceTimer);
+            const query = e.target.value.trim();
+            
+            if (query.length === 0) {
+                const panel = document.getElementById('searchResultsPanel');
+                if (panel) panel.classList.remove('active');
+                return;
+            }
+            
+            if (query.length < 2) {
+                return;
+            }
+            
+            searchDebounceTimer = setTimeout(() => {
+                performSearch();
+            }, 400);
+        });
+    }
     
     // Update filter counts
     updateFilterCounts();
@@ -1080,7 +1180,7 @@ window.openReservationModal = function(plotId, plotNumber, compartmentId = null)
     let plotInfoHtml = `
         <p style="margin: 0 0 8px 0; display: flex; align-items: center; gap: 8px;">
             <strong>Plot Number:</strong> 
-            <span style="color: #667eea; font-weight: 600;">${plotNumber || 'Plot #' + plotId}</span>
+            <span style="color: #00c853; font-weight: 600;">${plotNumber || 'Plot #' + plotId}</span>
         </p>
     `;
     
@@ -1098,9 +1198,9 @@ window.openReservationModal = function(plotId, plotNumber, compartmentId = null)
     
     // Populate reservation type dropdown with pricing
     const typeSelect = document.getElementById('reservation_type');
-    typeSelect.innerHTML = '<option value="" style="background: #1a1a2e; color: white;">Select Type</option>' + 
+    typeSelect.innerHTML = '<option value="" style="background: #0a0a0a; color: white;">Select Type</option>' + 
         pricingData.map(p => `
-            <option value="${p.plot_type}" data-price="${p.price}" style="background: #1a1a2e; color: white; padding: 12px;">
+            <option value="${p.plot_type}" data-price="${p.price}" style="background: #0a0a0a; color: white; padding: 12px;">
                 ${p.plot_type.charAt(0).toUpperCase() + p.plot_type.slice(1)} - ₱${parseFloat(p.price).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
             </option>
         `).join('');
@@ -1213,24 +1313,24 @@ function showSuccessModal(message, isSuccess = true) {
     
     if (isSuccess) {
         // Success styling
-        iconDiv.style.background = 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)';
+        iconDiv.style.background = 'linear-gradient(135deg, #5a9b6f 0%, #059669 100%)';
         iconDiv.innerHTML = `
             <svg style="width: 48px; height: 48px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
         `;
         titleDiv.textContent = 'Reservation Successful!';
-        titleDiv.style.color = '#22c55e';
+        titleDiv.style.color = '#5a9b6f';
     } else {
         // Error styling
-        iconDiv.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        iconDiv.style.background = 'linear-gradient(135deg, #b55a5a 0%, #dc2626 100%)';
         iconDiv.innerHTML = `
             <svg style="width: 48px; height: 48px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
         `;
         titleDiv.textContent = 'Reservation Failed';
-        titleDiv.style.color = '#ef4444';
+        titleDiv.style.color = '#b55a5a';
     }
     
     modal.style.display = 'flex';
@@ -1278,7 +1378,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
                                 <p style="margin: 0 0 8px 0;">
                                     <span style="color: rgba(255,255,255,0.6);">Plot:</span> 
-                                    <strong style="color: #667eea;">${data.plot_number || 'N/A'}</strong>
+                                    <strong style="color: #00c853;">${data.plot_number || 'N/A'}</strong>
                                 </p>
                     `;
                     
@@ -1287,7 +1387,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         successMessage += `
                             <p style="margin: 0 0 8px 0;">
                                 <span style="color: rgba(255,255,255,0.6);">Compartment:</span> 
-                                <strong style="color: #667eea;">${label} (#${data.compartment})</strong>
+                                <strong style="color: #00c853;">${label} (#${data.compartment})</strong>
                             </p>
                         `;
                     }
@@ -1295,7 +1395,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     successMessage += `
                                 <p style="margin: 0;">
                                     <span style="color: rgba(255,255,255,0.6);">Total Amount:</span> 
-                                    <strong style="color: #22c55e; font-size: 1.2rem;">₱${parseFloat(data.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+                                    <strong style="color: #5a9b6f; font-size: 1.2rem;">₱${parseFloat(data.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
                                 </p>
                             </div>
                             <p style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 600; color: white;">💡 Next Steps:</p>
@@ -1361,86 +1461,6 @@ function getCompartmentLabel(compartmentNum, plotData) {
     return String.fromCharCode(65 + row) + (col + 1);
 }
 
-// Modify addAvailablePlots function to include Reserve button
-const originalAddAvailablePlots = window.addAvailablePlots;
-window.addAvailablePlots = function(plots) {
-    if (typeof originalAddAvailablePlots === 'function') {
-        originalAddAvailablePlots(plots);
-    }
-    
-    // Override popup creation for available plots
-    plots.forEach(plot => {
-        const marker = L.marker([plot.latitude, plot.longitude], {
-            icon: L.icon({
-                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowSize: [41, 41]
-            })
-        });
-        
-        const popupContent = `
-            <div style="min-width: 250px; padding: 8px;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                        <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 style="margin: 0; font-size: 1.1rem; color: #22c55e;">Available Plot</h3>
-                        <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: var(--zinc-400);">Ready for reservation</p>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 12px;">
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                        <svg style="width: 16px; height: 16px; color: var(--zinc-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                        </svg>
-                        <strong style="font-size: 0.9rem;">Plot Number:</strong>
-                        <span>${plot.plot_number || 'N/A'}</span>
-                    </div>
-                    ${plot.compartment_count ? `
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            <svg style="width: 16px; height: 16px; color: var(--zinc-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
-                            </svg>
-                            <strong style="font-size: 0.9rem;">Compartments:</strong>
-                            <span>${plot.compartment_count} spaces</span>
-                        </div>
-                    ` : ''}
-                </div>
-                
-                ${plot.notes ? `
-                    <p style="margin: 8px 0 12px 0; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px; color: var(--zinc-400); font-size: 0.85rem; line-height: 1.4;">
-                        ${plot.notes}
-                    </p>
-                ` : ''}
-                
-                <button onclick="openReservationModal(${plot.id}, '${(plot.plot_number || '').replace(/'/g, "\\'")}');" 
-                    style="width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px;"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.4)';"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                    <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                    </svg>
-                    Reserve This Plot
-                </button>
-            </div>
-        `;
-        
-        marker.bindPopup(popupContent, {
-            maxWidth: 300,
-            className: 'custom-popup'
-        });
-        marker.addTo(window.map);
-    });
-};
-
-
 // Toggle navigation bar
 function toggleNavBar() {
     const topBar = document.getElementById('topBar');
@@ -1486,7 +1506,7 @@ function updateBearingDisplay() {
         const bearing = map.getBearing();
         const bearingEl = document.getElementById('bearingDisplay');
         if (bearingEl) {
-            bearingEl.textContent = 'Bearing: ' + bearing.toFixed(0) + '°';
+            bearingEl.textContent = bearing.toFixed(0) + '°';
         }
     }
 }

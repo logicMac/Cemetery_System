@@ -175,7 +175,7 @@ try {
                     draggable: true,
                     icon: L.divIcon({
                         className: 'custom-marker',
-                        html: '<div style="background: #ef4444; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white;"></div>',
+                        html: '<div style="background: #b55a5a; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white;"></div>',
                         iconSize: [16, 16],
                         iconAnchor: [8, 8]
                     })

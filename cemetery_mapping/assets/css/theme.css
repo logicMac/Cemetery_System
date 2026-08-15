@@ -1,7 +1,8 @@
 /**
  * Matinao Memorial Cemetery - Theme Styles
  * Pure black background with glass morphism design
- * Purple gradient accents and smooth transitions
+ * Emerald & Gold palette with glass morphism design
+ * Smooth transitions and modern UI
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -11,10 +12,11 @@
     --bg-black: #000000;
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --purple-start: #667eea;
-    --purple-end: #764ba2;
+    --emerald-start: #00e676;
+    --emerald-end: #00c853;
+    --gold-accent: #22c55e;
     --green-available: #22c55e;
-    --gold-premium: #fbbf24;
+    --gold-premium: #4ade80;
     --zinc-400: #a1a1aa;
     --white: #ffffff;
     
@@ -53,9 +55,9 @@ body {
     transform: translateY(-2px);
 }
 
-/* Purple Gradient Buttons */
+/* Emerald Gradient Buttons */
 .btn-primary {
-    background: linear-gradient(135deg, var(--purple-start) 0%, var(--purple-end) 100%);
+    background: linear-gradient(135deg, var(--emerald-start) 0%, var(--emerald-end) 100%);
     color: var(--white);
     border: none;
     padding: 12px 24px;
@@ -68,7 +70,7 @@ body {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 20px rgba(74, 222, 128, 0.4);
 }
 
 .btn-primary:active {
@@ -109,8 +111,8 @@ body {
 
 .input-field:focus {
     outline: none;
-    border-color: var(--purple-start);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    border-color: var(--emerald-start);
+    box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.2);
 }
 
 .input-field::placeholder {
@@ -182,13 +184,13 @@ p {
 
 /* Links */
 a {
-    color: var(--purple-start);
+    color: var(--emerald-start);
     text-decoration: none;
     transition: color var(--transition-smooth);
 }
 
 a:hover {
-    color: var(--purple-end);
+    color: var(--emerald-end);
 }
 
 /* Scrollbar Styling */
@@ -202,18 +204,18 @@ a:hover {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, var(--purple-start) 0%, var(--purple-end) 100%);
+    background: linear-gradient(135deg, var(--emerald-start) 0%, var(--emerald-end) 100%);
     border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--purple-end);
+    background: var(--emerald-end);
 }
 
 /* Loading Spinner */
 .spinner {
     border: 3px solid var(--glass-border);
-    border-top: 3px solid var(--purple-start);
+    border-top: 3px solid var(--emerald-start);
     border-radius: 50%;
     width: 40px;
     height: 40px;
@@ -287,9 +289,9 @@ a:hover {
 }
 
 .alert-info {
-    background: rgba(102, 126, 234, 0.1);
-    border-color: var(--purple-start);
-    color: var(--purple-start);
+    background: rgba(74, 222, 128, 0.1);
+    border-color: var(--emerald-start);
+    color: var(--emerald-start);
 }
 
 /* Utility Classes */

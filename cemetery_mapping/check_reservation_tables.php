@@ -17,7 +17,7 @@ header('Content-Type: text/html; charset=utf-8');
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             color: white;
             padding: 20px;
             margin: 0;
@@ -34,7 +34,7 @@ header('Content-Type: text/html; charset=utf-8');
         h1 {
             margin-top: 0;
             font-size: 2rem;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -43,23 +43,23 @@ header('Content-Type: text/html; charset=utf-8');
             border-radius: 12px;
             padding: 20px;
             margin: 20px 0;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #00c853;
         }
         .success {
-            border-left-color: #22c55e;
-            background: rgba(34, 197, 94, 0.1);
+            border-left-color: #5a9b6f;
+            background: rgba(0, 200, 83, 0.1);
         }
         .error {
-            border-left-color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
+            border-left-color: #b55a5a;
+            background: rgba(181, 90, 90, 0.1);
         }
         .warning {
-            border-left-color: #f59e0b;
-            background: rgba(245, 158, 11, 0.1);
+            border-left-color: #a68b52;
+            background: rgba(166, 139, 82, 0.1);
         }
         .info {
-            border-left-color: #3b82f6;
-            background: rgba(59, 130, 246, 0.1);
+            border-left-color: #5a87a8;
+            background: rgba(90, 135, 168, 0.1);
         }
         table {
             width: 100%;
@@ -72,7 +72,7 @@ header('Content-Type: text/html; charset=utf-8');
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         th {
-            background: rgba(102, 126, 234, 0.2);
+            background: rgba(0, 230, 118, 0.2);
             font-weight: 600;
         }
         .badge {
@@ -83,17 +83,17 @@ header('Content-Type: text/html; charset=utf-8');
             font-weight: 600;
         }
         .badge-success {
-            background: #22c55e;
+            background: #5a9b6f;
             color: white;
         }
         .badge-error {
-            background: #ef4444;
+            background: #b55a5a;
             color: white;
         }
         .btn {
             display: inline-block;
             padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             color: white;
             text-decoration: none;
             border-radius: 10px;
@@ -105,7 +105,7 @@ header('Content-Type: text/html; charset=utf-8');
         }
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 8px 25px rgba(0, 230, 118, 0.5);
         }
         pre {
             background: rgba(0, 0, 0, 0.5);
@@ -297,11 +297,11 @@ header('Content-Type: text/html; charset=utf-8');
                     echo '<p>✓ uploads/payments directory already exists</p>';
                 }
                 
-                echo '<p style="margin-top: 20px; padding: 15px; background: rgba(34, 197, 94, 0.2); border-radius: 8px; border: 1px solid #22c55e;"><strong>✓ All tables created successfully!</strong></p>';
+                echo '<p style="margin-top: 20px; padding: 15px; background: rgba(0, 200, 83, 0.2); border-radius: 8px; border: 1px solid #5a9b6f;"><strong>✓ All tables created successfully!</strong></p>';
                 echo '<a href="check_reservation_tables.php" class="btn">Refresh Page</a>';
                 
             } catch (PDOException $e) {
-                echo '<p style="color: #ef4444;">❌ Error: ' . $e->getMessage() . '</p>';
+                echo '<p style="color: #b55a5a;">❌ Error: ' . $e->getMessage() . '</p>';
             }
             
             echo '</div>';

@@ -216,13 +216,13 @@ function updatePasswordStrength(inputId, barId, textId) {
                 text.textContent = '';
             } else if (strength === 'weak') {
                 text.textContent = 'Weak password';
-                text.style.color = '#ef4444';
+                text.style.color = '#b55a5a';
             } else if (strength === 'medium') {
                 text.textContent = 'Medium password';
-                text.style.color = '#fbbf24';
+                text.style.color = '#c9a86c';
             } else {
                 text.textContent = 'Strong password';
-                text.style.color = '#22c55e';
+                text.style.color = '#5a9b6f';
             }
         }
     });

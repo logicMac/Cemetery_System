@@ -8,7 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             min-height: 100vh;
             padding: 40px 20px;
         }
@@ -21,7 +21,7 @@
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -37,18 +37,18 @@
             align-items: center;
             justify-content: space-between;
         }
-        .check-item.success { background: #d1fae5; border-left: 4px solid #10b981; }
-        .check-item.error { background: #fee2e2; border-left: 4px solid #ef4444; }
-        .check-item.warning { background: #fef3c7; border-left: 4px solid #f59e0b; }
+        .check-item.success { background: #d1fae5; border-left: 4px solid #00c853; }
+        .check-item.error { background: #fee2e2; border-left: 4px solid #b55a5a; }
+        .check-item.warning { background: #fef3c7; border-left: 4px solid #a68b52; }
         .status {
             font-weight: 600;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 0.85rem;
         }
-        .status.success { background: #10b981; color: white; }
-        .status.error { background: #ef4444; color: white; }
-        .status.warning { background: #f59e0b; color: white; }
+        .status.success { background: #00c853; color: white; }
+        .status.error { background: #b55a5a; color: white; }
+        .status.warning { background: #a68b52; color: white; }
         .info { background: #e0e7ff; padding: 20px; border-radius: 8px; margin-top: 20px; }
         .info h3 { color: #4338ca; margin-bottom: 10px; }
         .info ul { margin-left: 20px; }
@@ -56,7 +56,7 @@
         .btn {
             display: inline-block;
             padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             color: white;
             text-decoration: none;
             border-radius: 8px;
@@ -69,7 +69,7 @@
             text-align: center;
             padding: 20px;
             background: #f9fafb;
-            color: #6b7280;
+            color: #00e676;
             font-size: 0.9rem;
         }
     </style>
@@ -200,14 +200,14 @@
             ?>
             
             <?php if ($allPassed): ?>
-                <div class="info" style="background: #d1fae5; border-left: 4px solid #10b981;">
+                <div class="info" style="background: #d1fae5; border-left: 4px solid #00c853;">
                     <h3 style="color: #065f46;">✅ System Ready!</h3>
                     <p>All critical checks passed. Your system is ready to use.</p>
                     <a href="index.php" class="btn">Go to Landing Page →</a>
-                    <a href="admin/login.php" class="btn" style="background: #6b7280;">Admin Login →</a>
+                    <a href="login.php?role=admin" class="btn" style="background: #00e676;">Admin Login →</a>
                 </div>
             <?php else: ?>
-                <div class="info" style="background: #fee2e2; border-left: 4px solid #ef4444;">
+                <div class="info" style="background: #fee2e2; border-left: 4px solid #b55a5a;">
                     <h3 style="color: #991b1b;">⚠️ Setup Required</h3>
                     <p>Please fix the errors above before using the system.</p>
                     <ul>

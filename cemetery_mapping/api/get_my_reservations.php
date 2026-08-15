@@ -21,6 +21,7 @@ try {
             ap.longitude,
             pc.compartment_number,
             v.full_name as visitor_name,
+            v.phone as visitor_phone,
             a.username as approved_by_name
         FROM plot_reservations pr
         LEFT JOIN available_plots ap ON pr.plot_id = ap.id

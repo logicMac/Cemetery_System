@@ -84,19 +84,19 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
             </div>
             <div>
                 <p style="color: var(--zinc-400); margin: 0; font-size: 0.85rem;">RESERVED</p>
-                <p style="margin: 5px 0 0 0; font-size: 1.3rem; font-weight: 600; color: #f59e0b;">
+                <p style="margin: 5px 0 0 0; font-size: 1.3rem; font-weight: 600; color: #a68b52;">
                     <?php echo $reservedCount; ?>
                 </p>
             </div>
             <div>
                 <p style="color: var(--zinc-400); margin: 0; font-size: 0.85rem;">AVAILABLE</p>
-                <p style="margin: 5px 0 0 0; font-size: 1.3rem; font-weight: 600; color: #22c55e;">
+                <p style="margin: 5px 0 0 0; font-size: 1.3rem; font-weight: 600; color: #5a9b6f;">
                     <?php echo $availableCount; ?>
                 </p>
             </div>
             <div>
                 <p style="color: var(--zinc-400); margin: 0; font-size: 0.85rem;">OCCUPANCY</p>
-                <p style="margin: 5px 0 0 0; font-size: 1.3rem; font-weight: 600; color: #667eea;">
+                <p style="margin: 5px 0 0 0; font-size: 1.3rem; font-weight: 600; color: #22c55e;">
                     <?php echo number_format($occupancyRate, 1); ?>%
                 </p>
             </div>
@@ -123,10 +123,10 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
                 
                 if ($isReserved) {
                     $reservation = $reservedCompartments[$compartmentNum];
-                    $statusColor = $reservation['status'] === 'approved' ? '#22c55e' : '#f59e0b';
+                    $statusColor = $reservation['status'] === 'approved' ? '#5a9b6f' : '#a68b52';
                     $bgGradient = $reservation['status'] === 'approved' 
-                        ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                        : 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                        ? 'linear-gradient(135deg, #5a9b6f 0%, #059669 100%)'
+                        : 'linear-gradient(135deg, #a68b52 0%, #8a7340 100%)';
                     
                     $tooltipData = htmlspecialchars(json_encode($reservation), ENT_QUOTES, 'UTF-8');
                     
@@ -172,7 +172,7 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
                         transition: all 0.3s ease;
                         color: rgba(255,255,255,0.5);
                     " 
-                    onmouseover="this.style.transform=\'scale(1.05)\'; this.style.borderColor=\'rgba(102, 126, 234, 0.5)\';" 
+                    onmouseover="this.style.transform=\'scale(1.05)\'; this.style.borderColor=\'rgba(74, 222, 128, 0.5)\';" 
                     onmouseout="this.style.transform=\'scale(1)\'; this.style.borderColor=\'rgba(255,255,255,0.1)\';"
                     onclick="selectCompartment(\'' . $label . '\', ' . $compartmentNum . ')">';
                     echo '<div>' . $label . '</div>';
@@ -196,11 +196,11 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
                 <span style="color: var(--zinc-400);">Available</span>
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 6px;"></div>
+                <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #a68b52 0%, #8a7340 100%); border-radius: 6px;"></div>
                 <span style="color: var(--zinc-400);">Reserved (Pending Approval)</span>
             </div>
             <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 6px;"></div>
+                <div style="width: 30px; height: 30px; background: linear-gradient(135deg, #5a9b6f 0%, #059669 100%); border-radius: 6px;"></div>
                 <span style="color: var(--zinc-400);">Reserved (Approved)</span>
             </div>
         </div>
@@ -212,7 +212,7 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
 
 <!-- Reservation Details Modal -->
 <div id="reservationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); z-index: 2000; align-items: center; justify-content: center;">
-    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 20px; padding: 40px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+    <div style="background: linear-gradient(135deg, #0a0a0a 0%, #050505 100%); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 20px; padding: 40px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
             <h3 style="margin: 0; font-size: 1.5rem;">Compartment Details</h3>
             <button onclick="closeModal()" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">×</button>
@@ -257,12 +257,12 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
             if (!reservation) return;
             
             const statusBadge = reservation.status === 'approved' 
-                ? '<span style="padding: 4px 12px; background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; border-radius: 12px; color: #22c55e; font-size: 0.85rem; font-weight: 600;">APPROVED</span>'
-                : '<span style="padding: 4px 12px; background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b; border-radius: 12px; color: #f59e0b; font-size: 0.85rem; font-weight: 600;">PENDING</span>';
+                ? '<span style="padding: 4px 12px; background: rgba(34, 197, 94, 0.2); border: 1px solid #5a9b6f; border-radius: 12px; color: #5a9b6f; font-size: 0.85rem; font-weight: 600;">APPROVED</span>'
+                : '<span style="padding: 4px 12px; background: rgba(166, 139, 82, 0.2); border: 1px solid #a68b52; border-radius: 12px; color: #a68b52; font-size: 0.85rem; font-weight: 600;">PENDING</span>';
             
             const paymentBadge = reservation.payment_status === 'paid'
-                ? '<span style="padding: 4px 12px; background: rgba(34, 197, 94, 0.2); border: 1px solid #22c55e; border-radius: 12px; color: #22c55e; font-size: 0.85rem; font-weight: 600;">PAID</span>'
-                : '<span style="padding: 4px 12px; background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; border-radius: 12px; color: #ef4444; font-size: 0.85rem; font-weight: 600;">UNPAID</span>';
+                ? '<span style="padding: 4px 12px; background: rgba(34, 197, 94, 0.2); border: 1px solid #5a9b6f; border-radius: 12px; color: #5a9b6f; font-size: 0.85rem; font-weight: 600;">PAID</span>'
+                : '<span style="padding: 4px 12px; background: rgba(181, 90, 90, 0.2); border: 1px solid #b55a5a; border-radius: 12px; color: #b55a5a; font-size: 0.85rem; font-weight: 600;">UNPAID</span>';
             
             const rows = <?php echo $plot['grid_rows']; ?>;
             const cols = <?php echo $plot['grid_cols']; ?>;
@@ -271,9 +271,9 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
             const label = String.fromCharCode(65 + row) + (col + 1);
             
             const content = `
-                <div style="background: rgba(102, 126, 234, 0.1); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+                <div style="background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 20px;">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                        <h4 style="margin: 0; font-size: 1.3rem; color: #667eea;">Compartment ${label}</h4>
+                        <h4 style="margin: 0; font-size: 1.3rem; color: #22c55e;">Compartment ${label}</h4>
                         <span style="font-size: 0.9rem; color: rgba(255,255,255,0.5);">#${compartmentNum}</span>
                     </div>
                     <div style="display: flex; gap: 10px;">

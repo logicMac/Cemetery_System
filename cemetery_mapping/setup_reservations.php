@@ -18,7 +18,7 @@ header('Content-Type: text/html; charset=utf-8');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             color: white;
             padding: 40px 20px;
             min-height: 100vh;
@@ -35,7 +35,7 @@ header('Content-Type: text/html; charset=utf-8');
         h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -52,16 +52,16 @@ header('Content-Type: text/html; charset=utf-8');
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .box.success {
-            border-color: #22c55e;
-            background: rgba(34, 197, 94, 0.1);
+            border-color: #5a9b6f;
+            background: rgba(0, 200, 83, 0.1);
         }
         .box.error {
-            border-color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
+            border-color: #b55a5a;
+            background: rgba(181, 90, 90, 0.1);
         }
         .box.warning {
-            border-color: #f59e0b;
-            background: rgba(245, 158, 11, 0.1);
+            border-color: #a68b52;
+            background: rgba(166, 139, 82, 0.1);
         }
         .box h3 {
             margin-bottom: 15px;
@@ -74,7 +74,7 @@ header('Content-Type: text/html; charset=utf-8');
         .btn {
             display: inline-block;
             padding: 16px 32px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00c853 0%, #059669 100%);
             color: white;
             text-decoration: none;
             border-radius: 12px;
@@ -87,7 +87,7 @@ header('Content-Type: text/html; charset=utf-8');
         }
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+            box-shadow: 0 8px 25px rgba(0, 230, 118, 0.5);
         }
         .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
@@ -306,8 +306,8 @@ header('Content-Type: text/html; charset=utf-8');
                 echo '<div class="box">';
                 echo '<h3>🎯 Next Steps:</h3>';
                 echo '<ul>';
-                echo '<li>Go to the <a href="visitor/dashboard.php" style="color: #667eea; text-decoration: underline;">Visitor Dashboard</a> to test reservations</li>';
-                echo '<li>Go to <a href="admin/reservations.php" style="color: #667eea; text-decoration: underline;">Admin Reservations</a> to manage requests</li>';
+                echo '<li>Go to the <a href="visitor/dashboard.php" style="color: #00c853; text-decoration: underline;">Visitor Dashboard</a> to test reservations</li>';
+                echo '<li>Go to <a href="admin/reservations.php" style="color: #00c853; text-decoration: underline;">Admin Reservations</a> to manage requests</li>';
                 echo '<li>Modify pricing in the admin settings if needed</li>';
                 echo '</ul>';
                 echo '</div>';
@@ -321,7 +321,7 @@ header('Content-Type: text/html; charset=utf-8');
                 echo '<p>The following errors occurred:</p>';
                 echo '<ul>';
                 foreach ($errors as $error) {
-                    echo '<li style="color: #ef4444;">' . htmlspecialchars($error) . '</li>';
+                    echo '<li style="color: #b55a5a;">' . htmlspecialchars($error) . '</li>';
                 }
                 echo '</ul>';
                 echo '</div>';

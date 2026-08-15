@@ -4,7 +4,7 @@ require_once '../config/database.php';
 
 // Check if admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    header('Location: login.php');
+    header('Location: ../login.php?role=admin');
     exit;
 }
 
@@ -62,12 +62,12 @@ try {
             text-align: center;
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 3px solid #667eea;
+            border-bottom: 3px solid #22c55e;
         }
         
         .report-header h1 {
             font-size: 20px;
-            color: #667eea;
+            color: #22c55e;
             margin-bottom: 3px;
         }
         
@@ -91,7 +91,7 @@ try {
         
         .summary-box {
             background: #f9fafb;
-            border: 2px solid #667eea;
+            border: 2px solid #22c55e;
             padding: 15px;
             border-radius: 6px;
             text-align: center;
@@ -100,7 +100,7 @@ try {
         .summary-box .count {
             font-size: 28px;
             font-weight: bold;
-            color: #667eea;
+            color: #22c55e;
         }
         
         .summary-box .label {
@@ -140,7 +140,7 @@ try {
         }
         
         th {
-            background: #667eea;
+            background: #22c55e;
             color: white;
             padding: 8px 6px;
             text-align: left;
@@ -192,7 +192,7 @@ try {
             position: fixed;
             top: 10px;
             right: 10px;
-            background: #667eea;
+            background: #22c55e;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -251,8 +251,8 @@ try {
             <div class="label">Total Available Plots</div>
         </div>
         
-        <div class="summary-box" style="border-color: #22c55e;">
-            <div class="count" style="color: #22c55e;"><?php echo number_format($totalCompartments); ?></div>
+        <div class="summary-box" style="border-color: #5a9b6f;">
+            <div class="count" style="color: #5a9b6f;"><?php echo number_format($totalCompartments); ?></div>
             <div class="label">Total Compartments/Spaces</div>
         </div>
     </div>
