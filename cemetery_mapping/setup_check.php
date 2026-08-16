@@ -204,7 +204,7 @@
                     <h3 style="color: #065f46;">✅ System Ready!</h3>
                     <p>All critical checks passed. Your system is ready to use.</p>
                     <a href="index.php" class="btn">Go to Landing Page →</a>
-                    <a href="login.php?role=admin" class="btn" style="background: #00e676;">Admin Login →</a>
+                    <a href="login.php" class="btn" style="background: #00e676;">Admin Login →</a>
                 </div>
             <?php else: ?>
                 <div class="info" style="background: #fee2e2; border-left: 4px solid #b55a5a;">

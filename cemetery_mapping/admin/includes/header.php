@@ -1,7 +1,7 @@
 <?php
 // Check if admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    header('Location: ../login.php?role=admin');
+    header('Location: ../login.php');
     exit;
 }
 
@@ -9,7 +9,7 @@ if (!isset($_SESSION['admin_id'])) {
 if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > 1800)) {
     session_unset();
     session_destroy();
-    header('Location: ../login.php?role=admin&timeout=1');
+    header('Location: ../login.php?timeout=1');
     exit;
 }
 
@@ -44,8 +44,8 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-rotate@0.2.8/dist/leaflet-rotate.css" />
     
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="../assets/css/theme.css?v=2">
-    <link rel="stylesheet" href="../assets/css/admin.css?v=4">
+    <link rel="stylesheet" href="../assets/css/theme.css?v=3">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=8">
     <link rel="stylesheet" href="../assets/css/mobile-responsive.css?v=2">
 </head>
 <body>

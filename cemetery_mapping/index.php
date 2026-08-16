@@ -1,3 +1,27 @@
+<?php
+require_once 'config/database.php';
+
+$counts = ['records' => 1248, 'plots' => 86, 'reservations' => 42];
+$available_count = 72;
+
+try {
+    $records = $pdo->query("SELECT COUNT(*) FROM burial_records")->fetchColumn();
+    $plots = $pdo->query("SELECT COUNT(*) FROM available_plots")->fetchColumn();
+    $reservations = $pdo->query("SELECT COUNT(*) FROM plot_reservations")->fetchColumn();
+    $available = $pdo->query("SELECT COUNT(*) FROM available_plots ap WHERE NOT EXISTS (SELECT 1 FROM plot_reservations pr WHERE pr.plot_id = ap.id AND pr.status IN ('pending','approved') AND pr.compartment_id IS NULL)")->fetchColumn();
+
+    $counts = [
+        'records' => (int)$records,
+        'plots' => (int)$plots,
+        'reservations' => (int)$reservations
+    ];
+    $available_count = (int)$available;
+} catch (PDOException $e) {
+    error_log('Index stats error: ' . $e->getMessage());
+}
+
+$percentage = $counts['plots'] > 0 ? round(($available_count / $counts['plots']) * 100) : 0;
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +39,10 @@
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
         * { font-family: 'Poppins', sans-serif; }
@@ -88,7 +116,7 @@
 
             <!-- CTA -->
             <div class="flex items-center gap-3">
-                <a href="login.php?role=visitor" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-emerald-600 transition px-3 py-2">
+                <a href="login.php" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-emerald-600 transition px-3 py-2">
                     <i data-lucide="log-in" class="w-4 h-4"></i> Sign In
                 </a>
                 <a href="visitor/register.php" class="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg px-4 py-2 transition shadow-sm shadow-emerald-200">
@@ -127,10 +155,10 @@
 
                 <!-- CTAs -->
                 <div class="flex flex-wrap gap-3 mb-10">
-                    <a href="login.php?role=visitor" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-6 py-3.5 transition shadow-lg shadow-emerald-200 hover:shadow-emerald-300">
+                    <a href="login.php" class="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-6 py-3.5 transition shadow-lg shadow-emerald-200 hover:shadow-emerald-300">
                         <i data-lucide="log-in" class="w-4 h-4"></i> Visitor Portal
                     </a>
-                    <a href="login.php?role=admin" class="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-sm font-semibold px-6 py-3.5 transition shadow-sm">
+                    <a href="login.php" class="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-sm font-semibold px-6 py-3.5 transition shadow-sm">
                         <i data-lucide="shield" class="w-4 h-4"></i> Admin Panel
                     </a>
                 </div>
@@ -158,88 +186,99 @@
             <div class="relative animate-fade-up" style="animation-delay: 0.15s;">
                 <div class="relative rounded-3xl bg-white border border-slate-200 shadow-2xl shadow-emerald-100/50 overflow-hidden">
                     <!-- Top bar -->
-                    <div class="flex items-center gap-2 px-5 py-3.5 border-b border-slate-100 bg-slate-50/60">
+                    <div class="flex items-center gap-2 px-5 py-3 border-b border-slate-100 bg-slate-50/60">
                         <span class="w-3 h-3 rounded-full bg-rose-300"></span>
                         <span class="w-3 h-3 rounded-full bg-amber-300"></span>
                         <span class="w-3 h-3 rounded-full bg-emerald-300"></span>
                         <span class="ml-3 text-xs text-slate-400 font-medium">matinao-memorial.app</span>
                     </div>
                     <!-- Mock dashboard -->
-                    <div class="p-6">
-                        <!-- Header row -->
-                        <div class="flex items-center justify-between mb-5">
+                    <div class="p-5">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-4">
                             <div>
                                 <div class="text-sm font-bold text-slate-900">Cemetery Overview</div>
-                                <div class="text-xs text-slate-400">Live dashboard preview</div>
+                                <div class="text-xs text-slate-400">Live data preview</div>
                             </div>
-                            <div class="w-9 h-9 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i data-lucide="layout-dashboard" class="w-4 h-4"></i></div>
+                            <div class="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[10px] font-semibold">Updated now</div>
                         </div>
+
                         <!-- Stat cards -->
-                        <div class="grid grid-cols-3 gap-3 mb-5">
-                            <div class="rounded-xl bg-emerald-50 p-3.5">
-                                <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2"><i data-lucide="file-text" class="w-3.5 h-3.5"></i></div>
-                                <div class="text-lg font-bold text-slate-900">1,248</div>
+                        <div class="grid grid-cols-3 gap-3 mb-4">
+                            <div class="rounded-xl bg-white border border-slate-100 p-3 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-2"><i data-lucide="file-text" class="w-3.5 h-3.5"></i></div>
+                                <div class="text-lg font-bold text-slate-900"><?php echo number_format($counts['records']); ?></div>
                                 <div class="text-[10px] text-slate-500">Records</div>
                             </div>
-                            <div class="rounded-xl bg-blue-50 p-3.5">
-                                <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center mb-2"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i></div>
-                                <div class="text-lg font-bold text-slate-900">86</div>
-                                <div class="text-[10px] text-slate-500">Plots</div>
+                            <div class="rounded-xl bg-white border border-slate-100 p-3 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-2"><i data-lucide="map-pin" class="w-3.5 h-3.5"></i></div>
+                                <div class="text-lg font-bold text-slate-900"><?php echo number_format($counts['plots']); ?></div>
+                                <div class="text-[10px] text-slate-500">Total Plots</div>
                             </div>
-                            <div class="rounded-xl bg-amber-50 p-3.5">
-                                <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center mb-2"><i data-lucide="calendar-check" class="w-3.5 h-3.5"></i></div>
-                                <div class="text-lg font-bold text-slate-900">42</div>
+                            <div class="rounded-xl bg-white border border-slate-100 p-3 shadow-sm hover:shadow-md transition-shadow">
+                                <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center mb-2"><i data-lucide="calendar-check" class="w-3.5 h-3.5"></i></div>
+                                <div class="text-lg font-bold text-slate-900"><?php echo number_format($counts['reservations']); ?></div>
                                 <div class="text-[10px] text-slate-500">Reservations</div>
                             </div>
                         </div>
-                        <!-- Mock map -->
-                        <div class="rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 p-4 h-44 relative overflow-hidden">
-                            <div class="absolute inset-0 opacity-30" style="background-image: linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px); background-size: 24px 24px;"></div>
-                            <!-- Plot pins -->
-                            <div class="absolute top-6 left-8 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-200 animate-pulse-dot"></div>
-                            <div class="absolute top-12 right-12 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-200"></div>
-                            <div class="absolute bottom-8 left-16 w-3 h-3 rounded-full bg-amber-500 ring-4 ring-amber-200"></div>
-                            <div class="absolute bottom-12 right-8 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-200 animate-pulse-dot"></div>
-                            <div class="absolute top-1/2 left-1/3 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-200"></div>
-                            <div class="relative z-10 text-xs font-semibold text-slate-700 flex items-center gap-1.5"><i data-lucide="map" class="w-3.5 h-3.5 text-emerald-600"></i> Interactive Cemetery Map</div>
-                            <!-- Mini legend -->
-                            <div class="absolute bottom-2 right-2 flex items-center gap-2 text-[9px] text-slate-500 bg-white/80 backdrop-blur px-2 py-1 rounded-md">
-                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Available</span>
-                                <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Reserved</span>
+
+                        <!-- Map preview -->
+                        <div class="rounded-xl border border-slate-200 h-44 relative overflow-hidden mb-4">
+                            <div id="heroMap" class="absolute inset-0"></div>
+
+                            <!-- Map label -->
+                            <div class="absolute top-3 left-3 z-[1000] inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur text-slate-700 text-[10px] font-semibold shadow-sm">
+                                <i data-lucide="map" class="w-3 h-3 text-emerald-600"></i>
+                                Interactive Cemetery Map
+                            </div>
+
+                            <!-- Legend -->
+                            <div class="absolute bottom-3 right-3 z-[1000] flex flex-col gap-1.5 text-[9px] text-slate-600 bg-white/90 backdrop-blur px-2.5 py-2 rounded-lg shadow-sm border border-slate-100">
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Available</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span> Reserved</span>
+                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span> Occupied</span>
                             </div>
                         </div>
-                        <!-- Mini chart row -->
-                        <div class="mt-3 grid grid-cols-2 gap-3">
-                            <div class="rounded-xl bg-slate-50 border border-slate-100 p-3">
+
+                        <!-- Bottom grid -->
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="rounded-xl bg-white border border-slate-100 p-3 shadow-sm">
                                 <div class="text-[10px] font-semibold text-slate-500 mb-2">Records by Month</div>
-                                <div class="flex items-end gap-1 h-12">
-                                    <div class="flex-1 bg-emerald-200 rounded-sm" style="height: 40%;"></div>
-                                    <div class="flex-1 bg-emerald-300 rounded-sm" style="height: 65%;"></div>
-                                    <div class="flex-1 bg-emerald-400 rounded-sm" style="height: 50%;"></div>
-                                    <div class="flex-1 bg-emerald-500 rounded-sm" style="height: 80%;"></div>
-                                    <div class="flex-1 bg-emerald-600 rounded-sm" style="height: 95%;"></div>
-                                    <div class="flex-1 bg-emerald-400 rounded-sm" style="height: 60%;"></div>
+                                <div class="flex items-end gap-1.5 h-12">
+                                    <div class="flex-1 rounded-t-sm bg-emerald-100" style="height: 30%;"></div>
+                                    <div class="flex-1 rounded-t-sm bg-emerald-200" style="height: 45%;"></div>
+                                    <div class="flex-1 rounded-t-sm bg-emerald-300" style="height: 35%;"></div>
+                                    <div class="flex-1 rounded-t-sm bg-emerald-400" style="height: 65%;"></div>
+                                    <div class="flex-1 rounded-t-sm bg-emerald-500" style="height: 80%;"></div>
+                                    <div class="flex-1 rounded-t-sm bg-emerald-400" style="height: 55%;"></div>
+                                    <div class="flex-1 rounded-t-sm bg-emerald-300" style="height: 40%;"></div>
                                 </div>
                             </div>
-                            <div class="rounded-xl bg-slate-50 border border-slate-100 p-3 flex flex-col justify-center">
-                                <div class="text-[10px] font-semibold text-slate-500 mb-1">Available Plots</div>
-                                <div class="flex items-center gap-2">
-                                    <div class="text-xl font-bold text-emerald-600">86</div>
-                                    <div class="text-[10px] text-emerald-500 font-semibold flex items-center gap-0.5"><i data-lucide="trending-up" class="w-3 h-3"></i> +12%</div>
-                                </div>
-                                <div class="mt-1 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                                    <div class="h-full bg-emerald-500 rounded-full" style="width: 72%;"></div>
+                            <div class="rounded-xl bg-white border border-slate-100 p-3 shadow-sm flex flex-col justify-between">
+                                <div class="text-[10px] font-semibold text-slate-500">Availability</div>
+                                <div class="flex items-end justify-between gap-2">
+                                    <div>
+                                        <div class="text-xl font-bold text-emerald-600"><?php echo $available_count; ?></div>
+                                        <div class="text-[10px] text-slate-500">plots open</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-[10px] font-semibold text-slate-600"><?php echo $percentage; ?>%</div>
+                                        <div class="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
+                                            <div class="h-full bg-emerald-500 rounded-full" style="width: <?php echo $percentage; ?>%"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- AI row -->
-                        <div class="mt-3 flex items-center gap-3 p-3 rounded-xl bg-violet-50 border border-violet-100">
-                            <div class="w-8 h-8 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center"><i data-lucide="sparkles" class="w-4 h-4"></i></div>
-                            <div class="flex-1">
+
+                        <!-- AI assistant preview -->
+                        <div class="rounded-xl bg-gradient-to-r from-violet-50 to-white border border-violet-100 p-3 flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center flex-shrink-0"><i data-lucide="bot" class="w-4 h-4"></i></div>
+                            <div class="flex-1 min-w-0">
                                 <div class="text-xs font-semibold text-slate-800">AI Assistant</div>
-                                <div class="text-[11px] text-slate-500">"How many records in Barangay Matinao?"</div>
+                                <div class="text-[11px] text-slate-500 truncate">Ask anything about plots, records, or directions...</div>
                             </div>
-                            <span class="text-[10px] font-semibold text-violet-600 bg-violet-100 px-2 py-0.5 rounded-full">Groq</span>
+                            <span class="px-2 py-1 rounded-full bg-white border border-violet-100 text-[10px] font-semibold text-violet-600 flex-shrink-0">Groq</span>
                         </div>
                     </div>
                 </div>
@@ -381,7 +420,7 @@
                             <div class="flex-1">
                                 <div class="flex items-center justify-between mb-1">
                                     <h3 class="text-base font-bold text-slate-900">Visitor Portal</h3>
-                                    <a href="login.php?role=visitor" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">Sign in <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
+                                    <a href="login.php" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">Sign in <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
                                 </div>
                                 <p class="text-sm text-slate-500 leading-relaxed">Search burial records, explore the interactive cemetery map, reserve plots, and chat with the AI assistant.</p>
                             </div>
@@ -392,7 +431,7 @@
                             <div class="flex-1">
                                 <div class="flex items-center justify-between mb-1">
                                     <h3 class="text-base font-bold text-slate-900">Admin Panel</h3>
-                                    <a href="login.php?role=admin" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">Sign in <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
+                                    <a href="login.php" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">Sign in <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
                                 </div>
                                 <p class="text-sm text-slate-500 leading-relaxed">Manage burial records, approve reservations, view analytics, configure settings, and generate reports.</p>
                             </div>
@@ -458,7 +497,7 @@
                 <a href="visitor/register.php" class="inline-flex items-center gap-2 rounded-xl bg-white text-emerald-700 hover:bg-emerald-50 text-sm font-semibold px-6 py-3.5 transition shadow-lg">
                     <i data-lucide="user-plus" class="w-4 h-4"></i> Create Visitor Account
                 </a>
-                <a href="login.php?role=admin" class="inline-flex items-center gap-2 rounded-xl bg-emerald-700/40 hover:bg-emerald-700/60 border border-white/30 text-white text-sm font-semibold px-6 py-3.5 transition backdrop-blur">
+                <a href="login.php" class="inline-flex items-center gap-2 rounded-xl bg-emerald-700/40 hover:bg-emerald-700/60 border border-white/30 text-white text-sm font-semibold px-6 py-3.5 transition backdrop-blur">
                     <i data-lucide="shield" class="w-4 h-4"></i> Admin Sign In
                 </a>
             </div>
@@ -488,8 +527,8 @@
                 <div>
                     <h4 class="text-sm font-semibold text-white mb-4">Quick Links</h4>
                     <ul class="space-y-2.5 text-sm">
-                        <li><a href="login.php?role=visitor" class="text-slate-400 hover:text-emerald-400 transition flex items-center gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i> Visitor Portal</a></li>
-                        <li><a href="login.php?role=admin" class="text-slate-400 hover:text-emerald-400 transition flex items-center gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i> Admin Login</a></li>
+                        <li><a href="login.php" class="text-slate-400 hover:text-emerald-400 transition flex items-center gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i> Visitor Portal</a></li>
+                        <li><a href="login.php" class="text-slate-400 hover:text-emerald-400 transition flex items-center gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i> Admin Login</a></li>
                         <li><a href="visitor/register.php" class="text-slate-400 hover:text-emerald-400 transition flex items-center gap-1.5"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i> Register Account</a></li>
                     </ul>
                 </div>
@@ -562,6 +601,61 @@
                     }
                 });
             });
+
+            // Initialize hero preview map
+            if (typeof L !== 'undefined') {
+                const heroMap = L.map('heroMap', {
+                    center: [6.18344118743717, 125.08457146469357],
+                    zoom: 17,
+                    minZoom: 15,
+                    maxZoom: 20,
+                    zoomControl: false,
+                    attributionControl: false,
+                    dragging: false,
+                    scrollWheelZoom: false,
+                    doubleClickZoom: false,
+                    touchZoom: false,
+                    boxZoom: false,
+                    keyboard: false
+                });
+
+                L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                    maxZoom: 20,
+                    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+                }).addTo(heroMap);
+
+                // Sample plot markers
+                const samplePlots = [
+                    { lat: 6.1832, lng: 125.0843, status: 'available' },
+                    { lat: 6.1836, lng: 125.0848, status: 'available' },
+                    { lat: 6.1831, lng: 125.0850, status: 'reserved' },
+                    { lat: 6.1838, lng: 125.0842, status: 'available' },
+                    { lat: 6.1835, lng: 125.0846, status: 'occupied' },
+                    { lat: 6.1833, lng: 125.0849, status: 'available' },
+                    { lat: 6.1837, lng: 125.0851, status: 'reserved' },
+                    { lat: 6.1834, lng: 125.0844, status: 'available' }
+                ];
+
+                const colors = {
+                    available: '#10b981',
+                    reserved: '#f59e0b',
+                    occupied: '#94a3b8'
+                };
+
+                samplePlots.forEach(p => {
+                    L.circleMarker([p.lat, p.lng], {
+                        radius: 6,
+                        fillColor: colors[p.status],
+                        color: '#ffffff',
+                        weight: 2,
+                        opacity: 1,
+                        fillOpacity: 0.9
+                    }).addTo(heroMap);
+                });
+
+                // Disable interactions after load
+                setTimeout(() => { heroMap.invalidateSize(); }, 200);
+            }
         });
     </script>
 </body>

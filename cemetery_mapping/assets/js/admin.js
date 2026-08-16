@@ -293,7 +293,7 @@ function initSessionMonitor() {
         sessionTimeout = setTimeout(() => {
             themeUtils.showAlert('Session expired. Redirecting to login...', 'error');
             setTimeout(() => {
-                window.location.href = '../login.php?role=admin&timeout=1';
+                window.location.href = '../login.php?timeout=1';
             }, 2000);
         }, TIMEOUT);
     }

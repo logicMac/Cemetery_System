@@ -84,32 +84,36 @@ try {
 
 /* Hero banner */
 .dv2-hero {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 28px;
-    align-items: center;
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     border-radius: 20px;
-    padding: 34px 40px;
+    padding: 40px 40px;
     color: #fff;
     margin-bottom: 28px;
     box-shadow: 0 12px 40px rgba(16,185,129,0.22);
     position: relative;
     overflow: hidden;
+    background-image: url('../assets/images/cemetery-banner.jpg');
+    background-size: cover;
+    background-position: center;
+    text-align: center;
 }
 
-.dv2-hero::before {
-    content: '';
+.dv2-hero-overlay {
     position: absolute;
-    top: -40%;
-    right: -10%;
-    width: 360px;
-    height: 360px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 50%;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0.5) 100%);
+    z-index: 0;
 }
 
-.dv2-hero-left { position: relative; z-index: 1; }
+.dv2-hero-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.dv2-hero-left { position: relative; z-index: 2; }
 
 .dv2-hero-tag {
     display: inline-flex;
@@ -123,6 +127,7 @@ try {
     font-weight: 600;
     margin-bottom: 14px;
     backdrop-filter: blur(6px);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.25);
 }
 
 .dv2-hero h1 {
@@ -130,12 +135,14 @@ try {
     font-weight: 800;
     margin: 0 0 6px;
     color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 .dv2-hero-date {
-    opacity: 0.85;
+    opacity: 0.9;
     font-size: 0.95rem;
     margin-bottom: 18px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.25);
 }
 
 .dv2-hero-badges {
@@ -143,6 +150,7 @@ try {
     gap: 10px;
     flex-wrap: wrap;
     margin-bottom: 20px;
+    justify-content: center;
 }
 
 .dv2-hero-badges span {
@@ -155,6 +163,7 @@ try {
     border-radius: 999px;
     font-size: 0.82rem;
     font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.25);
 }
 
 .dv2-hero-badges svg {
@@ -166,6 +175,7 @@ try {
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .dv2-btn {
@@ -202,7 +212,7 @@ try {
 
 .dv2-hero-right {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -452,6 +462,31 @@ try {
 
 <div class="dv2">
     <div class="dv2-hero">
+        <!-- Dark overlay on top of photo for text readability -->
+        <div class="dv2-hero-overlay"></div>
+        <!-- Decorative SVG background -->
+        <svg class="dv2-hero-svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Soft circles -->
+            <circle cx="680" cy="80" r="120" fill="rgba(255,255,255,0.06)"/>
+            <circle cx="720" cy="320" r="80" fill="rgba(255,255,255,0.05)"/>
+            <circle cx="120" cy="350" r="60" fill="rgba(255,255,255,0.04)"/>
+            <!-- Dot grid pattern (top-right) -->
+            <g fill="rgba(255,255,255,0.08)">
+                <circle cx="560" cy="40" r="2"/><circle cx="590" cy="40" r="2"/><circle cx="620" cy="40" r="2"/><circle cx="650" cy="40" r="2"/><circle cx="680" cy="40" r="2"/><circle cx="710" cy="40" r="2"/><circle cx="740" cy="40" r="2"/><circle cx="770" cy="40" r="2"/>
+                <circle cx="560" cy="70" r="2"/><circle cx="590" cy="70" r="2"/><circle cx="620" cy="70" r="2"/><circle cx="650" cy="70" r="2"/><circle cx="680" cy="70" r="2"/><circle cx="710" cy="70" r="2"/><circle cx="740" cy="70" r="2"/><circle cx="770" cy="70" r="2"/>
+                <circle cx="560" cy="100" r="2"/><circle cx="590" cy="100" r="2"/><circle cx="620" cy="100" r="2"/><circle cx="650" cy="100" r="2"/><circle cx="680" cy="100" r="2"/><circle cx="710" cy="100" r="2"/><circle cx="740" cy="100" r="2"/><circle cx="770" cy="100" r="2"/>
+                <circle cx="560" cy="130" r="2"/><circle cx="590" cy="130" r="2"/><circle cx="620" cy="130" r="2"/><circle cx="650" cy="130" r="2"/><circle cx="680" cy="130" r="2"/><circle cx="710" cy="130" r="2"/><circle cx="740" cy="130" r="2"/><circle cx="770" cy="130" r="2"/>
+            </g>
+            <!-- Wave paths (bottom) -->
+            <path d="M0,340 Q150,310 300,340 T600,340 T900,340 L900,400 L0,400 Z" fill="rgba(255,255,255,0.05)"/>
+            <path d="M0,360 Q150,335 300,360 T600,360 T900,360 L900,400 L0,400 Z" fill="rgba(255,255,255,0.04)"/>
+            <!-- Decorative lines (left side) -->
+            <g stroke="rgba(255,255,255,0.06)" stroke-width="1">
+                <line x1="0" y1="60" x2="180" y2="60"/>
+                <line x1="0" y1="80" x2="120" y2="80"/>
+                <line x1="0" y1="100" x2="150" y2="100"/>
+            </g>
+        </svg>
         <div class="dv2-hero-left">
             <div class="dv2-hero-tag">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -482,11 +517,6 @@ try {
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     Reports
                 </a>
-            </div>
-        </div>
-        <div class="dv2-hero-right">
-            <div class="dv2-hero-avatar">
-                <?php echo strtoupper(substr($admin_username, 0, 1)); ?>
             </div>
         </div>
     </div>

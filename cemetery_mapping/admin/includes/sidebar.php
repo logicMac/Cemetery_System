@@ -119,16 +119,16 @@
 
         <main class="admin-main">
             <?php require_once 'topbar.php'; ?>
-            
+
             <script>
             // Mobile Menu Toggle Function
             function toggleMobileMenu() {
                 const sidebar = document.getElementById('adminSidebar');
                 const overlay = document.getElementById('sidebarOverlay');
-                
+
                 sidebar.classList.toggle('open');
                 overlay.classList.toggle('active');
-                
+
                 // Prevent body scroll when menu is open
                 if (sidebar.classList.contains('open')) {
                     document.body.style.overflow = 'hidden';
@@ -136,12 +136,12 @@
                     document.body.style.overflow = '';
                 }
             }
-            
+
             // Sidebar collapse/expand on desktop
             function toggleSidebarCollapse() {
                 const layout = document.querySelector('.admin-layout');
                 layout.classList.toggle('collapsed');
-                
+
                 // Re-calculate open menus after transition so they don't get cut off
                 window.setTimeout(() => {
                     document.querySelectorAll('.sidebar-group.is-open .sidebar-group-menu').forEach(menu => {
@@ -149,88 +149,113 @@
                     });
                 }, 360);
             }
-            
-            // Sidebar Accordion
-            document.addEventListener('DOMContentLoaded', function() {
+
+            // Initialize Lucide icons first, then set up accordion heights
+            function initLucideIcons() {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                    return true;
+                }
+                return false;
+            }
+
+            // Sidebar Accordion — runs immediately (sidebar DOM is already parsed)
+            function initSidebarAccordion() {
                 const toggles = document.querySelectorAll('.sidebar-group-toggle');
-                
+
                 toggles.forEach(toggle => {
+                    // Skip if already initialized (prevents double-binding on reloads)
+                    if (toggle.dataset.initialized === 'true') return;
+
                     const group = toggle.closest('.sidebar-group');
-                    const menu = group.querySelector('.sidebar-group-menu');
-                    
-                    // Set initial height
-                    if (group.classList.contains('is-open')) {
-                        menu.style.maxHeight = menu.scrollHeight + 'px';
-                        menu.style.opacity = '1';
-                    } else {
-                        menu.style.maxHeight = '0';
-                        menu.style.opacity = '0';
-                    }
-                    
+
                     toggle.addEventListener('click', function() {
                         const isOpen = group.classList.contains('is-open');
-                        
-                        // Optional: close others (accordion behavior)
-                        // If you want multiple open, remove this block
+
+                        // Close others (accordion behavior)
                         document.querySelectorAll('.sidebar-group.is-open').forEach(openGroup => {
                             if (openGroup !== group) {
                                 openGroup.classList.remove('is-open');
-                                const openMenu = openGroup.querySelector('.sidebar-group-menu');
-                                openMenu.style.maxHeight = '0';
-                                openMenu.style.opacity = '0';
                                 openGroup.querySelector('.sidebar-group-toggle').setAttribute('aria-expanded', 'false');
                             }
                         });
-                        
+
                         if (isOpen) {
                             group.classList.remove('is-open');
-                            menu.style.maxHeight = '0';
-                            menu.style.opacity = '0';
                             toggle.setAttribute('aria-expanded', 'false');
                         } else {
                             group.classList.add('is-open');
-                            menu.style.maxHeight = menu.scrollHeight + 'px';
-                            menu.style.opacity = '1';
                             toggle.setAttribute('aria-expanded', 'true');
                         }
                     });
+
+                    toggle.dataset.initialized = 'true';
                 });
-                
+
                 // Close menu when clicking on a link
                 const sidebarLinks = document.querySelectorAll('.sidebar-group-menu a');
                 sidebarLinks.forEach(link => {
+                    if (link.dataset.initialized === 'true') return;
                     link.addEventListener('click', function() {
                         if (window.innerWidth <= 1024) {
                             toggleMobileMenu();
                         }
                     });
+                    link.dataset.initialized = 'true';
                 });
-                
-                // Show mobile hamburger on small screens
-                function updateMenuToggle() {
-                    const toggleBtn = document.getElementById('mobileMenuToggle');
-                    const collapseBtn = document.getElementById('sidebarCollapse');
-                    if (window.innerWidth <= 1024) {
-                        toggleBtn.style.display = 'flex';
-                        if (collapseBtn) collapseBtn.style.display = 'none';
-                        // Remove collapsed on mobile so it takes full width
-                        document.querySelector('.admin-layout').classList.remove('collapsed');
-                    } else {
-                        toggleBtn.style.display = 'none';
-                        if (collapseBtn) collapseBtn.style.display = 'flex';
-                        document.getElementById('adminSidebar').classList.remove('open');
-                        document.getElementById('sidebarOverlay').classList.remove('active');
-                        document.body.style.overflow = '';
+            }
+
+            // Recalculate open menu heights after icons render (no longer needed with CSS approach)
+            function recalcOpenMenuHeights() {}
+
+            // Mobile/desktop toggle visibility
+            function updateMenuToggle() {
+                const toggleBtn = document.getElementById('mobileMenuToggle');
+                const collapseBtn = document.getElementById('sidebarCollapse');
+                if (window.innerWidth <= 1024) {
+                    if (toggleBtn) toggleBtn.style.display = 'flex';
+                    if (collapseBtn) collapseBtn.style.display = 'none';
+                    document.querySelector('.admin-layout').classList.remove('collapsed');
+                } else {
+                    if (toggleBtn) toggleBtn.style.display = 'none';
+                    if (collapseBtn) collapseBtn.style.display = 'flex';
+                    document.getElementById('adminSidebar').classList.remove('open');
+                    document.getElementById('sidebarOverlay').classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+
+            // --- Initialize immediately (sidebar DOM is already available) ---
+            initSidebarAccordion();
+            updateMenuToggle();
+            window.addEventListener('resize', updateMenuToggle);
+
+            // --- Handle Lucide icons (may not be loaded yet on first visit) ---
+            if (!initLucideIcons()) {
+                // Lucide not loaded yet — poll until it's ready, then render icons and fix heights
+                var lucideAttempts = 0;
+                var lucidePoll = setInterval(function() {
+                    lucideAttempts++;
+                    if (initLucideIcons()) {
+                        clearInterval(lucidePoll);
+                        // Icons are now rendered — recalculate heights since icons changed layout
+                        recalcOpenMenuHeights();
+                    } else if (lucideAttempts > 50) {
+                        clearInterval(lucidePoll); // give up after ~5s
                     }
+                }, 100);
+            } else {
+                // Lucide was already loaded — icons rendered, recalc heights to be safe
+                recalcOpenMenuHeights();
+            }
+
+            // --- Also run on DOMContentLoaded as a safety net ---
+            document.addEventListener('DOMContentLoaded', function() {
+                initSidebarAccordion();
+                if (initLucideIcons()) {
+                    recalcOpenMenuHeights();
                 }
-                
                 updateMenuToggle();
-                window.addEventListener('resize', updateMenuToggle);
-                
-                // Initialize Lucide icons
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
             });
             </script>
 

@@ -4,7 +4,7 @@ require_once '../config/database.php';
 
 // Check if admin is logged in
 if (!isset($_SESSION['admin_id'])) {
-    header('Location: ../login.php?role=admin');
+    header('Location: ../login.php');
     exit;
 }
 

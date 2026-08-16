@@ -58,16 +58,42 @@ try {
     $stmt = $pdo->prepare("SELECT id, plot_number, has_grid, grid_rows, grid_cols FROM available_plots WHERE id = ?");
     $stmt->execute([$plot_id]);
     $plot = $stmt->fetch();
-    
+
     if (!$plot) {
         echo json_encode(['success' => false, 'message' => 'Plot not found or no longer available']);
         exit;
     }
-    
-    // If compartment is specified, validate it exists for plots with grids
+
+    // For non-grid plots, check if anyone has already reserved this plot
+    if ($plot['has_grid'] == 0 && $compartment_id === null) {
+        $stmt = $pdo->prepare("
+            SELECT id, status FROM plot_reservations
+            WHERE plot_id = ? AND compartment_id IS NULL AND status IN ('pending', 'approved')
+            ORDER BY reservation_date DESC LIMIT 1
+        ");
+        $stmt->execute([$plot_id]);
+        $existingPlotRes = $stmt->fetch();
+        if ($existingPlotRes) {
+            $statusText = ucfirst($existingPlotRes['status']);
+            echo json_encode(['success' => false, 'message' => "This plot is already {$statusText}. Please choose another plot."]);
+            exit;
+        }
+    }
+
+    // For grid plots, check if the specific compartment is already reserved
     if ($compartment_id !== null && $plot['has_grid'] == 1) {
-        // For now, we'll just store the compartment_id as a reference
-        // You can add validation logic here if you have a compartments table
+        $stmt = $pdo->prepare("
+            SELECT id, status FROM plot_reservations
+            WHERE plot_id = ? AND compartment_id = ? AND status IN ('pending', 'approved')
+            ORDER BY reservation_date DESC LIMIT 1
+        ");
+        $stmt->execute([$plot_id, $compartment_id]);
+        $existingCompRes = $stmt->fetch();
+        if ($existingCompRes) {
+            $statusText = ucfirst($existingCompRes['status']);
+            echo json_encode(['success' => false, 'message' => "Compartment #{$compartment_id} is already {$statusText}. Please choose another compartment."]);
+            exit;
+        }
     }
     
     // Check if visitor already has pending/approved reservation for this plot AND compartment

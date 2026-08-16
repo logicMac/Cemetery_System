@@ -173,7 +173,7 @@ try {
         </div>
         
         <div>
-            <a href="login.php?role=admin" class="btn">Go to Admin Login</a>
+            <a href="login.php" class="btn">Go to Admin Login</a>
             <a href="index.php" class="btn btn-secondary">Back to Home</a>
         </div>
         

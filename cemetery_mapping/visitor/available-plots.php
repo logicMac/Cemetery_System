@@ -1615,7 +1615,7 @@ require_once 'includes/header.php';
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
         </button>
-        <input type="text" id="searchInput" placeholder="Search by name, plot, or family...">
+        <input type="text" id="searchInput" placeholder="Search by plot number...">
     </div>
     
     <!-- Success Modal -->
@@ -1900,20 +1900,16 @@ require_once 'includes/header.php';
     <div class="map-legend">
         <h4 style="margin-bottom: 12px; font-size: 0.9rem;">Legend</h4>
         <div class="legend-item">
-            <div class="legend-color" style="background: #5a87a8;"></div>
-            <span style="font-size: 0.85rem;">Standard Burial</span>    
-        </div>
-        <div class="legend-item">
-            <div class="legend-color" style="background: #c9a86c;"></div>
-            <span style="font-size: 0.85rem;">Premium/Fenced</span>
-        </div>
-        <div class="legend-item">
             <div class="legend-color" style="background: #5a9b6f;"></div>
             <span style="font-size: 0.85rem;">Available Plot</span>
         </div>
         <div class="legend-item">
+            <div class="legend-color" style="background: #c9a86c;"></div>
+            <span style="font-size: 0.85rem;">Pending Reservation</span>
+        </div>
+        <div class="legend-item">
             <div class="legend-color" style="background: #b55a5a;"></div>
-            <span style="font-size: 0.85rem;">Search Result</span>
+            <span style="font-size: 0.85rem;">Reserved Plot</span>
         </div>
     </div>
     
@@ -1927,7 +1923,6 @@ require_once 'includes/header.php';
         <span id="bearingDisplay" style="font-size: 0.7rem; color: #64748b; padding: 0 6px; white-space: nowrap;">0°</span>
     </div>
     
-    <!-- AI Assistant Toggle -->
     <button id="chatToggle" onclick="toggleChat()" aria-label="Open AI Assistant">
         <img src="../assets/images/ai-assistant-logo.svg" alt="AI Assistant">
     </button>
@@ -1987,6 +1982,7 @@ require_once 'includes/header.php';
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     
     <!-- Visitor map functionality -->
+    <script>AVAILABLE_PLOTS_ONLY = true;</script>
     <script src="../assets/js/visitor.js?v=8"></script>
     </main>
     </div>

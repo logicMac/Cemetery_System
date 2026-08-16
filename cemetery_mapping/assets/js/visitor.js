@@ -4,6 +4,7 @@
  */
 
 // Global variables
+let AVAILABLE_PLOTS_ONLY = false;
 let map;
 let markers = {
     burials: L.markerClusterGroup(),
@@ -41,11 +42,22 @@ function initMap() {
         maxZoom: 20,
         rotate: true,
         touchRotate: true,
-        bearing: 0
+        bearing: 315
     });
-    
-    console.log('Map created, checking for rotation support...');
-    console.log('Map.setBearing available:', typeof map.setBearing === 'function');
+
+    // Fit the cemetery bounds on load so the whole area is visible
+    // regardless of screen size (with padding around the edges)
+    setTimeout(() => {
+        map.fitBounds(CEMETERY_BOUNDS, {
+            padding: [50, 50],
+            maxZoom: 19,
+            animate: false
+        });
+        if (typeof map.setBearing === 'function') {
+            map.setBearing(315);
+            updateBearingDisplay();
+        }
+    }, 100);
     
     // Add rotation control explicitly
     if (typeof L.Control !== 'undefined' && typeof L.Control.Rotate !== 'undefined') {
@@ -99,7 +111,7 @@ function initMap() {
         "OpenStreetMap": osm
     };
     
-    L.control.layers(baseLayers).addTo(map);
+    L.control.layers(baseLayers, null, { collapsed: true }).addTo(map);
     
     // Fullscreen control (optional - only add if available)
     if (L.Control.Fullscreen) {
@@ -119,7 +131,9 @@ function initMap() {
     map.addLayer(markers.available);
     
     // Load data
-    loadBurialRecords();
+    if (!AVAILABLE_PLOTS_ONLY) {
+        loadBurialRecords();
+    }
     loadAvailablePlots();
 }
 
@@ -195,9 +209,9 @@ function displayBurialMarkers(records) {
 // Create burial popup content with enhanced details and photo
 function createBurialPopup(record) {
     const photoHtml = record.photo 
-        ? `<img src="../uploads/photos/${record.photo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" />`
-        : `<div style="width: 100%; height: 200px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center;">
-            <svg style="width: 80px; height: 80px; color: rgba(255,255,255,0.5);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        ? `<img src="../uploads/photos/${record.photo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />`
+        : `<div style="width: 100%; height: 200px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center;">
+            <svg style="width: 80px; height: 80px; color: rgba(255,255,255,0.7);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
         </div>`;
@@ -213,29 +227,29 @@ function createBurialPopup(record) {
         <div style="min-width: 300px; max-width: 350px;">
             ${photoHtml}
             <div style="text-align: center; margin-bottom: 16px;">
-                <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; font-weight: 700;">${record.decedent_name}</h3>
-                <p style="margin: 0; font-size: 0.9rem; color: rgba(255,255,255,0.6);">${birthDate} - ${deathDate}</p>
-                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: rgba(255,255,255,0.5);">Lived ${age} years</p>
+                <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; font-weight: 700; color: #0f172a;">${record.decedent_name}</h3>
+                <p style="margin: 0; font-size: 0.9rem; color: #475569;">${birthDate} - ${deathDate}</p>
+                <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">Lived ${age} years</p>
             </div>
             
-            <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+            <div style="background: #f8fafc; border-radius: 10px; padding: 12px; margin-bottom: 12px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.85rem;">
                     <div>
-                        <p style="margin: 0; color: rgba(255,255,255,0.5); font-size: 0.75rem;">PLOT NUMBER</p>
-                        <p style="margin: 2px 0 0 0; font-weight: 600;">${record.plot_number || 'N/A'}</p>
+                        <p style="margin: 0; color: #64748b; font-size: 0.75rem;">PLOT NUMBER</p>
+                        <p style="margin: 2px 0 0 0; font-weight: 600; color: #0f172a;">${record.plot_number || 'N/A'}</p>
                     </div>
                     <div>
-                        <p style="margin: 0; color: rgba(255,255,255,0.5); font-size: 0.75rem;">BARANGAY</p>
-                        <p style="margin: 2px 0 0 0; font-weight: 600;">${record.barangay || 'N/A'}</p>
+                        <p style="margin: 0; color: #64748b; font-size: 0.75rem;">BARANGAY</p>
+                        <p style="margin: 2px 0 0 0; font-weight: 600; color: #0f172a;">${record.barangay || 'N/A'}</p>
                     </div>
                     <div style="grid-column: 1 / -1;">
-                        <p style="margin: 0; color: rgba(255,255,255,0.5); font-size: 0.75rem;">FAMILY NAME</p>
-                        <p style="margin: 2px 0 0 0; font-weight: 600;">${record.family_name || 'N/A'}</p>
+                        <p style="margin: 0; color: #64748b; font-size: 0.75rem;">FAMILY NAME</p>
+                        <p style="margin: 2px 0 0 0; font-weight: 600; color: #0f172a;">${record.family_name || 'N/A'}</p>
                     </div>
                     <div style="grid-column: 1 / -1;">
-                        <p style="margin: 0; color: rgba(255,255,255,0.5); font-size: 0.75rem;">TYPE</p>
+                        <p style="margin: 0; color: #64748b; font-size: 0.75rem;">TYPE</p>
                         <p style="margin: 2px 0 0 0;">
-                            <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; ${record.is_fenced == 1 ? 'background: linear-gradient(135deg, #c9a86c 0%, #a68b52 100%); color: #000;' : 'background: linear-gradient(135deg, #5a87a8 0%, #3e6a9c 100%); color: white;'}">
+                            <span style="display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; ${record.is_fenced == 1 ? 'background: #fffbeb; color: #b45309; border: 1px solid #fde68a;' : 'background: #f0fdf4; color: #047857; border: 1px solid #6ee7b7;'}">
                                 ${record.is_fenced == 1 ? 'Premium / Fenced' : 'Standard'}
                             </span>
                         </p>
@@ -244,13 +258,15 @@ function createBurialPopup(record) {
             </div>
             
             ${record.memory_space ? `
-                <div style="background: rgba(0, 230, 118, 0.1); border-left: 3px solid #00c853; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
-                    <p style="margin: 0; font-size: 0.75rem; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px;">Memory</p>
-                    <p style="margin: 6px 0 0 0; font-size: 0.9rem; font-style: italic; line-height: 1.5;">${record.memory_space}</p>
+                <div style="background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+                    <p style="margin: 0; font-size: 0.75rem; color: #047857; text-transform: uppercase; letter-spacing: 0.5px;">Memory</p>
+                    <p style="margin: 6px 0 0 0; font-size: 0.9rem; font-style: italic; line-height: 1.5; color: #0f172a;">${record.memory_space}</p>
                 </div>
             ` : ''}
             
-            <button onclick="window.navigateToLocation(${record.latitude}, ${record.longitude}, '${escapedName}')" class="btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(0, 230, 118, 0.4); cursor: pointer; border: none; border-radius: 12px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); color: white; font-weight: 600; transition: all 0.3s ease;">
+            <button onclick="window.navigateToLocation(${record.latitude}, ${record.longitude}, '${escapedName}')" class="btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none; border-radius: 12px; background: #10b981; color: white; font-weight: 600; transition: all 0.3s ease;"
+                onmouseover="this.style.backgroundColor='#059669';"
+                onmouseout="this.style.backgroundColor='#10b981';">
                 <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
                 </svg>
@@ -282,13 +298,16 @@ async function displayAvailablePlots(plots) {
     
     for (const plot of plots) {
         const resStatus = plot.reservation_status;
+        const hasGrid = plot.has_grid == 1;
         let markerColor = '#5a9b6f';
         let markerLabel = 'Available';
-        
-        if (resStatus === 'approved') {
+
+        // Only show as reserved/pending for non-grid plots
+        // Grid plots can still have available compartments
+        if (!hasGrid && resStatus === 'approved') {
             markerColor = '#b55a5a';
             markerLabel = 'Reserved';
-        } else if (resStatus === 'pending') {
+        } else if (!hasGrid && resStatus === 'pending') {
             markerColor = '#c9a86c';
             markerLabel = 'Pending';
         }
@@ -320,39 +339,53 @@ function createPlotPopup(plot) {
         : '';
     
     const resStatus = plot.reservation_status;
+    const hasGrid = plot.has_grid == 1;
     let statusBadge = '';
-    let headerColor = '#5a9b6f';
+    let headerIconColor = '#10b981';
+    let headerIconBg = '#f0fdf4';
     let headerText = 'Available Plot';
     let headerSub = 'Ready for reservation';
     let reserveBtnHtml = '';
-    
-    if (resStatus === 'approved') {
-        headerColor = '#b55a5a';
+
+    // For grid plots, always allow reservation (user picks a compartment in the modal)
+    // For non-grid plots, block if already pending/approved
+    const isBlocked = !hasGrid && (resStatus === 'approved' || resStatus === 'pending');
+
+    if (isBlocked && resStatus === 'approved') {
+        headerIconColor = '#b91c1c';
+        headerIconBg = '#fef2f2';
         headerText = 'Reserved Plot';
         headerSub = 'Already reserved';
-        statusBadge = `<span style="background: rgba(181, 90, 90, 0.2); color: #b55a5a; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(181, 90, 90, 0.3);">RESERVED</span>`;
-        reserveBtnHtml = `<div style="flex: 1; padding: 10px; background: rgba(181, 90, 90, 0.1); color: rgba(181, 90, 90, 0.5); border: 1px solid rgba(181, 90, 90, 0.2); border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: not-allowed; opacity: 0.6;">
+        statusBadge = `<span style="background: #fef2f2; color: #b91c1c; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid #fecaca;">RESERVED</span>`;
+        reserveBtnHtml = `<div style="flex: 1; padding: 10px; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: not-allowed; opacity: 0.9;">
             <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
             Reserved
         </div>`;
-    } else if (resStatus === 'pending') {
-        headerColor = '#c9a86c';
+    } else if (isBlocked && resStatus === 'pending') {
+        headerIconColor = '#b45309';
+        headerIconBg = '#fffbeb';
         headerText = 'Pending Reservation';
         headerSub = 'Awaiting approval';
-        statusBadge = `<span style="background: rgba(201, 168, 108, 0.2); color: #c9a86c; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid rgba(201, 168, 108, 0.3);">PENDING</span>`;
-        reserveBtnHtml = `<div style="flex: 1; padding: 10px; background: rgba(201, 168, 108, 0.1); color: rgba(201, 168, 108, 0.5); border: 1px solid rgba(201, 168, 108, 0.2); border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: not-allowed; opacity: 0.6;">
+        statusBadge = `<span style="background: #fffbeb; color: #b45309; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid #fde68a;">PENDING</span>`;
+        reserveBtnHtml = `<div style="flex: 1; padding: 10px; background: #fffbeb; color: #b45309; border: 1px solid #fde68a; border-radius: 8px; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: not-allowed; opacity: 0.9;">
             <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
             Pending Approval
         </div>`;
     } else {
-        reserveBtnHtml = `<button onclick="openReservationModal(${plot.id}, '${(plot.plot_number || '').replace(/'/g, "\\'")}');" 
-            style="flex: 1; padding: 10px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px;"
-            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(0, 230, 118, 0.4)';"
-            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+        // Show status badge for grid plots that have some reservations
+        if (hasGrid && resStatus === 'approved') {
+            statusBadge = `<span style="background: #fef2f2; color: #b91c1c; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid #fecaca;">SOME RESERVED</span>`;
+        } else if (hasGrid && resStatus === 'pending') {
+            statusBadge = `<span style="background: #fffbeb; color: #b45309; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: 1px solid #fde68a;">SOME PENDING</span>`;
+        }
+        reserveBtnHtml = `<button onclick="openReservationModal(${plot.id}, '${(plot.plot_number || '').replace(/'/g, "\\'")}');"
+            style="flex: 1; padding: 10px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 6px;"
+            onmouseover="this.style.backgroundColor='#059669';"
+            onmouseout="this.style.backgroundColor='#10b981';">
             <svg style="width: 16px; height: 16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
             </svg>
@@ -363,40 +396,40 @@ function createPlotPopup(plot) {
     return `
         <div style="min-width: 280px; padding: 8px;">
             ${photoHtml}
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <div style="width: 40px; height: 40px; background: linear-gradient(135deg, ${headerColor} 0%, ${headerColor}dd 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                    <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
+                <div style="width: 40px; height: 40px; background: ${headerIconBg}; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <svg style="width: 24px; height: 24px; color: ${headerIconColor};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                     </svg>
                 </div>
                 <div style="flex: 1;">
-                    <h3 style="margin: 0; font-size: 1.1rem; color: ${headerColor};">${headerText}</h3>
-                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: var(--zinc-400);">${headerSub}</p>
+                    <h3 style="margin: 0; font-size: 1.1rem; color: #0f172a;">${headerText}</h3>
+                    <p style="margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b;">${headerSub}</p>
                 </div>
                 ${statusBadge}
             </div>
             
-            <div style="margin-bottom: 12px;">
+            <div style="background: #f8fafc; border-radius: 8px; padding: 10px; margin-bottom: 12px; color: #0f172a;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                    <svg style="width: 16px; height: 16px; color: var(--zinc-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg style="width: 16px; height: 16px; color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
                     </svg>
-                    <strong style="font-size: 0.9rem;">Plot Number:</strong>
-                    <span>${plot.plot_number || 'N/A'}</span>
+                    <strong style="font-size: 0.9rem; color: #0f172a;">Plot Number:</strong>
+                    <span style="color: #475569;">${plot.plot_number || 'N/A'}</span>
                 </div>
                 ${plot.has_grid == 1 ? `
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <svg style="width: 16px; height: 16px; color: var(--zinc-400);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg style="width: 16px; height: 16px; color: #64748b;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
                         </svg>
-                        <strong style="font-size: 0.9rem;">Compartments:</strong>
-                        <span>${plot.grid_rows} × ${plot.grid_cols}</span>
+                        <strong style="font-size: 0.9rem; color: #0f172a;">Compartments:</strong>
+                        <span style="color: #475569;">${plot.grid_rows} × ${plot.grid_cols}</span>
                     </div>
                 ` : ''}
             </div>
             
             ${plot.notes ? `
-                <p style="margin: 8px 0 12px 0; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px; color: var(--zinc-400); font-size: 0.85rem; line-height: 1.4;">
+                <p style="margin: 8px 0 12px 0; padding: 10px; background: #f8fafc; border-radius: 6px; color: #475569; font-size: 0.85rem; line-height: 1.4;">
                     ${plot.notes}
                 </p>
             ` : ''}
@@ -404,9 +437,9 @@ function createPlotPopup(plot) {
             <div style="display: flex; gap: 8px;">
                 ${reserveBtnHtml}
                 <button onclick="navigateToLocation(${plot.latitude}, ${plot.longitude})" 
-                    style="padding: 10px 14px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;"
-                    onmouseover="this.style.background='rgba(255,255,255,0.1)';"
-                    onmouseout="this.style.background='rgba(255,255,255,0.05)';">
+                    style="padding: 10px 14px; background: #f0fdf4; color: #047857; border: 1px solid #6ee7b7; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;"
+                    onmouseover="this.style.background='#d1fae5';"
+                    onmouseout="this.style.background='#f0fdf4';">
                     <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
                     </svg>
@@ -544,6 +577,16 @@ async function performSearch() {
         themeUtils.showAlert('Please enter at least 2 characters', 'info');
         return;
     }
+
+    if (AVAILABLE_PLOTS_ONLY) {
+        const filtered = allPlots.filter(p =>
+            (p.plot_number || '').toLowerCase().includes(query.toLowerCase()) ||
+            (p.notes || '').toLowerCase().includes(query.toLowerCase())
+        );
+        displayAvailablePlotSearchResults(filtered);
+        document.getElementById('searchResultsPanel').classList.add('active');
+        return;
+    }
     
     try {
         const response = await fetch(`../api/search.php?q=${encodeURIComponent(query)}`);
@@ -558,6 +601,45 @@ async function performSearch() {
         console.error('Search error:', error);
         themeUtils.showAlert('Search failed', 'error');
     }
+}
+
+// Display available plot search results
+function displayAvailablePlotSearchResults(plots) {
+    const container = document.getElementById('searchResults');
+    const panel = document.getElementById('searchResultsPanel');
+
+    if (plots.length === 0) {
+        container.innerHTML = '<div class="glass-card"><p style="text-align: center; color: #94a3b8;">No available plots found</p></div>';
+        panel.classList.add('active');
+        return;
+    }
+
+    panel.classList.add('active');
+    container.innerHTML = plots.map(plot => {
+        let statusLabel = 'Available';
+        let statusColor = '#10b981';
+        if (plot.reservation_status === 'approved') { statusLabel = 'Reserved'; statusColor = '#b91c1c'; }
+        else if (plot.reservation_status === 'pending') { statusLabel = 'Pending'; statusColor = '#b45309'; }
+        return `
+            <div class="search-result-item" onclick="showAvailablePlotResult(${plot.latitude}, ${plot.longitude}, ${plot.id})" style="display: flex; align-items: center; cursor: pointer;">
+                <div style="width: 40px; height: 40px; background: ${statusColor}20; border-radius: 8px; margin-right: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <svg style="width: 20px; height: 20px; color: ${statusColor};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                    </svg>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                    <p style="margin: 0; font-weight: 600; color: #0f172a; font-size: 0.9rem;">Plot ${plot.plot_number || '#' + plot.id}</p>
+                    <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: ${statusColor};">${statusLabel}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Show an available plot search result on the map
+function showAvailablePlotResult(lat, lng, plotId) {
+    map.setView([lat, lng], 19);
+    document.getElementById('searchResultsPanel').classList.remove('active');
 }
 
 // Display search results with photos
@@ -982,15 +1064,15 @@ function handleChatKeyPress(event) {
 async function sendMessage() {
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
-    
+
     if (!message) return;
-    
+
     // Add user message
     addChatMessage(message, 'user');
     input.value = '';
-    
+
     // Show typing indicator
-    const typingId = addChatMessage('Thinking...', 'assistant');
+    const typingId = addTypingIndicator();
     
     try {
         const response = await fetch('../api/visitor_assistant.php', {
@@ -1029,38 +1111,61 @@ async function sendMessage() {
 function addChatMessage(text, sender) {
     const messagesContainer = document.getElementById('chatMessages');
     const messageId = 'msg-' + Date.now();
-    
+
     const messageDiv = document.createElement('div');
     messageDiv.id = messageId;
     messageDiv.className = `chat-message ${sender}`;
-    
-    // For assistant messages, add logo and create flex layout
+
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.textContent = text;
+
     if (sender === 'assistant') {
-        messageDiv.style.display = 'flex';
-        messageDiv.style.gap = '10px';
-        messageDiv.style.alignItems = 'start';
-        
         const logo = document.createElement('img');
         logo.src = '../assets/images/ai-assistant-logo.svg';
         logo.alt = 'AI';
-        logo.style.width = '28px';
-        logo.style.height = '28px';
-        logo.style.flexShrink = '0';
-        logo.style.marginTop = '2px';
-        
-        const textDiv = document.createElement('div');
-        textDiv.textContent = text;
-        
+        logo.className = 'chat-avatar';
         messageDiv.appendChild(logo);
-        messageDiv.appendChild(textDiv);
+        messageDiv.appendChild(bubble);
     } else {
-        // For user messages, just add text
-        messageDiv.textContent = text;
+        messageDiv.appendChild(bubble);
     }
-    
+
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    
+
+    return messageId;
+}
+
+// Show animated typing indicator
+function addTypingIndicator() {
+    const messagesContainer = document.getElementById('chatMessages');
+    const messageId = 'msg-typing-' + Date.now();
+
+    const messageDiv = document.createElement('div');
+    messageDiv.id = messageId;
+    messageDiv.className = 'chat-message assistant typing';
+
+    const logo = document.createElement('img');
+    logo.src = '../assets/images/ai-assistant-logo.svg';
+    logo.alt = 'AI';
+    logo.className = 'chat-avatar';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.innerHTML = `
+        <div class="typing-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    `;
+
+    messageDiv.appendChild(logo);
+    messageDiv.appendChild(bubble);
+    messagesContainer.appendChild(messageDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
     return messageId;
 }
 
@@ -1130,10 +1235,12 @@ window.toggleFilterPanel = function() {
     }
 };
 
-// Update filter counts
+// Update filter counts (legacy; hidden on new visitor layout)
 function updateFilterCounts() {
-    document.getElementById('burialsCount').textContent = allRecords.length;
-    document.getElementById('availableCount').textContent = allPlots.length;
+    const burialsEl = document.getElementById('burialsCount');
+    const availableEl = document.getElementById('availableCount');
+    if (burialsEl) burialsEl.textContent = allRecords.length;
+    if (availableEl) availableEl.textContent = allPlots.length;
 }
 
 // Initialize map on page load
@@ -1374,45 +1481,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.success) {
                     let successMessage = `
                         <div style="text-align: left;">
-                            <p style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: white;">📋 Reservation Details:</p>
-                            <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; margin-bottom: 16px;">
-                                <p style="margin: 0 0 8px 0;">
-                                    <span style="color: rgba(255,255,255,0.6);">Plot:</span> 
-                                    <strong style="color: #00c853;">${data.plot_number || 'N/A'}</strong>
+                            <p style="margin: 0 0 16px 0; font-size: 1.1rem; font-weight: 600; color: #0f172a;">📋 Reservation Details:</p>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; margin-bottom: 16px;">
+                                <p style="margin: 0 0 8px 0; color: #0f172a;">
+                                    <span style="color: #64748b;">Plot:</span>
+                                    <strong style="color: #10b981;">${data.plot_number || 'N/A'}</strong>
                                 </p>
                     `;
-                    
+
                     if (data.compartment) {
                         const label = getCompartmentLabel(data.compartment, currentPlotData);
                         successMessage += `
-                            <p style="margin: 0 0 8px 0;">
-                                <span style="color: rgba(255,255,255,0.6);">Compartment:</span> 
-                                <strong style="color: #00c853;">${label} (#${data.compartment})</strong>
+                            <p style="margin: 0 0 8px 0; color: #0f172a;">
+                                <span style="color: #64748b;">Compartment:</span>
+                                <strong style="color: #10b981;">${label} (#${data.compartment})</strong>
                             </p>
                         `;
                     }
-                    
+
                     successMessage += `
-                                <p style="margin: 0;">
-                                    <span style="color: rgba(255,255,255,0.6);">Total Amount:</span> 
-                                    <strong style="color: #5a9b6f; font-size: 1.2rem;">₱${parseFloat(data.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
+                                <p style="margin: 0; color: #0f172a;">
+                                    <span style="color: #64748b;">Total Amount:</span>
+                                    <strong style="color: #10b981; font-size: 1.2rem;">₱${parseFloat(data.total_amount).toLocaleString('en-PH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong>
                                 </p>
                             </div>
-                            <p style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 600; color: white;">💡 Next Steps:</p>
-                            <ol style="margin: 0; padding-left: 20px; color: rgba(255,255,255,0.8); line-height: 1.8;">
+                            <p style="margin: 0 0 12px 0; font-size: 1.1rem; font-weight: 600; color: #0f172a;">💡 Next Steps:</p>
+                            <ol style="margin: 0; padding-left: 20px; color: #475569; line-height: 1.8;">
                                 <li>Wait for admin approval</li>
                                 <li>After approval, submit payment</li>
                                 <li>Track status in "My Reservations"</li>
                             </ol>
                         </div>
                     `;
-                    
+
                     showSuccessModal(successMessage, true);
                     closeReservationModal();
                 } else {
                     showSuccessModal(`
                         <div style="text-align: center;">
-                            <p style="margin: 0; font-size: 1.1rem; line-height: 1.6; color: rgba(255,255,255,0.9);">
+                            <p style="margin: 0; font-size: 1.1rem; line-height: 1.6; color: #0f172a;">
                                 ${data.message}
                             </p>
                         </div>
@@ -1431,7 +1538,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error:', error);
                 showSuccessModal(`
                     <div style="text-align: center;">
-                        <p style="margin: 0; font-size: 1.1rem; line-height: 1.6; color: rgba(255,255,255,0.9);">
+                        <p style="margin: 0; font-size: 1.1rem; line-height: 1.6; color: #0f172a;">
                             Error submitting reservation. Please check your connection and try again.
                         </p>
                     </div>
@@ -1461,10 +1568,10 @@ function getCompartmentLabel(compartmentNum, plotData) {
     return String.fromCharCode(65 + row) + (col + 1);
 }
 
-// Toggle navigation bar
+// Toggle navigation bar (legacy, no longer used with new visitor layout)
 function toggleNavBar() {
     const topBar = document.getElementById('topBar');
-    topBar.classList.toggle('collapsed');
+    if (topBar) topBar.classList.toggle('collapsed');
 }
 
 // Toggle search bar
@@ -1494,7 +1601,7 @@ function rotateMap(degrees) {
 function resetRotation() {
     console.log('Reset rotation called');
     if (map && typeof map.setBearing === 'function') {
-        map.setBearing(0);
+        map.setBearing(315);
         updateBearingDisplay();
     } else {
         console.error('Map rotation not supported!');

@@ -1,5 +1,5 @@
 <?php
-// Redirect to unified login with admin role preselected
-header('Location: ../login.php?role=admin');
+// Redirect to unified login
+header('Location: ../login.php');
 exit;
     

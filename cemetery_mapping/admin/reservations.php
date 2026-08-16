@@ -464,7 +464,7 @@ require_once '../config/database.php';
                         if (testData.message === 'Unauthorized') {
                             themeUtils.showAlert('ERROR: You are not logged in as admin! Please login first.', 'error');
                             setTimeout(() => {
-                                window.location.href = '../login.php?role=admin';
+                                window.location.href = '../login.php';
                             }, 2000);
                             return;
                         }

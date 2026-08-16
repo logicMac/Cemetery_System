@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="../index.php#about" class="nav-link hover:text-emerald-600 transition">About</a>
             </div>
             <div class="flex items-center gap-3">
-                <a href="../login.php?role=visitor" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-emerald-600 transition px-3 py-2">
+                <a href="../login.php" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-emerald-600 transition px-3 py-2">
                     <i data-lucide="log-in" class="w-4 h-4"></i> Sign In
                 </a>
                 <a href="../index.php" class="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg px-4 py-2 transition shadow-sm shadow-emerald-200">
@@ -143,233 +143,159 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </nav>
 
-    <div class="min-h-screen flex pt-16">
-        <!-- LEFT PANEL (70%) - Branding -->
-        <div class="hidden lg:flex lg:w-[70%] relative bg-gradient-to-br from-emerald-50 via-emerald-100/40 to-teal-100/50 items-center justify-center p-12 overflow-hidden">
-            <!-- Decorative blobs -->
-            <div class="absolute top-10 left-10 w-80 h-80 bg-emerald-200 rounded-full blur-3xl opacity-60 animate-pulse-slow"></div>
-            <div class="absolute bottom-10 right-10 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-70 animate-pulse-slow"></div>
-            <div class="absolute top-1/3 right-1/4 w-72 h-72 bg-teal-100 rounded-full blur-3xl opacity-50"></div>
-            <div class="absolute bottom-1/4 left-1/3 w-64 h-64 bg-emerald-300/40 rounded-full blur-3xl opacity-50 animate-pulse-slow"></div>
+    <!-- ===================== REGISTER CARD ===================== -->
+    <div class="min-h-screen flex items-center justify-center p-6 pt-24 pb-12 bg-white">
+        <!-- Register Card -->
+        <div class="w-full max-w-md animate-fade-up">
+            <div class="bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden">
 
-            <!-- Subtle grid pattern overlay -->
-            <div class="absolute inset-0 opacity-[0.05]" style="background-image: linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px); background-size: 32px 32px;"></div>
-
-            <div class="relative z-10 max-w-xl animate-fade-up">
-                <!-- Logo + Brand -->
-                <div class="flex items-center gap-4 mb-12">
-                    <div class="w-16 h-16 rounded-full bg-white shadow-xl shadow-emerald-200 border-2 border-emerald-200 flex items-center justify-center">
-                        <img src="../assets/images/matinao-logo.png" alt="Matinao Memorial Logo" class="w-12 h-12 rounded-full object-cover">
+                <div class="p-8 sm:p-10">
+                    <!-- Logo + Heading -->
+                    <div class="text-center mb-8">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-white shadow-lg shadow-emerald-100 border-2 border-emerald-200 flex items-center justify-center">
+                            <img src="../assets/images/matinao-logo.png" alt="Matinao Memorial Logo" class="w-12 h-12 rounded-full object-cover">
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-900">Create account</h2>
+                        <p class="text-sm text-slate-500 mt-1">Join Matinao Memorial Cemetery</p>
                     </div>
-                    <div>
-                        <h1 class="text-2xl font-bold text-slate-900">Matinao Memorial</h1>
-                        <p class="text-sm text-emerald-700 font-medium">Cemetery Mapping & Management System</p>
-                    </div>
-                </div>
 
-                <!-- Badge -->
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur text-emerald-700 text-xs font-semibold mb-6 border border-emerald-200 shadow-sm">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse-dot"></span>
-                    Visitor Registration · Free Account
-                </div>
+                    <?php if ($error): ?>
+                        <div class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2.5 animate-fade-in">
+                            <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
+                            <span><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></span>
+                        </div>
+                    <?php endif; ?>
 
-                <!-- Headline -->
-                <h2 class="text-5xl font-bold text-slate-900 leading-[1.1] mb-5 tracking-tight">
-                    Join the <span class="text-emerald-700 relative inline-block">community<svg class="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" preserveAspectRatio="none"><path d="M0,6 Q100,0 200,6" stroke="#10b981" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6"/></svg></span> of remembrance.
-                </h2>
-                <p class="text-slate-600 text-base leading-relaxed mb-10 max-w-lg">
-                    Create a free visitor account to search burial records, explore the interactive cemetery map, reserve plots, and chat with our AI assistant.
-                </p>
+                    <?php if ($success): ?>
+                        <div class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm animate-fade-in">
+                            <div class="flex items-center gap-2.5 mb-2">
+                                <i data-lucide="check-circle" class="w-4 h-4 flex-shrink-0"></i>
+                                <span><?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></span>
+                            </div>
+                            <a href="../login.php" class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800">Go to Login <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
+                        </div>
+                    <?php endif; ?>
 
-                <!-- Benefits -->
-                <div class="space-y-3 max-w-lg mb-10 reveal-stagger reveal reveal-up">
-                    <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white/80 backdrop-blur border border-emerald-200 shadow-sm">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center"><i data-lucide="search" class="w-4 h-4"></i></div>
+                    <form method="POST" action="" id="registerForm" class="space-y-4">
+                        <!-- Full Name -->
                         <div>
-                            <div class="text-sm font-semibold text-slate-800">Search Burial Records</div>
-                            <div class="text-xs text-emerald-600/70">Find loved ones by name or plot number</div>
+                            <label for="full_name" class="block text-sm font-medium text-slate-700 mb-1.5">Full Name <span class="text-rose-500">*</span></label>
+                            <div class="relative">
+                                <i data-lucide="user" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input
+                                    type="text"
+                                    id="full_name"
+                                    name="full_name"
+                                    placeholder="Juan Dela Cruz"
+                                    required
+                                    value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name'], ENT_QUOTES, 'UTF-8') : ''; ?>"
+                                    class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
+                                >
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white/80 backdrop-blur border border-emerald-200 shadow-sm">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center"><i data-lucide="map" class="w-4 h-4"></i></div>
+
+                        <!-- Email -->
                         <div>
-                            <div class="text-sm font-semibold text-slate-800">Explore Cemetery Map</div>
-                            <div class="text-xs text-emerald-600/70">GPS-enabled interactive mapping</div>
+                            <label for="email" class="block text-sm font-medium text-slate-700 mb-1.5">Email Address <span class="text-rose-500">*</span></label>
+                            <div class="relative">
+                                <i data-lucide="mail" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="you@example.com"
+                                    required
+                                    value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8') : ''; ?>"
+                                    class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
+                                >
+                            </div>
+                            <small id="email-status" class="text-xs mt-1 block"></small>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-white/80 backdrop-blur border border-emerald-200 shadow-sm">
-                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center"><i data-lucide="calendar-check" class="w-4 h-4"></i></div>
+
+                        <!-- Phone -->
                         <div>
-                            <div class="text-sm font-semibold text-slate-800">Reserve Plots Online</div>
-                            <div class="text-xs text-emerald-600/70">Track status & payments</div>
+                            <label for="phone" class="block text-sm font-medium text-slate-700 mb-1.5">Phone Number <span class="text-slate-400 text-xs font-normal">(optional)</span></label>
+                            <div class="relative">
+                                <i data-lucide="phone" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input
+                                    type="tel"
+                                    id="phone"
+                                    name="phone"
+                                    placeholder="+63 9XX XXX XXXX"
+                                    value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone'], ENT_QUOTES, 'UTF-8') : ''; ?>"
+                                    class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
+                                >
+                            </div>
                         </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-slate-700 mb-1.5">Password <span class="text-rose-500">*</span></label>
+                            <div class="relative">
+                                <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Min 8 characters"
+                                    required
+                                    minlength="8"
+                                    oninput="updateStrength(this)"
+                                    class="w-full rounded-xl border border-slate-300 pl-10 pr-11 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
+                                >
+                                <button type="button" onclick="togglePassword('password', 'eyeIcon1')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition">
+                                    <i data-lucide="eye" class="w-4 h-4" id="eyeIcon1"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength"><div class="password-strength-bar" id="strength-bar"></div></div>
+                            <small id="strength-text" class="text-xs text-slate-400 mt-1 block"></small>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div>
+                            <label for="confirm_password" class="block text-sm font-medium text-slate-700 mb-1.5">Confirm Password <span class="text-rose-500">*</span></label>
+                            <div class="relative">
+                                <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input
+                                    type="password"
+                                    id="confirm_password"
+                                    name="confirm_password"
+                                    placeholder="Re-enter password"
+                                    required
+                                    minlength="8"
+                                    oninput="checkMatch()"
+                                    class="w-full rounded-xl border border-slate-300 pl-10 pr-11 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
+                                >
+                                <button type="button" onclick="togglePassword('confirm_password', 'eyeIcon2')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition">
+                                    <i data-lucide="eye" class="w-4 h-4" id="eyeIcon2"></i>
+                                </button>
+                            </div>
+                            <small id="match-status" class="text-xs mt-1 block"></small>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-3.5 transition shadow-lg shadow-emerald-200 hover:shadow-emerald-300 mt-2">
+                            <i data-lucide="user-plus" class="w-4 h-4"></i> Create Account
+                        </button>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="flex items-center gap-4 my-6">
+                        <div class="flex-1 h-px bg-slate-200"></div>
+                        <span class="text-xs text-slate-400 font-medium">or</span>
+                        <div class="flex-1 h-px bg-slate-200"></div>
+                    </div>
+
+                    <!-- Links -->
+                    <div class="space-y-2.5">
+                        <a href="../login.php" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-sm font-semibold py-3 transition">
+                            <i data-lucide="log-in" class="w-4 h-4"></i> Already have an account? Sign in
+                        </a>
+                        <a href="../index.php" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-sm font-semibold py-3 transition">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
+                        </a>
                     </div>
                 </div>
-
-                <!-- Footer note -->
-                <p class="text-xs text-slate-600 flex items-center gap-1.5">
-                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i> Your data is protected with bcrypt password hashing
-                </p>
-            </div>
-        </div>
-
-        <!-- RIGHT PANEL (30%) - Register form -->
-        <div class="w-full lg:w-[30%] flex items-center justify-center p-6 sm:p-10 bg-white border-l border-slate-200">
-            <div class="w-full max-w-sm animate-fade-up">
-                <!-- Mobile logo (shown only on small screens) -->
-                <div class="lg:hidden text-center mb-8">
-                    <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-200 flex items-center justify-center">
-                        <img src="../assets/images/matinao-logo.png" alt="Matinao Memorial Logo" class="w-11 h-11 rounded-full object-cover">
-                    </div>
-                    <h1 class="text-xl font-bold text-slate-900">Matinao Memorial</h1>
-                    <p class="text-xs text-slate-500 mt-0.5">Visitor Registration</p>
-                </div>
-
-                <!-- Heading -->
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-slate-900">Create account</h2>
-                    <p class="text-sm text-slate-500 mt-1">Join Matinao Memorial Cemetery</p>
-                </div>
-
-                <?php if ($error): ?>
-                    <div class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2.5 animate-fade-in">
-                        <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
-                        <span><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></span>
-                    </div>
-                <?php endif; ?>
-
-                <?php if ($success): ?>
-                    <div class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm animate-fade-in">
-                        <div class="flex items-center gap-2.5 mb-2">
-                            <i data-lucide="check-circle" class="w-4 h-4 flex-shrink-0"></i>
-                            <span><?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></span>
-                        </div>
-                        <a href="../login.php?role=visitor" class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800">Go to Login <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
-                    </div>
-                <?php endif; ?>
-
-                <form method="POST" action="" id="registerForm" class="space-y-4">
-                    <!-- Full Name -->
-                    <div>
-                        <label for="full_name" class="block text-sm font-medium text-slate-700 mb-1.5">Full Name <span class="text-rose-500">*</span></label>
-                        <div class="relative">
-                            <i data-lucide="user" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input
-                                type="text"
-                                id="full_name"
-                                name="full_name"
-                                placeholder="Juan Dela Cruz"
-                                required
-                                value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-                                class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
-                            >
-                        </div>
-                    </div>
-
-                    <!-- Email -->
-                    <div>
-                        <label for="email" class="block text-sm font-medium text-slate-700 mb-1.5">Email Address <span class="text-rose-500">*</span></label>
-                        <div class="relative">
-                            <i data-lucide="mail" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                placeholder="you@example.com"
-                                required
-                                value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-                                class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
-                            >
-                        </div>
-                        <small id="email-status" class="text-xs mt-1 block"></small>
-                    </div>
-
-                    <!-- Phone -->
-                    <div>
-                        <label for="phone" class="block text-sm font-medium text-slate-700 mb-1.5">Phone Number <span class="text-slate-400 text-xs font-normal">(optional)</span></label>
-                        <div class="relative">
-                            <i data-lucide="phone" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input
-                                type="tel"
-                                id="phone"
-                                name="phone"
-                                placeholder="+63 9XX XXX XXXX"
-                                value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-                                class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
-                            >
-                        </div>
-                    </div>
-
-                    <!-- Password -->
-                    <div>
-                        <label for="password" class="block text-sm font-medium text-slate-700 mb-1.5">Password <span class="text-rose-500">*</span></label>
-                        <div class="relative">
-                            <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                placeholder="Min 8 characters"
-                                required
-                                minlength="8"
-                                oninput="updateStrength(this)"
-                                class="w-full rounded-xl border border-slate-300 pl-10 pr-11 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
-                            >
-                            <button type="button" onclick="togglePassword('password', 'eyeIcon1')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition">
-                                <i data-lucide="eye" class="w-4 h-4" id="eyeIcon1"></i>
-                            </button>
-                        </div>
-                        <div class="password-strength"><div class="password-strength-bar" id="strength-bar"></div></div>
-                        <small id="strength-text" class="text-xs text-slate-400 mt-1 block"></small>
-                    </div>
-
-                    <!-- Confirm Password -->
-                    <div>
-                        <label for="confirm_password" class="block text-sm font-medium text-slate-700 mb-1.5">Confirm Password <span class="text-rose-500">*</span></label>
-                        <div class="relative">
-                            <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                            <input
-                                type="password"
-                                id="confirm_password"
-                                name="confirm_password"
-                                placeholder="Re-enter password"
-                                required
-                                minlength="8"
-                                oninput="checkMatch()"
-                                class="w-full rounded-xl border border-slate-300 pl-10 pr-11 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
-                            >
-                            <button type="button" onclick="togglePassword('confirm_password', 'eyeIcon2')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition">
-                                <i data-lucide="eye" class="w-4 h-4" id="eyeIcon2"></i>
-                            </button>
-                        </div>
-                        <small id="match-status" class="text-xs mt-1 block"></small>
-                    </div>
-
-                    <!-- Submit -->
-                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-3.5 transition shadow-lg shadow-emerald-200 hover:shadow-emerald-300 mt-2">
-                        <i data-lucide="user-plus" class="w-4 h-4"></i> Create Account
-                    </button>
-                </form>
-
-                <!-- Divider -->
-                <div class="flex items-center gap-4 my-6">
-                    <div class="flex-1 h-px bg-slate-200"></div>
-                    <span class="text-xs text-slate-400 font-medium">or</span>
-                    <div class="flex-1 h-px bg-slate-200"></div>
-                </div>
-
-                <!-- Links -->
-                <div class="space-y-2.5">
-                    <a href="../login.php?role=visitor" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-sm font-semibold py-3 transition">
-                        <i data-lucide="log-in" class="w-4 h-4"></i> Already have an account? Sign in
-                    </a>
-                    <a href="../index.php" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-sm font-semibold py-3 transition">
-                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
-                    </a>
-                </div>
-
-                <!-- Footer -->
-                <p class="text-center text-xs text-slate-400 mt-8">&copy; <?php echo date('Y'); ?> Matinao Memorial Cemetery</p>
             </div>
         </div>
     </div>
