@@ -2,6 +2,7 @@
 session_start();
 require_once 'includes/header.php';
 require_once '../config/database.php';
+require_once '../config/groq_config.php';
 
 $success = '';
 $error = '';
@@ -242,7 +243,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
                 </span>
             </div>
             <div class="text-sm text-slate-700 mb-1">Model: <span class="font-mono font-semibold text-slate-900"><?php echo defined('GROQ_MODEL') ? GROQ_MODEL : 'llama-3.3-70b-versatile'; ?></span></div>
-            <p class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="info" class="w-3 h-3"></i> Edit <code class="px-1 py-0.5 rounded bg-slate-200 text-slate-600 text-[10px]">config/groq_config.php</code> to update</p>
+            <p class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="info" class="w-3 h-3"></i> Manage keys in <a href="api-keys.php" class="text-emerald-600 hover:underline font-semibold">System → AI API Keys</a> — stored in the database, no file edits needed</p>
         </div>
         <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100">
             <p class="text-xs font-semibold text-emerald-700 uppercase mb-2 flex items-center gap-1.5"><i data-lucide="info" class="w-3.5 h-3.5"></i> AI Assistant Features</p>

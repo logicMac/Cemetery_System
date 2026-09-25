@@ -3,8 +3,32 @@ session_start();
 require_once 'includes/header.php';
 require_once '../config/database.php';
 
-// Get barangays for dropdown
-$barangays = ['Matinao', 'Poblacion', 'San Isidro', 'San Jose', 'San Miguel', 'San Pedro', 'San Roque', 'Santa Cruz'];
+// Barangays of Polomolok, South Cotabato
+$barangays = [
+    'Bentung',
+    'Cannery Site',
+    'Crossing Palkan',
+    'Glamang',
+    'Kinilis',
+    'Klinan 6',
+    'Koronadal Proper',
+    'Lam Caliaf',
+    'Landan',
+    'Lapu',
+    'Lumakil',
+    'Magsaysay',
+    'Maligo',
+    'Pagalungan',
+    'Palkan',
+    'Poblacion',
+    'Polo',
+    'Rubber',
+    'Silway 7',
+    'Silway 8',
+    'Sulit',
+    'Sumbakil',
+    'Upper Klinan',
+];
 ?>
 
 <?php require_once 'includes/sidebar.php'; ?>
@@ -54,6 +78,24 @@ button svg, a svg, button i, a i { pointer-events: none; }
                     <label for="death_date" class="block text-sm font-medium text-slate-700 mb-1.5">Death Date</label>
                     <input type="date" id="death_date" name="death_date"
                         class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+                </div>
+                <div>
+                    <label for="burial_date" class="block text-sm font-medium text-slate-700 mb-1.5">Burial Date <span class="text-xs text-slate-400">— schedule</span></label>
+                    <input type="date" id="burial_date" name="burial_date"
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+                </div>
+                <div>
+                    <label for="burial_time" class="block text-sm font-medium text-slate-700 mb-1.5">Burial Time</label>
+                    <input type="time" id="burial_time" name="burial_time"
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+                </div>
+                <div>
+                    <label for="is_buried" class="block text-sm font-medium text-slate-700 mb-1.5">Burial Status</label>
+                    <select id="is_buried" name="is_buried"
+                        class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition bg-white">
+                        <option value="1">Buried / Done</option>
+                        <option value="0">Scheduled (not yet buried)</option>
+                    </select>
                 </div>
             </div>
         </section>
@@ -141,6 +183,28 @@ button svg, a svg, button i, a i { pointer-events: none; }
             <div id="mapPicker" class="map-picker rounded-xl overflow-hidden border border-slate-200" style="height: 380px;"></div>
         </section>
 
+        <!-- Plot Boundary card -->
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 animate-[fadeUp_0.95s_ease]">
+            <div class="flex items-center gap-2 mb-2">
+                <i data-lucide="pen-tool" class="w-4 h-4 text-emerald-600"></i>
+                <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-700">Plot Boundary</h3>
+            </div>
+            <p class="text-sm text-slate-500 mb-5">Draw a free-form polygon around the plot. Click points on the map, then click Finish.</p>
+            <input type="hidden" id="polygon" name="polygon">
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button type="button" id="startPolygonBtn" onclick="polygonDrawer.startDrawing()" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 transition">
+                    Draw Boundary
+                </button>
+                <button type="button" onclick="polygonDrawer.finishPolygon()" class="inline-flex items-center gap-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-sm font-semibold px-4 py-2.5 transition">
+                    Finish Polygon
+                </button>
+                <button type="button" onclick="polygonDrawer.clearPolygon()" class="inline-flex items-center gap-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold px-4 py-2.5 transition">
+                    Clear
+                </button>
+            </div>
+            <div id="polygonMap" class="map-picker rounded-xl overflow-hidden border border-slate-200" style="height: 380px;"></div>
+        </section>
+
         <!-- Action bar -->
         <div class="flex items-center gap-3 pt-2 animate-[fadeUp_1s_ease]">
             <button type="submit"
@@ -172,20 +236,41 @@ button svg, a svg, button i, a i { pointer-events: none; }
     <script>
         // Initialize map picker
         const CEMETERY_CENTER = [6.18344118743717, 125.08457146469357];
-        const CEMETERY_BOUNDS = [
-            [6.18244118743717, 125.08357146469357],
-            [6.18444118743717, 125.08557146469357]
+        // Actual cemetery boundary polygon (4 corners, expanded ~15% to include all graves)
+        const CEMETERY_POLYGON = [
+            [6.184703227248634, 125.08388389813996],
+            [6.183142672429919, 125.08538436803683],
+            [6.182440110293303, 125.08476491148839],
+            [6.184002859166614, 125.08321729641679]
         ];
-        
-        const mapPicker = L.map('mapPicker').setView(CEMETERY_CENTER, 17);
-        
-        L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        // Bounding box for fitBounds
+        const CEMETERY_BOUNDS = [
+            [6.182440110293303, 125.08321729641679],
+            [6.184703227248634, 125.08538436803683]
+        ];
+
+        function isInsideCemetery(lat, lng) {
+            const poly = CEMETERY_POLYGON;
+            let inside = false;
+            for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                const xi = poly[i][1], yi = poly[i][0];
+                const xj = poly[j][1], yj = poly[j][0];
+                const intersect = ((yi > lat) !== (yj > lat)) &&
+                    (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        const mapPicker = L.map('mapPicker', { rotate: true, touchRotate: true, bearing: 315 }).setView(CEMETERY_CENTER, 17);
+
+        L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
             maxZoom: 20,
             subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
         }).addTo(mapPicker);
-        
+
         // Draw cemetery boundary
-        L.rectangle(CEMETERY_BOUNDS, {
+        L.polygon(CEMETERY_POLYGON, {
             color: '#b55a5a',
             weight: 2,
             fillOpacity: 0,
@@ -198,7 +283,16 @@ button svg, a svg, button i, a i { pointer-events: none; }
         mapPicker.on('click', function(e) {
             const lat = e.latlng.lat;
             const lng = e.latlng.lng;
-            
+
+            if (!isInsideCemetery(lat, lng)) {
+                if (typeof themeUtils !== 'undefined' && themeUtils.showAlert) {
+                    themeUtils.showAlert('Please click inside the cemetery boundary (red box).', 'error');
+                } else {
+                    alert('Please click inside the cemetery boundary (red box).');
+                }
+                return;
+            }
+
             document.getElementById('latitude').value = lat;
             document.getElementById('longitude').value = lng;
             
@@ -264,6 +358,16 @@ button svg, a svg, button i, a i { pointer-events: none; }
                 themeUtils.showAlert('An error occurred', 'error');
             }
         });
+
+        // Initialize plot boundary polygon drawer
+        setTimeout(() => {
+            window.polygonDrawer = themeUtils.createPolygonDrawer('polygonMap', {
+                center: CEMETERY_CENTER,
+                onChange: function(points) {
+                    document.getElementById('polygon').value = points ? JSON.stringify(points) : '';
+                }
+            });
+        }, 300);
 
         // Initialize Lucide icons
         if (typeof lucide !== 'undefined') {

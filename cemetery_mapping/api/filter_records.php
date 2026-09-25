@@ -46,13 +46,17 @@ try {
     $total = $stmt->fetchColumn();
     $total_pages = ceil($total / $per_page);
 
-    // Get records
+    // Get records with optional grid/cell assignment
     $sql = "
-        SELECT id, decedent_name, family_name, birth_date, death_date, plot_number,
-               barangay, is_fenced, photo, date_added
-        FROM burial_records
+        SELECT br.id, br.decedent_name, br.family_name, br.birth_date, br.death_date, br.burial_date, br.burial_time, br.is_buried, br.expiration_date, br.renewal_count, br.plot_number,
+               br.barangay, br.is_fenced, br.photo, br.date_added,
+               pg.id AS grid_id, pg.name AS grid_name,
+               pgc.row_idx AS cell_row, pgc.col_idx AS cell_col
+        FROM burial_records br
+        LEFT JOIN plot_grid_cells pgc ON pgc.record_id = br.id
+        LEFT JOIN plot_grids pg ON pg.id = pgc.grid_id
         $whereClause
-        ORDER BY date_added DESC
+        ORDER BY br.date_added DESC
         LIMIT ? OFFSET ?
     ";
     $params[] = $per_page;

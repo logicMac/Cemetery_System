@@ -14,9 +14,9 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once '../config/database.php';
 
-    $full_name = filter_input(INPUT_POST, 'full_name', FILTER_SANITIZE_STRING);
+    $full_name = strip_tags((string)filter_input(INPUT_POST, 'full_name'));
     $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-    $phone = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_STRING);
+    $phone = strip_tags((string)filter_input(INPUT_POST, 'phone'));
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
 
@@ -114,189 +114,226 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="min-h-screen">
 
-    <!-- ===================== NAVBAR ===================== -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-200/70">
-        <div class="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
-            <a href="../index.php" class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-white shadow-md border border-emerald-200 flex items-center justify-center">
-                    <img src="../assets/images/matinao-logo.png" alt="Matinao Memorial Logo" class="w-8 h-8 rounded-full object-cover">
+    <!-- ===================== REGISTER LAYOUT ===================== -->
+    <div class="min-h-screen flex items-stretch">
+        <!-- Left: Photo panel (desktop only) -->
+        <div class="hidden lg:flex w-[70%] relative overflow-hidden">
+            <!-- Background photo -->
+            <img src="../assets/images/cemetery-banner.jpg" alt="Matinao Memorial Cemetery" class="absolute inset-0 w-full h-full object-cover">
+            <!-- Subtle dark gradient for text readability at top/bottom -->
+            <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/50"></div>
+
+            <div class="relative z-10 flex flex-col justify-between p-12 xl:p-20 text-white w-full animate-fade-left">
+                <!-- Top: logo + badge -->
+                <div>
+                    <div class="flex items-center justify-between mb-10">
+                        <div class="flex items-center gap-3">
+                            <div class="w-14 h-14 rounded-full bg-white/90 shadow-lg flex items-center justify-center ring-4 ring-white/10">
+                                <img src="../assets/images/matinao-logo.png" alt="Matinao Memorial Logo" class="w-10 h-10 rounded-full object-cover">
+                            </div>
+                            <div>
+                                <div class="text-lg font-bold leading-tight">Matinao Memorial</div>
+                                <div class="text-sm text-emerald-100 font-medium leading-tight">Cemetery System</div>
+                            </div>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 text-emerald-50 text-xs font-semibold">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse-dot"></span>
+                            Free Registration
+                        </div>
+                    </div>
+
+                    <h2 class="text-4xl xl:text-5xl font-bold leading-[1.1] mb-6 max-w-2xl drop-shadow-lg">
+                        Create an account to <span class="relative inline-block">stay connected<svg class="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" preserveAspectRatio="none"><path d="M0,6 Q100,0 200,6" stroke="#6ee7b7" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.8"/></svg></span>.
+                    </h2>
+                    <p class="text-white/80 text-lg leading-relaxed max-w-xl drop-shadow-md">
+                        Register as a visitor to search burial records, explore the interactive cemetery map, reserve plots, and get AI-assisted directions to your loved ones.
+                    </p>
                 </div>
-                <div class="hidden sm:block">
-                    <div class="text-sm font-bold text-slate-900 leading-tight">Matinao Memorial</div>
-                    <div class="text-[11px] text-emerald-600 font-medium leading-tight">Cemetery System</div>
+
+                <!-- Bottom: quote + location -->
+                <div>
+                    <div class="flex items-start gap-3 mb-6 max-w-xl">
+                        <i data-lucide="quote" class="w-8 h-8 text-white/30 flex-shrink-0"></i>
+                        <p class="text-white/70 text-sm italic leading-relaxed">
+                            "Finding my grandmother's plot used to take hours. Now I can locate it in seconds with the interactive map."
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 text-white/60 text-sm pt-6 border-t border-white/10">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                        <span>Polomolok, South Cotabato, Philippines</span>
+                    </div>
                 </div>
-            </a>
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
-                <a href="../index.php#home" class="nav-link hover:text-emerald-600 transition">Home</a>
-                <a href="../index.php#features" class="nav-link hover:text-emerald-600 transition">Features</a>
-                <a href="../index.php#services" class="nav-link hover:text-emerald-600 transition">Services</a>
-                <a href="../index.php#about" class="nav-link hover:text-emerald-600 transition">About</a>
-            </div>
-            <div class="flex items-center gap-3">
-                <a href="../login.php" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-emerald-600 transition px-3 py-2">
-                    <i data-lucide="log-in" class="w-4 h-4"></i> Sign In
-                </a>
-                <a href="../index.php" class="inline-flex items-center gap-1.5 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg px-4 py-2 transition shadow-sm shadow-emerald-200">
-                    <i data-lucide="home" class="w-4 h-4"></i> Home
-                </a>
             </div>
         </div>
-    </nav>
 
-    <!-- ===================== REGISTER CARD ===================== -->
-    <div class="min-h-screen flex items-center justify-center p-6 pt-24 pb-12 bg-white">
-        <!-- Register Card -->
-        <div class="w-full max-w-md animate-fade-up">
-            <div class="bg-white rounded-3xl shadow-xl border border-slate-200/80 overflow-hidden">
+        <!-- Right: Register form -->
+        <div class="w-full lg:w-[30%] flex items-center justify-center p-6 sm:p-10 bg-gradient-to-b from-slate-50 to-white relative overflow-y-auto">
+            <!-- Subtle decorative accent -->
+            <div class="absolute top-0 right-0 w-40 h-40 bg-emerald-100/40 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-32 h-32 bg-emerald-50/50 rounded-full blur-3xl"></div>
 
-                <div class="p-8 sm:p-10">
-                    <!-- Logo + Heading -->
-                    <div class="text-center mb-8">
-                        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-white shadow-lg shadow-emerald-100 border-2 border-emerald-200 flex items-center justify-center">
-                            <img src="../assets/images/matinao-logo.png" alt="Matinao Memorial Logo" class="w-12 h-12 rounded-full object-cover">
-                        </div>
-                        <h2 class="text-2xl font-bold text-slate-900">Create account</h2>
-                        <p class="text-sm text-slate-500 mt-1">Join Matinao Memorial Cemetery</p>
+        <div class="w-full max-w-md animate-fade-up relative z-10">
+            <!-- Mobile logo (visible on small screens) -->
+            <div class="lg:hidden text-center mb-8">
+                <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-white shadow-lg shadow-emerald-100 border border-emerald-200 flex items-center justify-center">
+                    <img src="../assets/images/matinao-logo.png" alt="Matinao Memorial Logo" class="w-12 h-12 rounded-full object-cover">
+                </div>
+                <div class="text-sm font-bold text-slate-900">Matinao Memorial</div>
+                <div class="text-xs text-emerald-600 font-medium">Cemetery System</div>
+            </div>
+
+            <!-- Heading -->
+            <div class="mb-8">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold mb-4">
+                    <i data-lucide="user-plus" class="w-3 h-3"></i> Free Visitor Account
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900">Create account</h2>
+                <p class="text-sm text-slate-500 mt-1.5">Register to search records and reserve plots</p>
+            </div>
+
+            <?php if ($error): ?>
+                <div class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2.5 animate-fade-in">
+                    <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
+                    <span><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($success): ?>
+                <div class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm animate-fade-in">
+                    <div class="flex items-center gap-2.5 mb-2">
+                        <i data-lucide="check-circle" class="w-4 h-4 flex-shrink-0"></i>
+                        <span><?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></span>
                     </div>
+                    <a href="../login.php" class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800">Go to Login <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
+                </div>
+            <?php endif; ?>
 
-                    <?php if ($error): ?>
-                        <div class="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2.5 animate-fade-in">
-                            <i data-lucide="alert-circle" class="w-4 h-4 flex-shrink-0"></i>
-                            <span><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></span>
-                        </div>
-                    <?php endif; ?>
-
-                    <?php if ($success): ?>
-                        <div class="mb-5 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm animate-fade-in">
-                            <div class="flex items-center gap-2.5 mb-2">
-                                <i data-lucide="check-circle" class="w-4 h-4 flex-shrink-0"></i>
-                                <span><?php echo htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></span>
-                            </div>
-                            <a href="../login.php" class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800">Go to Login <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></a>
-                        </div>
-                    <?php endif; ?>
-
-                    <form method="POST" action="" id="registerForm" class="space-y-4">
-                        <!-- Full Name -->
-                        <div>
-                            <label for="full_name" class="block text-sm font-medium text-slate-700 mb-1.5">Full Name <span class="text-rose-500">*</span></label>
-                            <div class="relative">
-                                <i data-lucide="user" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input
-                                    type="text"
-                                    id="full_name"
-                                    name="full_name"
-                                    placeholder="Juan Dela Cruz"
-                                    required
-                                    value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-                                    class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Email -->
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-slate-700 mb-1.5">Email Address <span class="text-rose-500">*</span></label>
-                            <div class="relative">
-                                <i data-lucide="mail" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    placeholder="you@example.com"
-                                    required
-                                    value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-                                    class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
-                                >
-                            </div>
-                            <small id="email-status" class="text-xs mt-1 block"></small>
-                        </div>
-
-                        <!-- Phone -->
-                        <div>
-                            <label for="phone" class="block text-sm font-medium text-slate-700 mb-1.5">Phone Number <span class="text-slate-400 text-xs font-normal">(optional)</span></label>
-                            <div class="relative">
-                                <i data-lucide="phone" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input
-                                    type="tel"
-                                    id="phone"
-                                    name="phone"
-                                    placeholder="+63 9XX XXX XXXX"
-                                    value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone'], ENT_QUOTES, 'UTF-8') : ''; ?>"
-                                    class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
-                                >
-                            </div>
-                        </div>
-
-                        <!-- Password -->
-                        <div>
-                            <label for="password" class="block text-sm font-medium text-slate-700 mb-1.5">Password <span class="text-rose-500">*</span></label>
-                            <div class="relative">
-                                <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    name="password"
-                                    placeholder="Min 8 characters"
-                                    required
-                                    minlength="8"
-                                    oninput="updateStrength(this)"
-                                    class="w-full rounded-xl border border-slate-300 pl-10 pr-11 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
-                                >
-                                <button type="button" onclick="togglePassword('password', 'eyeIcon1')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition">
-                                    <i data-lucide="eye" class="w-4 h-4" id="eyeIcon1"></i>
-                                </button>
-                            </div>
-                            <div class="password-strength"><div class="password-strength-bar" id="strength-bar"></div></div>
-                            <small id="strength-text" class="text-xs text-slate-400 mt-1 block"></small>
-                        </div>
-
-                        <!-- Confirm Password -->
-                        <div>
-                            <label for="confirm_password" class="block text-sm font-medium text-slate-700 mb-1.5">Confirm Password <span class="text-rose-500">*</span></label>
-                            <div class="relative">
-                                <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                                <input
-                                    type="password"
-                                    id="confirm_password"
-                                    name="confirm_password"
-                                    placeholder="Re-enter password"
-                                    required
-                                    minlength="8"
-                                    oninput="checkMatch()"
-                                    class="w-full rounded-xl border border-slate-300 pl-10 pr-11 py-3 text-sm text-slate-900 placeholder-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
-                                >
-                                <button type="button" onclick="togglePassword('confirm_password', 'eyeIcon2')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition">
-                                    <i data-lucide="eye" class="w-4 h-4" id="eyeIcon2"></i>
-                                </button>
-                            </div>
-                            <small id="match-status" class="text-xs mt-1 block"></small>
-                        </div>
-
-                        <!-- Submit -->
-                        <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-3.5 transition shadow-lg shadow-emerald-200 hover:shadow-emerald-300 mt-2">
-                            <i data-lucide="user-plus" class="w-4 h-4"></i> Create Account
-                        </button>
-                    </form>
-
-                    <!-- Divider -->
-                    <div class="flex items-center gap-4 my-6">
-                        <div class="flex-1 h-px bg-slate-200"></div>
-                        <span class="text-xs text-slate-400 font-medium">or</span>
-                        <div class="flex-1 h-px bg-slate-200"></div>
-                    </div>
-
-                    <!-- Links -->
-                    <div class="space-y-2.5">
-                        <a href="../login.php" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-sm font-semibold py-3 transition">
-                            <i data-lucide="log-in" class="w-4 h-4"></i> Already have an account? Sign in
-                        </a>
-                        <a href="../index.php" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 text-sm font-semibold py-3 transition">
-                            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
-                        </a>
+            <form method="POST" action="" id="registerForm" class="space-y-4">
+                <!-- Full Name -->
+                <div>
+                    <label for="full_name" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Full Name <span class="text-rose-500 normal-case">*</span></label>
+                    <div class="relative group">
+                        <i data-lucide="user" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition"></i>
+                        <input
+                            type="text"
+                            id="full_name"
+                            name="full_name"
+                            placeholder="Juan Dela Cruz"
+                            required
+                            value="<?php echo isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name'], ENT_QUOTES, 'UTF-8') : ''; ?>"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
+                        >
                     </div>
                 </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Email Address <span class="text-rose-500 normal-case">*</span></label>
+                    <div class="relative group">
+                        <i data-lucide="mail" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition"></i>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            placeholder="you@example.com"
+                            required
+                            value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email'], ENT_QUOTES, 'UTF-8') : ''; ?>"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
+                        >
+                    </div>
+                    <small id="email-status" class="text-xs mt-1 block"></small>
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label for="phone" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Phone Number <span class="text-slate-400 text-xs font-normal normal-case">(optional)</span></label>
+                    <div class="relative group">
+                        <i data-lucide="phone" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition"></i>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            placeholder="+63 9XX XXX XXXX"
+                            value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone'], ENT_QUOTES, 'UTF-8') : ''; ?>"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
+                        >
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Password <span class="text-rose-500 normal-case">*</span></label>
+                    <div class="relative group">
+                        <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition"></i>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Min 8 characters"
+                            required
+                            minlength="8"
+                            oninput="updateStrength(this)"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-11 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
+                        >
+                        <button type="button" onclick="togglePassword('password', 'eyeIcon1')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition">
+                            <i data-lucide="eye" class="w-4 h-4" id="eyeIcon1"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength"><div class="password-strength-bar" id="strength-bar"></div></div>
+                    <small id="strength-text" class="text-xs text-slate-400 mt-1 block"></small>
+                </div>
+
+                <!-- Confirm Password -->
+                <div>
+                    <label for="confirm_password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Confirm Password <span class="text-rose-500 normal-case">*</span></label>
+                    <div class="relative group">
+                        <i data-lucide="lock" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition"></i>
+                        <input
+                            type="password"
+                            id="confirm_password"
+                            name="confirm_password"
+                            placeholder="Re-enter password"
+                            required
+                            minlength="8"
+                            oninput="checkMatch()"
+                            class="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-11 py-3 text-sm text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition"
+                        >
+                        <button type="button" onclick="togglePassword('confirm_password', 'eyeIcon2')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition">
+                            <i data-lucide="eye" class="w-4 h-4" id="eyeIcon2"></i>
+                        </button>
+                    </div>
+                    <small id="match-status" class="text-xs mt-1 block"></small>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-3.5 transition shadow-lg shadow-emerald-200 hover:shadow-emerald-300 hover:-translate-y-0.5 active:translate-y-0 mt-2">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i> Create Account
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="flex items-center gap-4 my-6">
+                <div class="flex-1 h-px bg-slate-200"></div>
+                <span class="text-xs text-slate-400 font-medium">or</span>
+                <div class="flex-1 h-px bg-slate-200"></div>
             </div>
+
+            <!-- Links -->
+            <div class="space-y-2.5">
+                <a href="../login.php" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 text-sm font-semibold py-3 transition hover:-translate-y-0.5">
+                    <i data-lucide="log-in" class="w-4 h-4"></i> Already have an account? Sign in
+                </a>
+                <a href="../index.php" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold py-3 transition">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home
+                </a>
+            </div>
+
+            <!-- Trust note -->
+            <p class="text-center text-xs text-slate-400 mt-8 flex items-center justify-center gap-1.5">
+                <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>
+                Protected with encrypted passwords and secure sessions
+            </p>
+        </div>
         </div>
     </div>
 
@@ -393,18 +430,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
             }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
             reveals.forEach(el => observer.observe(el));
-
-            // Navbar background change on scroll
-            const nav = document.querySelector('nav');
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 20) {
-                    nav.classList.add('shadow-md', 'bg-white/95');
-                    nav.classList.remove('bg-white/80');
-                } else {
-                    nav.classList.remove('shadow-md', 'bg-white/95');
-                    nav.classList.add('bg-white/80');
-                }
-            });
         });
     </script>
 </body>

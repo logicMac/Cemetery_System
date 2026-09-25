@@ -23,6 +23,35 @@ try {
     // Records by barangay
     $byBarangay = $pdo->query("SELECT barangay, COUNT(*) as count FROM burial_records WHERE barangay IS NOT NULL GROUP BY barangay ORDER BY count DESC LIMIT 5")->fetchAll();
 
+    // Scheduled burials this week (not yet done)
+    $scheduledBurials = $pdo->query("
+        SELECT id, decedent_name, plot_number, barangay, burial_date, burial_time
+        FROM burial_records
+        WHERE burial_date IS NOT NULL
+          AND is_buried = 0
+          AND YEARWEEK(burial_date, 1) = YEARWEEK(CURDATE(), 1)
+        ORDER BY burial_date ASC, burial_time ASC
+    ")->fetchAll();
+
+    // All scheduled burials for the current month (for calendar view)
+    $calMonth = isset($_GET['cal_month']) ? (int)$_GET['cal_month'] : (int)date('n');
+    $calYear  = isset($_GET['cal_year']) ? (int)$_GET['cal_year'] : (int)date('Y');
+    if ($calMonth < 1 || $calMonth > 12) { $calMonth = (int)date('n'); }
+    if ($calYear < 2000 || $calYear > 2100) { $calYear = (int)date('Y'); }
+    $calStmt = $pdo->prepare("
+        SELECT id, decedent_name, plot_number, burial_date, burial_time, is_buried
+        FROM burial_records
+        WHERE burial_date IS NOT NULL
+          AND MONTH(burial_date) = ? AND YEAR(burial_date) = ?
+        ORDER BY burial_date ASC, burial_time ASC
+    ");
+    $calStmt->execute([$calMonth, $calYear]);
+    $calendarBurials = [];
+    foreach ($calStmt->fetchAll() as $row) {
+        $day = (int)date('j', strtotime($row['burial_date']));
+        $calendarBurials[$day][] = $row;
+    }
+
 } catch (PDOException $e) {
     error_log("Dashboard stats error: " . $e->getMessage());
 }
@@ -457,6 +486,9 @@ try {
     .admin-main {
         padding: 20px;
     }
+    .burial-schedule-grid {
+        grid-template-columns: 1fr !important;
+    }
 }
 </style>
 
@@ -549,6 +581,103 @@ try {
             </div>
             <div class="dv2-stat-value"><?php echo number_format($totalVisitors); ?></div>
             <div class="dv2-stat-label">Active Visitors</div>
+        </div>
+    </div>
+
+    <div class="dv2-card" style="margin-bottom: 28px;">
+        <h3>
+            <span>
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                Burial Schedule
+            </span>
+            <span style="font-size:0.82rem; color:#64748b; font-weight:600;"><?php echo count($scheduledBurials ?? []); ?> scheduled this week</span>
+        </h3>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px;" class="burial-schedule-grid">
+            <!-- Mini Calendar -->
+            <div>
+                <?php
+                $prevM = $calMonth - 1; $prevY = $calYear; if ($prevM < 1) { $prevM = 12; $prevY--; }
+                $nextM = $calMonth + 1; $nextY = $calYear; if ($nextM > 12) { $nextM = 1; $nextY++; }
+                $firstDay = mktime(0, 0, 0, $calMonth, 1, $calYear);
+                $daysInMonth = (int)date('t', $firstDay);
+                $startDow = (int)date('N', $firstDay); // 1=Mon
+                $monthName = date('F Y', $firstDay);
+                $today = (int)date('j'); $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
+                ?>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+                    <a href="?cal_month=<?php echo $prevM; ?>&cal_year=<?php echo $prevY; ?>" style="padding:4px 10px; border:1px solid #e2e8f0; border-radius:8px; color:#10b981; font-weight:700; text-decoration:none;">&lsaquo;</a>
+                    <strong style="color:#0f172a; font-size:0.95rem;"><?php echo $monthName; ?></strong>
+                    <a href="?cal_month=<?php echo $nextM; ?>&cal_year=<?php echo $nextY; ?>" style="padding:4px 10px; border:1px solid #e2e8f0; border-radius:8px; color:#10b981; font-weight:700; text-decoration:none;">&rsaquo;</a>
+                </div>
+                <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+                    <thead>
+                        <tr>
+                            <?php foreach (['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $d): ?>
+                                <th style="padding:6px 2px; font-size:0.65rem; text-transform:uppercase; color:#94a3b8; font-weight:700; text-align:center;"><?php echo $d; ?></th>
+                            <?php endforeach; ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $dayNum = 1;
+                        for ($w = 0; $w < 6 && $dayNum <= $daysInMonth; $w++) {
+                            echo '<tr>';
+                            for ($d = 1; $d <= 7; $d++) {
+                                if (($w === 0 && $d < $startDow) || $dayNum > $daysInMonth) {
+                                    echo '<td style="padding:4px;"></td>';
+                                    continue;
+                                }
+                                $hasBurial = isset($calendarBurials[$dayNum]);
+                                $isToday = $isCurrentMonth && $dayNum === $today;
+                                $cellBg = $hasBurial ? '#fef3c7' : ($isToday ? '#ecfdf5' : 'transparent');
+                                $cellBorder = $hasBurial ? '1px solid #f59e0b' : ($isToday ? '1px solid #10b981' : '1px solid #f1f5f9');
+                                echo '<td style="padding:2px; vertical-align:top;">';
+                                echo '<div style="min-height:52px; border-radius:8px; padding:4px; background:' . $cellBg . '; border:' . $cellBorder . ';">';
+                                echo '<div style="font-size:0.75rem; font-weight:' . ($isToday ? '800' : '600') . '; color:' . ($isToday ? '#059669' : '#64748b') . '; text-align:center;">' . $dayNum . '</div>';
+                                if ($hasBurial) {
+                                    foreach ($calendarBurials[$dayNum] as $cb) {
+                                        $time = $cb['burial_time'] ? date('g:i A', strtotime($cb['burial_time'])) : '';
+                                        $done = $cb['is_buried'] == 1;
+                                        echo '<div title="' . htmlspecialchars($cb['decedent_name'] . ($time ? ' @ ' . $time : ''), ENT_QUOTES) . '" style="font-size:0.6rem; line-height:1.2; margin-top:2px; padding:1px 4px; border-radius:4px; background:' . ($done ? '#d1fae5' : '#fde68a') . '; color:' . ($done ? '#065f46' : '#92400e') . '; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' . htmlspecialchars($cb['decedent_name']) . ($time ? ' ' . $time : '') . '</div>';
+                                    }
+                                }
+                                echo '</div></td>';
+                                $dayNum++;
+                            }
+                            echo '</tr>';
+                        }
+                        ?>
+                    </tbody>
+                </table>
+                <div style="display:flex; gap:14px; margin-top:10px; font-size:0.7rem; color:#64748b;">
+                    <span><span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:#fde68a; border:1px solid #f59e0b;"></span> Scheduled</span>
+                    <span><span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:#d1fae5;"></span> Done</span>
+                </div>
+            </div>
+
+            <!-- This Week list -->
+            <div>
+                <div style="font-size:0.8rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">This Week</div>
+                <?php if (empty($scheduledBurials)): ?>
+                    <div class="dv2-empty">No burials scheduled this week</div>
+                <?php else: ?>
+                    <?php foreach ($scheduledBurials as $b): ?>
+                        <div id="burial-row-<?php echo (int)$b['id']; ?>" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid #f1f5f9; border-radius:10px; margin-bottom:8px; background:#fffbeb;">
+                            <div style="min-width:0;">
+                                <div style="font-weight:700; font-size:0.9rem; color:#0f172a;"><?php echo htmlspecialchars($b['decedent_name'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                <div style="font-size:0.78rem; color:#64748b;">
+                                    <?php echo date('D, M d', strtotime($b['burial_date'])); ?>
+                                    <?php echo $b['burial_time'] ? ' @ ' . date('g:i A', strtotime($b['burial_time'])) : ''; ?>
+                                    · Plot <?php echo htmlspecialchars($b['plot_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?>
+                                    · <?php echo htmlspecialchars($b['barangay'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?>
+                                </div>
+                            </div>
+                            <button type="button" onclick="markBurialDone(<?php echo (int)$b['id']; ?>, this)" style="padding:6px 16px; background:#10b981; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">DONE</button>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
@@ -653,13 +782,13 @@ try {
                     <span class="dv2-qa-desc">Interactive cemetery map</span>
                 </div>
             </a>
-            <a href="reservations_simple.php" class="dv2-qa">
+            <a href="expiring-plots.php" class="dv2-qa">
                 <div class="dv2-qa-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                 </div>
                 <div>
-                    <span class="dv2-qa-title-text">Reservations</span>
-                    <span class="dv2-qa-desc">Manage reservations</span>
+                    <span class="dv2-qa-title-text">Expiring Plots</span>
+                    <span class="dv2-qa-desc">Renewals due soon</span>
                 </div>
             </a>
         </div>
@@ -671,5 +800,33 @@ try {
 
     <!-- Scripts -->
     <script src="../assets/js/theme.js"></script>
+    <script>
+    async function markBurialDone(recordId, btn) {
+        btn.disabled = true;
+        btn.textContent = '...';
+        try {
+            const fd = new FormData();
+            fd.append('record_id', recordId);
+            const res = await fetch('../api/mark_buried.php', { method: 'POST', body: fd });
+            const data = await res.json();
+            if (data.success) {
+                const row = document.getElementById('burial-row-' + recordId);
+                if (row) {
+                    row.style.transition = 'opacity 0.4s';
+                    row.style.opacity = '0';
+                    setTimeout(() => row.remove(), 400);
+                }
+            } else {
+                alert(data.message || 'Failed to mark burial as done');
+                btn.disabled = false;
+                btn.textContent = 'DONE';
+            }
+        } catch (e) {
+            alert('Network error');
+            btn.disabled = false;
+            btn.textContent = 'DONE';
+        }
+    }
+    </script>
 </body>
 </html>

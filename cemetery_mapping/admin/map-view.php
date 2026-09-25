@@ -191,12 +191,15 @@ button svg, a svg, button i, a i { pointer-events: none; }
             fillOpacity: 0,
             dashArray: '5, 10'
         }).addTo(map);
+
+        // Compass direction labels (N/E/S/W) at true geographic positions
+        addCompassLabels();
         
         console.log('Map initialized, loading data...');
         
         // Load data
         loadAllData();
-        
+
         // After loading, check if we should zoom to a specific location
         setTimeout(() => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -222,7 +225,40 @@ button svg, a svg, button i, a i { pointer-events: none; }
             }
         }, 1500);
     }
-    
+
+    // Place N/E/S/W labels at the true compass edges of the cemetery.
+    // Markers are anchored to real lat/lng positions so they rotate with
+    // the map and always indicate actual compass directions.
+    function addCompassLabels() {
+        const south = CEMETERY_BOUNDS[0][0];
+        const west  = CEMETERY_BOUNDS[0][1];
+        const north = CEMETERY_BOUNDS[1][0];
+        const east  = CEMETERY_BOUNDS[1][1];
+        const midLat = (north + south) / 2;
+        const midLng = (east + west) / 2;
+        const padLat = (north - south) * 0.07;
+        const padLng = (east - west) * 0.07;
+
+        const dirs = [
+            { label: 'N', pos: [north + padLat, midLng] },
+            { label: 'S', pos: [south - padLat, midLng] },
+            { label: 'E', pos: [midLat, east + padLng] },
+            { label: 'W', pos: [midLat, west - padLng] }
+        ];
+
+        dirs.forEach(d => {
+            const icon = L.divIcon({
+                className: 'compass-label',
+                html: '<div style="background:rgba(15,23,42,0.85);color:#fff;width:28px;height:28px;border-radius:50%;' +
+                      'display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;' +
+                      'border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.45);">' + d.label + '</div>',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+            L.marker(d.pos, { icon: icon, interactive: false, keyboard: false }).addTo(map);
+        });
+    }
+
     // Load data on page load
     async function loadAllData() {
         console.log('Loading burial records and plots...');

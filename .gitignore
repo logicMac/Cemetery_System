@@ -5,3 +5,6 @@ cemetery_mapping/uploads/*
 # IDE
 .vscode/
 *.log
+
+# Windows reserved device name file (accidentally created, cannot be deleted or indexed)
+nul

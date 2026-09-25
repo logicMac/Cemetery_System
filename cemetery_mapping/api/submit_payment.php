@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 try {
     $visitor_id = $_SESSION['visitor_id'];
     $reservation_id = $_POST['reservation_id'] ?? null;
-    $payment_method = $_POST['payment_method'] ?? 'cash';
+    $payment_method = 'cash'; // Only cash is accepted
     $amount = $_POST['amount'] ?? 0;
     $reference_number = $_POST['reference_number'] ?? '';
     $notes = $_POST['notes'] ?? '';

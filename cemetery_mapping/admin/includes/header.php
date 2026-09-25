@@ -23,6 +23,9 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico?v=2">
+    <link rel="shortcut icon" type="image/x-icon" href="../assets/images/favicon.ico?v=2">
+    <link rel="icon" type="image/png" href="../assets/images/favicon.png?v=2">
     <title><?php echo ucfirst(str_replace('-', ' ', $current_page)); ?> - Admin Panel</title>
 
     <!-- Poppins -->
@@ -45,7 +48,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="../assets/css/theme.css?v=3">
-    <link rel="stylesheet" href="../assets/css/admin.css?v=8">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=9">
     <link rel="stylesheet" href="../assets/css/mobile-responsive.css?v=2">
 </head>
 <body>

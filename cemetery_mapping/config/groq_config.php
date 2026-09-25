@@ -1,13 +1,55 @@
 <?php
 /**
  * Groq AI Configuration
- * Configuration for Groq API integration using llama-3.1-70b-versatile model
+ * Configuration for Groq API integration.
+ *
+ * API credentials are now stored in the `ai_api_keys` table and managed
+ * from Admin -> API Keys. The file constants below act as a fallback when
+ * the table is missing or has no active 'groq' row.
  */
 
-// Groq API Configuration
-define('GROQ_API_KEY', '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'); // Replace with actual API key
-define('GROQ_API_URL', 'https://api.groq.com/openai/v1/chat/completions');
-define('GROQ_MODEL', 'llama-3.3-70b-versatile'); // Updated to newer model
+// Fallback credentials (used only if the database has no active Groq key)
+// The API key lives in groq_key.local.php (gitignored). Never commit real keys.
+$_groqLocalKey = '';
+$__groqKeyFile = __DIR__ . '/groq_key.local.php';
+if (is_file($__groqKeyFile)) {
+    // groq_key.local.php should define GROQ_API_KEY or GROQ_LOCAL_API_KEY
+    include $__groqKeyFile;
+    if (defined('GROQ_API_KEY')) $_groqLocalKey = GROQ_API_KEY;
+    elseif (defined('GROQ_LOCAL_API_KEY')) $_groqLocalKey = GROQ_LOCAL_API_KEY;
+}
+define('GROQ_API_KEY_FALLBACK', $_groqLocalKey);
+define('GROQ_API_URL_FALLBACK', 'https://api.groq.com/openai/v1/chat/completions');
+define('GROQ_MODEL_FALLBACK', 'openai/gpt-oss-120b');
+
+// Resolve credentials: database first, file fallback second
+$_groqKey = GROQ_API_KEY_FALLBACK;
+$_groqUrl = GROQ_API_URL_FALLBACK;
+$_groqModel = GROQ_MODEL_FALLBACK;
+
+try {
+    if (!isset($pdo)) {
+        require_once __DIR__ . '/database.php';
+    }
+    $stmt = $pdo->query(
+        "SELECT api_key, api_url, model FROM ai_api_keys
+         WHERE provider = 'groq' AND is_active = 1
+         ORDER BY id DESC LIMIT 1"
+    );
+    $row = $stmt->fetch();
+    if ($row && !empty($row['api_key'])) {
+        $_groqKey = $row['api_key'];
+        if (!empty($row['api_url'])) $_groqUrl = $row['api_url'];
+        if (!empty($row['model']))   $_groqModel = $row['model'];
+    }
+} catch (Exception $e) {
+    // Table may not exist yet — fall back to file constants
+    error_log('ai_api_keys lookup failed: ' . $e->getMessage());
+}
+
+define('GROQ_API_KEY', $_groqKey);
+define('GROQ_API_URL', $_groqUrl);
+define('GROQ_MODEL', $_groqModel);
 
 /**
  * Send request to Groq API

@@ -221,31 +221,51 @@ async function exportData(format, endpoint) {
 // Map utilities for admin
 function initAdminMap(containerId, options = {}) {
     const CEMETERY_CENTER = [6.18344118743717, 125.08457146469357];
-    const CEMETERY_BOUNDS = [
-        [6.18244118743717, 125.08357146469357],
-        [6.18444118743717, 125.08557146469357]
+    const CEMETERY_POLYGON = [
+        [6.184703227248634, 125.08388389813996],
+        [6.183142672429919, 125.08538436803683],
+        [6.182440110293303, 125.08476491148839],
+        [6.184002859166614, 125.08321729641679]
     ];
-    
-    const map = L.map(containerId, {
+
+    const mapOpts = {
         center: options.center || CEMETERY_CENTER,
         zoom: options.zoom || 17,
         minZoom: 10,
-        maxZoom: 20
-    });
-    
-    L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-        maxZoom: 20,
+        maxZoom: 22
+    };
+    if (options.bearing !== undefined) {
+        mapOpts.rotate = true;
+        mapOpts.touchRotate = true;
+        mapOpts.bearing = options.bearing;
+    }
+
+    const map = L.map(containerId, mapOpts);
+
+    L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 22,
         subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
     }).addTo(map);
-    
-    // Draw cemetery boundary
-    L.rectangle(CEMETERY_BOUNDS, {
+
+    // Draw cemetery boundary polygon
+    const boundaryPolygon = L.polygon(CEMETERY_POLYGON, {
         color: '#b55a5a',
         weight: 2,
         fillOpacity: 0,
         dashArray: '5, 10'
     }).addTo(map);
-    
+
+    // Expose cemetery polygon on the map instance for boundary validation
+    map._cemeteryPolygon = CEMETERY_POLYGON;
+
+    // Hide the plugin's default rotate control if present
+    if (options.bearing !== undefined) {
+        setTimeout(() => {
+            const c = map.getContainer();
+            c.querySelectorAll('.leaflet-control-rotate').forEach(el => el.style.display = 'none');
+        }, 50);
+    }
+
     return map;
 }
 

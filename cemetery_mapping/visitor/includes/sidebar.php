@@ -21,18 +21,6 @@
                         ['dashboard.php', 'dashboard', 'Cemetery Map', 'map'],
                     ],
                 ],
-                'Plots' => [
-                    'icon' => 'map-pin',
-                    'items' => [
-                        ['available-plots.php', 'available-plots', 'Available Plots', 'map-pin'],
-                    ],
-                ],
-                'Reservations' => [
-                    'icon' => 'calendar',
-                    'items' => [
-                        ['my-reservations.php', 'my-reservations', 'My Reservations', 'calendar-check'],
-                    ],
-                ],
             ];
             ?>
 
@@ -56,7 +44,7 @@
                         </span>
                         <i data-lucide="chevron-down" class="sidebar-group-chevron" width="14" height="14"></i>
                     </button>
-                    <ul class="sidebar-group-menu">
+                    <ul class="sidebar-group-menu" data-group-label="<?php echo $groupName; ?>">
                         <?php foreach ($items as $item): ?>
                         <li class="sidebar-group-item <?php echo $current_page === $item[1] ? 'active' : ''; ?>">
                             <a href="<?php echo $item[0]; ?>" class="sidebar-link">

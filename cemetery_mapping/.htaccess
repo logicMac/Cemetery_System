@@ -9,22 +9,19 @@ Options -Indexes
 
 # Protect sensitive directories
 <FilesMatch "\.(htaccess|htpasswd|ini|log|sql)$">
-    Order Allow,Deny
-    Deny from all
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order Allow,Deny
+        Deny from all
+    </IfModule>
 </FilesMatch>
 
 # Block access to config directory
 <IfModule mod_rewrite.c>
     RewriteRule ^config/ - [F,L]
 </IfModule>
-
-# Protect uploads directory from PHP execution
-<Directory "uploads">
-    <Files "*.php">
-        Order allow,deny
-        Deny from all
-    </Files>
-</Directory>
 
 # Set default charset
 AddDefaultCharset UTF-8

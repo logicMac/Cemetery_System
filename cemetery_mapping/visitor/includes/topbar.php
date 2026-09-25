@@ -38,7 +38,7 @@ if ($page_title === 'Available Plots') { $page_title = 'Available Plots'; }
                         <p>No notifications yet</p>
                     </div>
                 </div>
-                <a href="my-reservations.php" class="visitor-notif-footer">View all reservations</a>
+                <a href="dashboard.php" class="visitor-notif-footer">View cemetery map</a>
             </div>
         </div>
         <a href="logout.php" class="admin-header-btn" title="Logout" aria-label="Logout">
@@ -413,7 +413,7 @@ function renderVisitorNotifications(notifs, unreadCount) {
         const unreadClass = n.unread ? ' unread' : '';
         const unreadDot = n.unread ? '<span class="visitor-notif-unread-dot"></span>' : '';
         return `
-            <div class="visitor-notif-item${unreadClass}" onclick="window.location.href='my-reservations.php'">
+            <div class="visitor-notif-item${unreadClass}" onclick="window.location.href='dashboard.php'">
                 <div class="visitor-notif-icon" style="background: ${n.color}15; color: ${n.color};">
                     <i data-lucide="${n.icon}" width="20" height="20"></i>
                 </div>

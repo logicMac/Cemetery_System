@@ -17,7 +17,7 @@ require_once '../config/database.php';
 
 // Validate required fields
 $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-$decedent_name = filter_input(INPUT_POST, 'decedent_name', FILTER_SANITIZE_STRING);
+$decedent_name = strip_tags((string)filter_input(INPUT_POST, 'decedent_name'));
 $latitude = filter_input(INPUT_POST, 'latitude', FILTER_VALIDATE_FLOAT);
 $longitude = filter_input(INPUT_POST, 'longitude', FILTER_VALIDATE_FLOAT);
 
@@ -27,13 +27,35 @@ if (!$id || empty($decedent_name) || $latitude === false || $longitude === false
 }
 
 // Sanitize optional fields
-$family_name = filter_input(INPUT_POST, 'family_name', FILTER_SANITIZE_STRING);
-$birth_date = filter_input(INPUT_POST, 'birth_date', FILTER_SANITIZE_STRING);
-$death_date = filter_input(INPUT_POST, 'death_date', FILTER_SANITIZE_STRING);
-$plot_number = filter_input(INPUT_POST, 'plot_number', FILTER_SANITIZE_STRING);
-$barangay = filter_input(INPUT_POST, 'barangay', FILTER_SANITIZE_STRING);
-$memory_space = filter_input(INPUT_POST, 'memory_space', FILTER_SANITIZE_STRING);
+$family_name = strip_tags((string)filter_input(INPUT_POST, 'family_name'));
+$visitor_id = filter_input(INPUT_POST, 'visitor_id', FILTER_VALIDATE_INT);
+$birth_date = strip_tags((string)filter_input(INPUT_POST, 'birth_date'));
+$death_date = strip_tags((string)filter_input(INPUT_POST, 'death_date'));
+$plot_number = strip_tags((string)filter_input(INPUT_POST, 'plot_number'));
+$barangay = strip_tags((string)filter_input(INPUT_POST, 'barangay'));
+$memory_space = strip_tags((string)filter_input(INPUT_POST, 'memory_space'));
+$expiration_date = strip_tags((string)filter_input(INPUT_POST, 'expiration_date'));
+$burial_date = strip_tags((string)filter_input(INPUT_POST, 'burial_date'));
+$burial_time = strip_tags((string)filter_input(INPUT_POST, 'burial_time'));
+$is_buried = isset($_POST['is_buried']) && $_POST['is_buried'] === '0' ? 0 : 1;
 $is_fenced = isset($_POST['is_fenced']) ? 1 : 0;
+
+$expiration_date = !empty($expiration_date) ? date('Y-m-d', strtotime($expiration_date)) : null;
+if (!empty($expiration_date) && $expiration_date === '1970-01-01') {
+    $expiration_date = null;
+}
+
+$burial_date = !empty($burial_date) ? date('Y-m-d', strtotime($burial_date)) : null;
+$burial_time = !empty($burial_time) ? date('H:i:s', strtotime($burial_time)) : null;
+
+// Polygon is a JSON array of [lat, lng] points; validate it instead of sanitizing
+$polygon = null;
+if (!empty($_POST['polygon'])) {
+    $decoded = json_decode($_POST['polygon'], true);
+    if (is_array($decoded) && count($decoded) >= 3) {
+        $polygon = json_encode($decoded);
+    }
+}
 
 // Get existing record
 try {
@@ -91,23 +113,29 @@ try {
     
     // Update record
     $updateStmt = $pdo->prepare("
-        UPDATE burial_records 
-        SET decedent_name = ?, family_name = ?, birth_date = ?, death_date = ?, 
-            plot_number = ?, barangay = ?, memory_space = ?, latitude = ?, 
-            longitude = ?, is_fenced = ?, photo = ?
+        UPDATE burial_records
+        SET decedent_name = ?, family_name = ?, visitor_id = ?, birth_date = ?, death_date = ?, burial_date = ?, burial_time = ?, is_buried = ?, expiration_date = ?,
+            plot_number = ?, barangay = ?, memory_space = ?, latitude = ?,
+            longitude = ?, polygon = ?, is_fenced = ?, photo = ?
         WHERE id = ?
     ");
-    
+
     $updateStmt->execute([
         $decedent_name,
         $family_name,
+        $visitor_id ?: null,
         $birth_date ?: null,
         $death_date ?: null,
+        $burial_date,
+        $burial_time,
+        $is_buried,
+        $expiration_date,
         $plot_number,
         $barangay,
         $memory_space,
         $latitude,
         $longitude,
+        $polygon,
         $is_fenced,
         $photo_filename,
         $id

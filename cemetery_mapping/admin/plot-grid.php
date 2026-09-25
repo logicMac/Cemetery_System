@@ -107,11 +107,23 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
 <!-- Grid Visualization -->
 <div class="glass-card" style="padding: 30px;">
     <h3 style="margin: 0 0 20px 0;">Compartment Grid</h3>
-    
-    <div id="gridContainer" style="display: inline-block; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px;">
+    <p style="margin: 0 0 15px 0; font-size: 0.9rem; color: var(--zinc-500);">
+        Satellite map is shown behind the grid. Click any cell to log its map coordinates.
+    </p>
+
+    <?php
+    $rows = (int)$plot['grid_rows'];
+    $cols = (int)$plot['grid_cols'];
+    // Compute pixel dimensions of the grid block (cell 80 + gap 10) + padding 20 each side
+    $gridWidthPx  = $cols * 80 + ($cols - 1) * 10 + 40;
+    $gridHeightPx = $rows * 80 + ($rows - 1) * 10 + 40;
+    ?>
+    <div id="gridMapWrapper" style="position: relative; width: <?php echo $gridWidthPx; ?>px; height: <?php echo $gridHeightPx; ?>px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+        <!-- Satellite map background -->
+        <div id="gridSatMap" style="position: absolute; inset: 0; width: 100%; height: 100%; background: #0a0a0a; z-index: 100;"></div>
+        <!-- Grid overlay -->
+        <div id="gridContainer" style="position: absolute; inset: 0; display: flex; flex-direction: column; padding: 20px; z-index: 400; pointer-events: none;">
         <?php
-        $rows = (int)$plot['grid_rows'];
-        $cols = (int)$plot['grid_cols'];
         $compartmentNum = 1;
         
         for ($row = 0; $row < $rows; $row++) {
@@ -125,13 +137,14 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
                     $reservation = $reservedCompartments[$compartmentNum];
                     $statusColor = $reservation['status'] === 'approved' ? '#5a9b6f' : '#a68b52';
                     $bgGradient = $reservation['status'] === 'approved' 
-                        ? 'linear-gradient(135deg, #5a9b6f 0%, #059669 100%)'
-                        : 'linear-gradient(135deg, #a68b52 0%, #8a7340 100%)';
+                        ? 'linear-gradient(135deg, rgba(90,155,111,0.85) 0%, rgba(5,150,105,0.85) 100%)'
+                        : 'linear-gradient(135deg, rgba(166,139,82,0.85) 0%, rgba(138,115,64,0.85) 100%)';
                     
                     $tooltipData = htmlspecialchars(json_encode($reservation), ENT_QUOTES, 'UTF-8');
                     
                     echo '<div class="grid-cell reserved-cell" 
                         data-reservation=\'' . $tooltipData . '\'
+                        data-row="' . $row . '" data-col="' . $col . '"
                         style="
                             width: 80px; 
                             height: 80px; 
@@ -147,6 +160,7 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
                             cursor: pointer;
                             transition: all 0.3s ease;
                             position: relative;
+                            pointer-events: auto;
                         " 
                         onclick="showReservationDetails(' . $compartmentNum . ')"
                         onmouseover="this.style.transform=\'scale(1.05)\'; this.style.boxShadow=\'0 8px 20px rgba(0,0,0,0.4)\';" 
@@ -156,11 +170,11 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
                     echo '<div style="position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>';
                     echo '</div>';
                 } else {
-                    echo '<div class="grid-cell available-cell" style="
+                    echo '<div class="grid-cell available-cell" data-row="' . $row . '" data-col="' . $col . '" style="
                         width: 80px; 
                         height: 80px; 
-                        background: rgba(255,255,255,0.05);
-                        border: 2px solid rgba(255,255,255,0.1);
+                        background: rgba(255,255,255,0.08);
+                        border: 2px solid rgba(255,255,255,0.25);
                         border-radius: 8px;
                         display: flex;
                         flex-direction: column;
@@ -170,13 +184,14 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
                         font-size: 1.1rem;
                         cursor: pointer;
                         transition: all 0.3s ease;
-                        color: rgba(255,255,255,0.5);
+                        color: rgba(255,255,255,0.85);
+                        pointer-events: auto;
                     " 
-                    onmouseover="this.style.transform=\'scale(1.05)\'; this.style.borderColor=\'rgba(74, 222, 128, 0.5)\';" 
-                    onmouseout="this.style.transform=\'scale(1)\'; this.style.borderColor=\'rgba(255,255,255,0.1)\';"
-                    onclick="selectCompartment(\'' . $label . '\', ' . $compartmentNum . ')">';
+                    onmouseover="this.style.transform=\'scale(1.05)\'; this.style.borderColor=\'rgba(74, 222, 128, 0.8)\';" 
+                    onmouseout="this.style.transform=\'scale(1)\'; this.style.borderColor=\'rgba(255,255,255,0.25)\';"
+                    onclick="selectCompartment(\'' . $label . '\', ' . $compartmentNum . ', this)">';
                     echo '<div>' . $label . '</div>';
-                    echo '<div style="font-size: 0.7rem; margin-top: 2px; opacity: 0.5;">#' . $compartmentNum . '</div>';
+                    echo '<div style="font-size: 0.7rem; margin-top: 2px; opacity: 0.8;">#' . $compartmentNum . '</div>';
                     echo '</div>';
                 }
                 
@@ -186,6 +201,18 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
             echo '</div>';
         }
         ?>
+        </div>
+    </div>
+
+    <!-- Coordinates log -->
+    <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h4 style="margin: 0; font-size: 0.95rem;">Logged Coordinates</h4>
+            <button onclick="clearLoggedCoords()" class="btn-secondary" style="padding: 4px 12px; font-size: 0.8rem;">Clear</button>
+        </div>
+        <div id="coordsLog" style="font-family: monospace; font-size: 0.85rem; color: #a3e635; max-height: 150px; overflow-y: auto;">
+            <div style="color: rgba(255,255,255,0.4);">Click a grid cell to log its map coordinates...</div>
+        </div>
     </div>
     
     <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--glass-border);">
@@ -244,12 +271,121 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
     </div>
     
     <script src="../assets/js/theme.js"></script>
+    <!-- Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.fullscreen@2.4.0/Control.FullScreen.js"></script>
     <script>
         // Store reservation data
         const reservations = <?php echo json_encode($reservedCompartments); ?>;
+        const PLOT_LAT = <?php echo (float)$plot['latitude']; ?>;
+        const PLOT_LNG = <?php echo (float)$plot['longitude']; ?>;
+        const PLOT_ROWS = <?php echo (int)$plot['grid_rows']; ?>;
+        const PLOT_COLS = <?php echo (int)$plot['grid_cols']; ?>;
+        let gridMap = null;
+        const loggedCoords = [];
+
+        // Initialize satellite map behind the grid
+        function initGridSatMap() {
+            gridMap = L.map('gridSatMap', {
+                zoomControl: true,
+                attributionControl: false,
+                dragging: true,
+                scrollWheelZoom: true,
+                doubleClickZoom: false,
+                boxZoom: false,
+                keyboard: false
+            }).setView([PLOT_LAT, PLOT_LNG], 20);
+
+            L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                maxZoom: 22,
+                subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+            }).addTo(gridMap);
+
+            if (typeof L.Control.Fullscreen !== 'undefined') {
+                gridMap.addControl(new L.Control.Fullscreen());
+            }
+
+            // Center marker for the plot
+            L.marker([PLOT_LAT, PLOT_LNG], {
+                icon: L.divIcon({
+                    className: 'custom-marker',
+                    html: '<div style="width:14px;height:14px;background:#22c55e;border:2px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(0,0,0,0.6);"></div>',
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7]
+                })
+            }).addTo(gridMap);
+
+            // Show polygon if defined
+            const polygonRaw = <?php echo json_encode($plot['polygon'] ?? null); ?>;
+            if (polygonRaw) {
+                try {
+                    const pts = (typeof polygonRaw === 'string') ? JSON.parse(polygonRaw) : polygonRaw;
+                    if (Array.isArray(pts) && pts.length >= 3) {
+                        L.polygon(pts, {
+                            color: '#22c55e',
+                            weight: 2,
+                            fillColor: '#22c55e',
+                            fillOpacity: 0.15
+                        }).addTo(gridMap);
+                    }
+                } catch (e) { /* ignore bad polygon */ }
+            }
+        }
+
+        // Compute the lat/lng of a grid cell based on its row/col index.
+        // We treat the plot lat/lng as the center of the grid and spread cells
+        // evenly across a small area proportional to the grid size.
+        function getCellLatLng(row, col) {
+            // Estimate the plot's geographic span. ~0.0001 deg ~= 11m.
+            // We spread the grid over a span that scales with the number of cells.
+            const spanLat = 0.00010 * PLOT_ROWS + 0.00002 * (PLOT_ROWS - 1);
+            const spanLng = 0.00010 * PLOT_COLS + 0.00002 * (PLOT_COLS - 1);
+            const startLat = PLOT_LAT + spanLat / 2;
+            const startLng = PLOT_LNG - spanLng / 2;
+            const stepLat = spanLat / Math.max(PLOT_ROWS, 1);
+            const stepLng = spanLng / Math.max(PLOT_COLS, 1);
+            // Center of the cell
+            const lat = startLat - (row + 0.5) * stepLat;
+            const lng = startLng + (col + 0.5) * stepLng;
+            return [lat, lng];
+        }
+
+        function logCoordinates(label, num, lat, lng) {
+            const log = document.getElementById('coordsLog');
+            // Remove placeholder
+            if (loggedCoords.length === 0) log.innerHTML = '';
+            const entry = { label, num, lat, lng, time: new Date().toLocaleTimeString() };
+            loggedCoords.push(entry);
+            const div = document.createElement('div');
+            div.style.padding = '4px 0';
+            div.style.borderBottom = '1px dashed rgba(255,255,255,0.08)';
+            div.innerHTML = `<span style="color:#22c55e;">[${entry.time}]</span> ` +
+                `<strong>${label}</strong> (#${num}) &mdash; ` +
+                `lat: <span style="color:#fff;">${lat.toFixed(8)}</span>, ` +
+                `lng: <span style="color:#fff;">${lng.toFixed(8)}</span>`;
+            log.appendChild(div);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function clearLoggedCoords() {
+            loggedCoords.length = 0;
+            document.getElementById('coordsLog').innerHTML =
+                '<div style="color: rgba(255,255,255,0.4);">Click a grid cell to log its map coordinates...</div>';
+        }
         
-        function selectCompartment(label, num) {
-            themeUtils.showAlert(`Compartment ${label} (#${num}) is available`, 'info');
+        function selectCompartment(label, num, el) {
+            const row = parseInt(el.dataset.row, 10);
+            const col = parseInt(el.dataset.col, 10);
+            const [lat, lng] = getCellLatLng(row, col);
+            logCoordinates(label, num, lat, lng);
+            // Drop a temporary marker on the map
+            if (gridMap) {
+                L.popup({ className: 'grid-coord-popup' })
+                    .setLatLng([lat, lng])
+                    .setContent(`<strong>${label}</strong> (#${num})<br>lat: ${lat.toFixed(8)}<br>lng: ${lng.toFixed(8)}`)
+                    .openOn(gridMap);
+            }
+            themeUtils.showAlert(`Compartment ${label} (#${num}) is available. Coordinates logged.`, 'info');
         }
         
         function showReservationDetails(compartmentNum) {
@@ -332,9 +468,28 @@ $occupancyRate = $totalCompartments > 0 ? ($reservedCount / $totalCompartments) 
                 closeModal();
             }
         });
+
+        // Initialize the satellite map behind the grid
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                initGridSatMap();
+            } catch (e) {
+                console.error('Failed to init grid satellite map:', e);
+            }
+        });
     </script>
     
     <style>
+        #gridSatMap .leaflet-control-zoom,
+        #gridSatMap .leaflet-control-fullscreen-button {
+            margin: 10px;
+        }
+        #gridSatMap .leaflet-popup-content-wrapper {
+            background: #0a0a0a;
+            color: #fff;
+            border: 1px solid rgba(74, 222, 128, 0.4);
+        }
+        #gridSatMap .leaflet-popup-tip { background: #0a0a0a; }
         @media print {
             .sidebar, .btn-secondary, .btn-primary {
                 display: none !important;

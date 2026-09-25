@@ -3210,6 +3210,7 @@ input[type="radio"] {
 .admin-layout.collapsed .admin-sidebar {
     width: 72px;
     padding: 20px 10px;
+    overflow: visible;
 }
 
 .admin-layout.collapsed .admin-main {
@@ -3234,8 +3235,7 @@ input[type="radio"] {
 .admin-layout.collapsed .sidebar-chevron,
 .admin-layout.collapsed .sidebar-group-chevron,
 .admin-layout.collapsed .sidebar-user-info,
-.admin-layout.collapsed .sidebar-user-logout,
-.admin-layout.collapsed .sidebar-group-menu {
+.admin-layout.collapsed .sidebar-user-logout {
     display: none;
 }
 
@@ -3255,6 +3255,86 @@ input[type="radio"] {
 .admin-layout.collapsed .sidebar-link {
     justify-content: center;
     padding: 12px 10px;
+}
+
+/* Flyout submenu when collapsed */
+.admin-layout.collapsed .sidebar-group-menu {
+    position: fixed;
+    left: 72px;
+    top: auto;
+    min-width: 200px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+    padding: 8px;
+    max-height: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+.admin-layout.collapsed .sidebar-group:hover .sidebar-group-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+/* Flyout group label */
+.admin-layout.collapsed .sidebar-group-menu::before {
+    content: attr(data-group-label);
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #10b981;
+    padding: 6px 12px 8px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 4px;
+}
+
+/* Flyout link styling — show text again */
+.admin-layout.collapsed .sidebar-group-menu .sidebar-link-text {
+    display: inline;
+}
+
+.admin-layout.collapsed .sidebar-group-menu .sidebar-link {
+    justify-content: flex-start;
+    padding: 10px 12px;
+    gap: 10px;
+    border-radius: 8px;
+}
+
+/* Hover indicator arrow on the group icon */
+.admin-layout.collapsed .sidebar-group {
+    position: relative;
+}
+
+.admin-layout.collapsed .sidebar-group-toggle::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
+    background: #10b981;
+    border-radius: 2px;
+    transition: height 0.2s ease;
+}
+
+.admin-layout.collapsed .sidebar-group:hover .sidebar-group-toggle::after {
+    height: 24px;
+}
+
+.admin-layout.collapsed .sidebar-group:hover .sidebar-group-toggle {
+    background: #f0fdf4;
+    color: #10b981;
 }
 
 .admin-layout.collapsed .sidebar-footer {

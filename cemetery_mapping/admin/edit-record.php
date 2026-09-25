@@ -21,13 +21,32 @@ try {
     exit;
 }
 
-// Get barangays
-try {
-    $stmt = $pdo->query("SELECT DISTINCT barangay FROM burial_records WHERE barangay IS NOT NULL ORDER BY barangay");
-    $barangays = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch (PDOException $e) {
-    $barangays = [];
-}
+// Barangays of Polomolok, South Cotabato
+$barangays = [
+    'Bentung',
+    'Cannery Site',
+    'Crossing Palkan',
+    'Glamang',
+    'Kinilis',
+    'Klinan 6',
+    'Koronadal Proper',
+    'Lam Caliaf',
+    'Landan',
+    'Lapu',
+    'Lumakil',
+    'Magsaysay',
+    'Maligo',
+    'Pagalungan',
+    'Palkan',
+    'Poblacion',
+    'Polo',
+    'Rubber',
+    'Silway 7',
+    'Silway 8',
+    'Sulit',
+    'Sumbakil',
+    'Upper Klinan',
+];
 ?>
 
 <?php require_once 'includes/sidebar.php'; ?>

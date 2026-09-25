@@ -10,7 +10,7 @@ require_once '../config/database.php';
 try {
     $stmt = $pdo->query("
         SELECT 
-            ap.id, ap.plot_number, ap.latitude, ap.longitude, ap.notes, ap.photo, 
+            ap.id, ap.plot_number, ap.latitude, ap.longitude, ap.polygon, ap.notes, ap.photo, 
             ap.has_grid, ap.grid_rows, ap.grid_cols, ap.compartment_count,
             (SELECT pr.status FROM plot_reservations pr 
              WHERE pr.plot_id = ap.id AND pr.compartment_id IS NULL 

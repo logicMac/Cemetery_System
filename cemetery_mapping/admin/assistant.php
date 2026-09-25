@@ -24,6 +24,7 @@ try {
 @keyframes typing { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes twWave { 0%, 100% { transform: scaleY(0.4); opacity: 0.6; } 50% { transform: scaleY(1); opacity: 1; } }
 .animate-fade { animation: fadeUp 0.5s ease both; }
 .chat-message { animation: slideIn 0.3s ease; }
 .typing-dot { animation: typing 1.4s infinite; }
@@ -77,9 +78,15 @@ button svg, a svg, button i, a i { pointer-events: none; }
                     <p class="text-xs text-slate-400">Typically responds instantly</p>
                 </div>
             </div>
-            <div class="flex items-center gap-1.5 text-xs text-slate-400">
-                <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
-                <span id="msgCount">0</span> messages
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTTS()" id="ttsToggle" title="Toggle voice output" class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-slate-500 hover:bg-emerald-50 hover:text-emerald-600 transition">
+                    <i data-lucide="volume-x" class="w-4 h-4" id="ttsIcon"></i>
+                </button>
+                <div class="w-px h-6 bg-slate-200"></div>
+                <div class="flex items-center gap-1.5 text-xs text-slate-400">
+                    <i data-lucide="message-square" class="w-3.5 h-3.5"></i>
+                    <span id="msgCount">0</span> messages
+                </div>
             </div>
         </div>
 
@@ -116,6 +123,9 @@ button svg, a svg, button i, a i { pointer-events: none; }
                         style="max-height: 120px;"
                     ></textarea>
                 </div>
+                <button onclick="toggleVoiceInput()" id="voiceBtn" title="Voice input" class="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white hover:bg-emerald-50 hover:border-emerald-300 text-slate-600 hover:text-emerald-600 text-sm font-semibold px-3.5 py-3 transition">
+                    <i data-lucide="mic" class="w-4 h-4" id="voiceIcon"></i>
+                </button>
                 <button onclick="sendMessage()" id="sendBtn" class="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-3 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                     <i data-lucide="send" class="w-4 h-4" id="sendIcon"></i>
                     <span id="sendLabel" class="hidden sm:inline">Send</span>
@@ -273,11 +283,20 @@ button svg, a svg, button i, a i { pointer-events: none; }
             return new Date(date).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
         }
 
-        async function sendMessage() {
-            if (isProcessing) return;
-            const message = input.value.trim();
-            if (!message || message.length > 500) return;
+        let isVoiceMessage = false;
 
+        async function sendMessage() {
+            if (isProcessing) {
+                console.warn('sendMessage blocked: isProcessing=true');
+                return;
+            }
+            const message = input.value.trim();
+            if (!message || message.length > 500) {
+                console.warn('sendMessage blocked: empty or too long message', { length: message.length });
+                return;
+            }
+
+            console.log('sendMessage called with:', message, 'isVoice:', isVoiceMessage);
             isProcessing = true;
             addMessage(message, 'user');
             input.value = '';
@@ -298,14 +317,22 @@ button svg, a svg, button i, a i { pointer-events: none; }
                     body: JSON.stringify({ message })
                 });
                 const data = await response.json();
+                console.log('API response:', data);
                 document.getElementById(typingId).remove();
 
                 if (data.success) {
-                    addMessage(data.response, 'assistant');
+                    if (isVoiceMessage) {
+                        showTalkingAnimation(data.response);
+                    } else {
+                        addMessage(data.response, 'assistant');
+                    }
                     if (data.chart_data) addChartVisualization(data.chart_data);
                 } else if (data.response) {
-                    // API returned a fallback response with stats
-                    addMessage(data.response, 'assistant');
+                    if (isVoiceMessage) {
+                        showTalkingAnimation(data.response);
+                    } else {
+                        addMessage(data.response, 'assistant');
+                    }
                     if (data.chart_data) addChartVisualization(data.chart_data);
                     console.warn('Assistant API error:', data.error);
                 } else {
@@ -313,10 +340,12 @@ button svg, a svg, button i, a i { pointer-events: none; }
                     console.error('Assistant API error:', errMsg, data);
                     addMessage('I encountered an error: ' + errMsg + '. Please try again.', 'assistant');
                 }
+                isVoiceMessage = false;
             } catch (error) {
                 document.getElementById(typingId).remove();
                 console.error('Assistant fetch error:', error);
                 addMessage('I\'m having trouble connecting right now. Please check your network connection and try again.', 'assistant');
+                isVoiceMessage = false;
             } finally {
                 isProcessing = false;
                 input.disabled = false;
@@ -326,6 +355,55 @@ button svg, a svg, button i, a i { pointer-events: none; }
                 document.getElementById('sendIcon').setAttribute('data-lucide', 'send');
                 if (typeof lucide !== 'undefined') lucide.createIcons();
                 input.focus();
+            }
+        }
+
+        function showTalkingAnimation(text) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageId = 'msg-talking-' + Date.now();
+            const messageDiv = document.createElement('div');
+            messageDiv.id = messageId;
+            messageDiv.className = 'chat-message assistant talking-active';
+            messageDiv.style.marginBottom = '12px';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'rounded-xl rounded-tl-sm bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm';
+            bubble.innerHTML = `
+                <div class="talking-animation" style="display:flex; align-items:center; gap:12px; padding:4px 8px;">
+                    <div class="talking-wave" style="display:flex; align-items:center; gap:3px; height:24px;">
+                        <span style="display:block; width:4px; border-radius:2px; background:#10b981; animation:twWave 0.8s ease-in-out infinite; height:12px; animation-delay:0s;"></span>
+                        <span style="display:block; width:4px; border-radius:2px; background:#10b981; animation:twWave 0.8s ease-in-out infinite; height:20px; animation-delay:0.1s;"></span>
+                        <span style="display:block; width:4px; border-radius:2px; background:#10b981; animation:twWave 0.8s ease-in-out infinite; height:16px; animation-delay:0.2s;"></span>
+                        <span style="display:block; width:4px; border-radius:2px; background:#10b981; animation:twWave 0.8s ease-in-out infinite; height:22px; animation-delay:0.3s;"></span>
+                        <span style="display:block; width:4px; border-radius:2px; background:#10b981; animation:twWave 0.8s ease-in-out infinite; height:14px; animation-delay:0.4s;"></span>
+                    </div>
+                    <span style="font-size:0.82rem; font-weight:600; color:#10b981; white-space:nowrap;">Speaking...</span>
+                </div>
+            `;
+
+            messageDiv.appendChild(bubble);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // Speak the text
+            speakText(text, true);
+
+            // Remove animation when speech ends
+            const checkSpeechEnd = setInterval(() => {
+                if (!('speechSynthesis' in window) || !speechSynthesis.speaking) {
+                    clearInterval(checkSpeechEnd);
+                    messageDiv.remove();
+                    addMessage(text, 'assistant');
+                }
+            }, 200);
+
+            // Fallback: if TTS not available, show text after 2s
+            if (!('speechSynthesis' in window)) {
+                setTimeout(() => {
+                    clearInterval(checkSpeechEnd);
+                    messageDiv.remove();
+                    addMessage(text, 'assistant');
+                }, 2000);
             }
         }
 
@@ -494,6 +572,284 @@ button svg, a svg, button i, a i { pointer-events: none; }
                     document.getElementById('msgCount').textContent = '0';
                 }
             );
+        }
+
+        // ============ VOICE INPUT (Speech Recognition) ============
+        let recognition = null;
+        let isListening = false;
+        let voiceStatusEl = null;
+        let finalTranscript = '';
+        let manualStop = false;
+        let restartTimer = null;
+        let networkRetries = 0;
+        const MAX_NETWORK_RETRIES = 5;
+
+        function initSpeechRecognition() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SR) return null;
+            const rec = new SR();
+            rec.continuous = false;
+            rec.interimResults = true;
+            rec.lang = 'en-US';
+            rec.maxAlternatives = 1;
+
+            rec.onstart = function() {
+                isListening = true;
+                updateVoiceButton();
+                showVoiceStatus('Listening... speak now');
+                console.log('Recognition started');
+            };
+
+            rec.onresult = function(e) {
+                let interim = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    const transcript = e.results[i][0].transcript;
+                    if (e.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interim += transcript;
+                    }
+                }
+                const displayText = finalTranscript + interim;
+                if (displayText) {
+                    input.value = displayText;
+                    autoResize(input);
+                    updateCharCount();
+                }
+                showVoiceStatus(finalTranscript ? 'Heard: "' + finalTranscript.trim() + '"' : 'Listening...');
+            };
+
+            rec.onend = function() {
+                console.log('Recognition ended. finalTranscript:', finalTranscript, 'manualStop:', manualStop, 'networkRetries:', networkRetries);
+                
+                if (!manualStop && !finalTranscript.trim() && networkRetries < MAX_NETWORK_RETRIES) {
+                    console.log('Auto-restarting recognition... (retry ' + (networkRetries + 1) + '/' + MAX_NETWORK_RETRIES + ')');
+                    restartTimer = setTimeout(() => {
+                        try { rec.start(); } catch(e) { console.warn('Retry failed:', e); }
+                    }, 1000);
+                    return;
+                }
+                
+                isListening = false;
+                updateVoiceButton();
+                const capturedText = (input && input.value.trim()) ? input.value.trim() : finalTranscript.trim();
+                if (capturedText) {
+                    input.value = capturedText;
+                    autoResize(input);
+                    updateCharCount();
+                    showVoiceStatus('Sending: "' + capturedText + '"');
+                    setTimeout(() => {
+                        console.log('Auto-send triggered. input.value:', input.value, 'isProcessing:', isProcessing);
+                        if (input.value.trim()) {
+                            isVoiceMessage = true;
+                            sendMessage();
+                            hideVoiceStatus();
+                        }
+                    }, 2000);
+                } else if (networkRetries >= MAX_NETWORK_RETRIES) {
+                    showVoiceStatus('Voice service unavailable. Your browser cannot reach Google\'s speech servers. Check your internet connection.');
+                    setTimeout(hideVoiceStatus, 6000);
+                } else if (manualStop) {
+                    hideVoiceStatus();
+                }
+                manualStop = false;
+            };
+
+            rec.onerror = function(e) {
+                console.warn('Speech recognition error:', e.error);
+                if (e.error === 'not-allowed') {
+                    isListening = false;
+                    manualStop = true;
+                    updateVoiceButton();
+                    hideVoiceStatus();
+                    alert('Microphone access denied. Please allow microphone permissions in your browser settings:\n\n1. Click the lock/info icon next to the URL\n2. Allow microphone access\n3. Refresh the page');
+                } else if (e.error === 'no-speech') {
+                    console.log('no-speech error, will auto-restart');
+                } else if (e.error === 'network') {
+                    networkRetries++;
+                    console.warn('Network error, retry ' + networkRetries + '/' + MAX_NETWORK_RETRIES);
+                    if (networkRetries < MAX_NETWORK_RETRIES) {
+                        showVoiceStatus('Reconnecting to voice service... (' + networkRetries + '/' + MAX_NETWORK_RETRIES + ')');
+                    } else {
+                        isListening = false;
+                        manualStop = true;
+                        updateVoiceButton();
+                        showVoiceStatus('Voice service unavailable. Check your internet connection.');
+                        setTimeout(hideVoiceStatus, 4000);
+                    }
+                } else if (e.error === 'aborted') {
+                    console.log('Recognition aborted');
+                } else if (e.error === 'audio-capture') {
+                    isListening = false;
+                    manualStop = true;
+                    updateVoiceButton();
+                    hideVoiceStatus();
+                    alert('Microphone not found. Please check your microphone is connected and not in use by another app.');
+                } else {
+                    console.warn('Other speech error:', e.error);
+                }
+            };
+
+            return rec;
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition) recognition = initSpeechRecognition();
+            if (!recognition) {
+                alert('Voice input is not supported in your browser. Please use Chrome, Edge, or Safari.');
+                return;
+            }
+            if (isListening) {
+                // User manually stopped
+                manualStop = true;
+                if (restartTimer) { clearTimeout(restartTimer); restartTimer = null; }
+                try { recognition.stop(); } catch(e) {}
+                isListening = false;
+                updateVoiceButton();
+                // Use whatever is in the input (interim + final combined)
+                const capturedText = (input && input.value.trim()) ? input.value.trim() : finalTranscript.trim();
+                if (capturedText) {
+                    input.value = capturedText;
+                    autoResize(input);
+                    updateCharCount();
+                    showVoiceStatus('Sending: "' + capturedText + '"');
+                    setTimeout(() => {
+                        if (input.value.trim()) {
+                            isVoiceMessage = true;
+                            sendMessage();
+                            hideVoiceStatus();
+                        }
+                    }, 2000);
+                } else {
+                    hideVoiceStatus();
+                }
+            } else {
+                try {
+                    finalTranscript = '';
+                    manualStop = false;
+                    networkRetries = 0;
+                    input.value = '';
+                    updateCharCount();
+                    recognition.start();
+                    console.log('Voice recognition started by user');
+                } catch (err) {
+                    console.warn('Recognition start error:', err);
+                    try { recognition.stop(); } catch(e) {}
+                    setTimeout(() => {
+                        try { recognition.start(); } catch(e2) { console.warn('Retry start failed:', e2); }
+                    }, 200);
+                }
+            }
+        }
+
+        function showVoiceStatus(text) {
+            if (!voiceStatusEl) {
+                voiceStatusEl = document.createElement('div');
+                voiceStatusEl.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; padding:10px 20px; border-radius:999px; font-size:0.85rem; font-weight:600; z-index:9999; display:flex; align-items:center; gap:8px; box-shadow:0 4px 20px rgba(0,0,0,0.2);';
+                document.body.appendChild(voiceStatusEl);
+            }
+            voiceStatusEl.innerHTML = '<span style="width:8px; height:8px; border-radius:50%; background:#ef4444; animation:pulse 1s infinite;"></span>' + text;
+            voiceStatusEl.style.display = 'flex';
+        }
+
+        function hideVoiceStatus() {
+            if (voiceStatusEl) {
+                voiceStatusEl.style.display = 'none';
+            }
+        }
+
+        function updateVoiceButton() {
+            const btn = document.getElementById('voiceBtn');
+            const icon = document.getElementById('voiceIcon');
+            if (isListening) {
+                btn.classList.add('bg-rose-500', 'text-white', 'border-rose-500');
+                btn.classList.remove('bg-white', 'text-slate-600', 'border-slate-300', 'hover:bg-emerald-50', 'hover:text-emerald-600');
+                icon.setAttribute('data-lucide', 'mic-off');
+            } else {
+                btn.classList.remove('bg-rose-500', 'text-white', 'border-rose-500');
+                btn.classList.add('bg-white', 'text-slate-600', 'border-slate-300', 'hover:bg-emerald-50', 'hover:text-emerald-600');
+                icon.setAttribute('data-lucide', 'mic');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // ============ VOICE OUTPUT (Text-to-Speech) ============
+        let ttsEnabled = false;
+
+        function getBestVoice() {
+            if (!('speechSynthesis' in window)) return null;
+            const voices = speechSynthesis.getVoices();
+            if (!voices || voices.length === 0) return null;
+
+            const preferredNames = [
+                'Google US English',
+                'Microsoft Aria Online (Natural) - English (United States)',
+                'Microsoft Jenny Online (Natural) - English (United States)',
+                'Microsoft Guy Online (Natural) - English (United States)',
+                'Microsoft Zira - English (United States)',
+                'Samantha',
+                'Alex',
+                'Google UK English Female',
+                'Google UK English Male',
+            ];
+
+            for (const name of preferredNames) {
+                const found = voices.find(v => v.name === name);
+                if (found) return found;
+            }
+
+            const enUS = voices.find(v => v.lang === 'en-US' && v.name.toLowerCase().includes('female'));
+            if (enUS) return enUS;
+
+            const anyEnUS = voices.find(v => v.lang === 'en-US');
+            if (anyEnUS) return anyEnUS;
+
+            const anyEn = voices.find(v => v.lang && v.lang.startsWith('en'));
+            if (anyEn) return anyEn;
+
+            return voices[0];
+        }
+
+        function speakText(text, forceSpeak) {
+            if (!forceSpeak && !ttsEnabled) return;
+            if (!('speechSynthesis' in window)) return;
+            speechSynthesis.cancel();
+            const clean = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/[#`_~]/g, '').replace(/\n/g, ' ');
+            const utter = new SpeechSynthesisUtterance(clean);
+            const voice = getBestVoice();
+            if (voice) {
+                utter.voice = voice;
+                utter.lang = voice.lang;
+            } else {
+                utter.lang = 'en-US';
+            }
+            utter.rate = 0.95;
+            utter.pitch = 1.0;
+            utter.volume = 1;
+            speechSynthesis.speak(utter);
+        }
+
+        if ('speechSynthesis' in window) {
+            speechSynthesis.onvoiceschanged = function() {
+                console.log('TTS voices loaded:', speechSynthesis.getVoices().length, 'available');
+            };
+        }
+
+        function toggleTTS() {
+            ttsEnabled = !ttsEnabled;
+            const btn = document.getElementById('ttsToggle');
+            const icon = document.getElementById('ttsIcon');
+            if (ttsEnabled) {
+                btn.classList.add('bg-emerald-100', 'text-emerald-700');
+                btn.classList.remove('text-slate-500');
+                icon.setAttribute('data-lucide', 'volume-2');
+            } else {
+                btn.classList.remove('bg-emerald-100', 'text-emerald-700');
+                btn.classList.add('text-slate-500');
+                icon.setAttribute('data-lucide', 'volume-x');
+                speechSynthesis.cancel();
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         document.addEventListener('DOMContentLoaded', function() {

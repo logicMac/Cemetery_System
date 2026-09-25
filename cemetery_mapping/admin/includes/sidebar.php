@@ -24,8 +24,8 @@
                 'Records' => [
                     'icon' => 'file-plus',
                     'items' => [
-                        ['add-record.php', 'add-record', 'Add Record', 'plus-circle'],
                         ['records.php', 'records', 'All Records', 'file-text'],
+                        ['burial-calendar.php', 'burial-calendar', 'Burial Calendar', 'calendar-days'],
                     ],
                 ],
                 'Cemetery Map' => [
@@ -33,12 +33,14 @@
                     'items' => [
                         ['map-view.php', 'map-view', 'Map View', 'map'],
                         ['available-plots.php', 'available-plots', 'Available Plots', 'map-pin'],
+                        ['plot-grids.php', 'plot-grids', 'Plot Grids', 'grid'],
                     ],
                 ],
-                'Reservations' => [
-                    'icon' => 'calendar',
+                'Renewals' => [
+                    'icon' => 'refresh-cw',
                     'items' => [
-                        ['reservations_simple.php', 'reservations_simple', 'Reservations', 'calendar-check'],
+                        ['renewals.php', 'renewals', 'Renewal History', 'refresh-cw'],
+                        ['expiring-plots.php', 'expiring-plots', 'Expiring Plots', 'alert-triangle'],
                     ],
                 ],
                 'Analytics' => [
@@ -58,6 +60,7 @@
                     'icon' => 'settings',
                     'items' => [
                         ['settings.php', 'settings', 'Settings', 'settings'],
+                        ['api-keys.php', 'api-keys', 'AI API Keys', 'key'],
                     ],
                 ],
             ];
@@ -83,7 +86,7 @@
                         </span>
                         <i data-lucide="chevron-down" class="sidebar-chevron" width="16" height="16"></i>
                     </button>
-                    <ul class="sidebar-group-menu">
+                    <ul class="sidebar-group-menu" data-group-label="<?php echo $groupName; ?>">
                         <?php foreach ($items as $item): 
                             $href = $item[0];
                             $page = $item[1];

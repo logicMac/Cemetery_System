@@ -22,8 +22,22 @@ if ($latitude === false || $longitude === false) {
     exit;
 }
 
-$plot_number = filter_input(INPUT_POST, 'plot_number', FILTER_SANITIZE_STRING);
-$notes = filter_input(INPUT_POST, 'notes', FILTER_SANITIZE_STRING);
+$plot_number = strip_tags((string)filter_input(INPUT_POST, 'plot_number'));
+$notes = strip_tags((string)filter_input(INPUT_POST, 'notes'));
+$expiration_date = strip_tags((string)filter_input(INPUT_POST, 'expiration_date'));
+$expiration_date = !empty($expiration_date) ? date('Y-m-d', strtotime($expiration_date)) : null;
+if (!empty($expiration_date) && $expiration_date === '1970-01-01') {
+    $expiration_date = null;
+}
+
+// Polygon is a JSON array of [lat, lng] points; validate it instead of sanitizing
+$polygon = null;
+if (!empty($_POST['polygon'])) {
+    $decoded = json_decode($_POST['polygon'], true);
+    if (is_array($decoded) && count($decoded) >= 3) {
+        $polygon = json_encode($decoded);
+    }
+}
 $has_grid = isset($_POST['has_grid']) ? 1 : 0;
 $grid_rows = $has_grid ? filter_input(INPUT_POST, 'grid_rows', FILTER_VALIDATE_INT) : null;
 $grid_cols = $has_grid ? filter_input(INPUT_POST, 'grid_cols', FILTER_VALIDATE_INT) : null;
@@ -61,16 +75,18 @@ if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
 
 try {
     $stmt = $pdo->prepare("
-        INSERT INTO available_plots 
-        (plot_number, latitude, longitude, notes, photo, has_grid, grid_rows, grid_cols, compartment_count, added_by) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO available_plots
+        (plot_number, latitude, longitude, polygon, notes, expiration_date, photo, has_grid, grid_rows, grid_cols, compartment_count, added_by)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
-    
+
     $stmt->execute([
         $plot_number,
         $latitude,
         $longitude,
+        $polygon,
         $notes,
+        $expiration_date,
         $photo_filename,
         $has_grid,
         $grid_rows,

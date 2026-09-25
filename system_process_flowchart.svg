@@ -1,0 +1,297 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 920" width="1600" height="920">
+  <defs>
+    <style>
+      text { font-family: 'Poppins', 'Segoe UI', sans-serif; }
+      .title { font-size: 20px; font-weight: 700; fill: #111827; }
+      .subtitle { font-size: 12px; font-weight: 400; fill: #4b5563; }
+      .module-title { font-size: 13px; font-weight: 700; fill: #ffffff; }
+      .step-title { font-size: 11px; font-weight: 700; fill: #065f46; }
+      .step-text { font-size: 10px; font-weight: 400; fill: #374151; }
+      .box { fill: #f0fdf4; stroke: #10b981; stroke-width: 1.2; rx: 6; }
+      .dark-box { fill: #047857; rx: 8; }
+      .arrow { stroke: #047857; stroke-width: 1.5; fill: none; marker-end: url(#arrowhead); }
+      .dashed { stroke-dasharray: 5 5; }
+      .dashed-line { stroke: #047857; stroke-width: 1.5; fill: none; stroke-dasharray: 5 5; }
+      .dashed-line-end { stroke: #047857; stroke-width: 1.5; fill: none; stroke-dasharray: 5 5; marker-end: url(#arrowhead); }
+      .legend-text { font-size: 10px; fill: #374151; }
+      .arch-title { font-size: 12px; font-weight: 700; fill: #ffffff; }
+    .arch-sub { font-size: 10px; font-weight: 400; fill: #ecfdf5; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#047857" />
+    </marker>
+  </defs>
+
+  <rect width="1600" height="920" fill="#ffffff"/>
+
+  <!-- Title Block -->
+  <rect x="50" y="30" width="1100" height="70" fill="#ecfdf5" stroke="#10b981" stroke-width="2" rx="10"/>
+  <text x="600" y="55" text-anchor="middle" class="title">UNDAS: Web-Based AI-Powered Cemetery Mapping and Grave Locator System</text>
+  <text x="600" y="78" text-anchor="middle" class="subtitle">Process Flow for Matinao Memorial Cemetery — Plot, Grave, Reservation &amp; Renewal Management</text>
+
+  <!-- Legend -->
+  <g transform="translate(1170, 35)">
+    <rect width="220" height="60" fill="#ffffff" stroke="#d1d5db" stroke-width="1" rx="6"/>
+    <text x="15" y="20" class="step-title" font-size="11">Legend</text>
+    <line x1="15" y1="33" x2="45" y2="33" class="arrow"/>
+    <text x="55" y="36" class="legend-text">Process Flow</text>
+    <line x1="15" y1="51" x2="45" y2="51" class="dashed-line-end"/>
+    <text x="55" y="54" class="legend-text">Data / Response</text>
+  </g>
+
+  <g transform="translate(1400, 35)">
+    <rect width="200" height="60" fill="#ffffff" stroke="#d1d5db" stroke-width="1" rx="6"/>
+    <text x="15" y="20" class="step-title" font-size="11">Palette</text>
+    <rect x="15" y="30" width="14" height="10" fill="#047857" rx="2"/>
+    <text x="35" y="39" class="legend-text">Module Header</text>
+    <rect x="15" y="45" width="14" height="10" fill="#f0fdf4" stroke="#10b981" rx="2"/>
+    <text x="35" y="54" class="legend-text">Process Step</text>
+  </g>
+
+  <!-- ===================== MAIN PROCESS MODULES ===================== -->
+  <!-- Module 1 -->
+  <g transform="translate(50, 130)">
+    <rect width="285" height="50" fill="#047857" rx="8"/>
+    <text x="142" y="28" text-anchor="middle" class="module-title">1. DATA COLLECTION</text>
+  </g>
+  <g transform="translate(50, 186)">
+    <rect width="285" height="145" class="box" fill="#f0fdf4" stroke="#10b981" stroke-width="1.2" rx="6"/>
+    <text x="15" y="22" class="step-title">1.1 Cemetery Data</text>
+    <text x="15" y="36" class="step-text">- Boundary polygon &amp; center point</text>
+    <text x="15" y="50" class="step-text">- Satellite imagery calibration</text>
+    <text x="15" y="72" class="step-title">1.2 Burial Records</text>
+    <text x="15" y="86" class="step-text">- Decedent info, dates, photos</text>
+    <text x="15" y="100" class="step-text">- GPS coordinates &amp; plot number</text>
+    <text x="15" y="122" class="step-title">1.3 Account Data</text>
+    <text x="15" y="136" class="step-text">- Visitor registration &amp; profiles</text>
+  </g>
+
+  <!-- Module 2 -->
+  <g transform="translate(360, 130)">
+    <rect width="285" height="50" fill="#047857" rx="8"/>
+    <text x="142" y="28" text-anchor="middle" class="module-title">2. PLOT &amp; GRID MANAGEMENT</text>
+  </g>
+  <g transform="translate(360, 186)">
+    <rect width="285" height="145" class="box" fill="#f0fdf4" stroke="#10b981" stroke-width="1.2" rx="6"/>
+    <text x="15" y="22" class="step-title">2.1 Available Plots</text>
+    <text x="15" y="36" class="step-text">- Create &amp; position on map</text>
+    <text x="15" y="50" class="step-text">- Set price &amp; expiration date</text>
+    <text x="15" y="72" class="step-title">2.2 Grid Layout</text>
+    <text x="15" y="86" class="step-text">- Rows / columns &amp; rotation</text>
+    <text x="15" y="100" class="step-text">- Standalone grid cells</text>
+    <text x="15" y="122" class="step-title">2.3 Assignment</text>
+    <text x="15" y="136" class="step-text">- Link decedent to grid cell</text>
+  </g>
+
+  <!-- Module 3 -->
+  <g transform="translate(670, 130)">
+    <rect width="285" height="50" fill="#047857" rx="8"/>
+    <text x="142" y="28" text-anchor="middle" class="module-title">3. SEARCH &amp; NAVIGATION</text>
+  </g>
+  <g transform="translate(670, 186)">
+    <rect width="285" height="145" class="box" fill="#f0fdf4" stroke="#10b981" stroke-width="1.2" rx="6"/>
+    <text x="15" y="22" class="step-title">3.1 Grave Search</text>
+    <text x="15" y="36" class="step-text">- Name, family, barangay filter</text>
+    <text x="15" y="50" class="step-text">- Plot &amp; grid cell results</text>
+    <text x="15" y="72" class="step-title">3.2 AI Assistant</text>
+    <text x="15" y="86" class="step-text">- Groq chatbot integration</text>
+    <text x="15" y="100" class="step-text">- Cemetery policy questions</text>
+    <text x="15" y="122" class="step-title">3.3 Navigation</text>
+    <text x="15" y="136" class="step-text">- Walking route to plot</text>
+  </g>
+
+  <!-- Module 4 -->
+  <g transform="translate(980, 130)">
+    <rect width="285" height="50" fill="#047857" rx="8"/>
+    <text x="142" y="28" text-anchor="middle" class="module-title">4. RESERVATION &amp; RENEWAL</text>
+  </g>
+  <g transform="translate(980, 186)">
+    <rect width="285" height="145" class="box" fill="#f0fdf4" stroke="#10b981" stroke-width="1.2" rx="6"/>
+    <text x="15" y="22" class="step-title">4.1 Visitor Reservation</text>
+    <text x="15" y="36" class="step-text">- Select plot &amp; compartment</text>
+    <text x="15" y="50" class="step-text">- Submit reservation request</text>
+    <text x="15" y="72" class="step-title">4.2 Payment</text>
+    <text x="15" y="86" class="step-text">- Record payment status</text>
+    <text x="15" y="100" class="step-text">- Payment status tracking</text>
+    <text x="15" y="122" class="step-title">4.3 Renewal</text>
+    <text x="15" y="136" class="step-text">- Request, approve, extend</text>
+  </g>
+
+  <!-- Module 5 -->
+  <g transform="translate(1290, 130)">
+    <rect width="285" height="50" fill="#047857" rx="8"/>
+    <text x="142" y="28" text-anchor="middle" class="module-title">5. MONITORING &amp; REPORTS</text>
+  </g>
+  <g transform="translate(1290, 186)">
+    <rect width="285" height="145" class="box" fill="#f0fdf4" stroke="#10b981" stroke-width="1.2" rx="6"/>
+    <text x="15" y="22" class="step-title">5.1 Dashboard</text>
+    <text x="15" y="36" class="step-text">- Record, plot, grid counts</text>
+    <text x="15" y="50" class="step-text">- Expiration summaries</text>
+    <text x="15" y="72" class="step-title">5.2 Expiring Plots</text>
+    <text x="15" y="86" class="step-text">- Expired / expiring list</text>
+    <text x="15" y="100" class="step-text">- Direct admin renewal</text>
+    <text x="15" y="122" class="step-title">5.3 Reports</text>
+    <text x="15" y="136" class="step-text">- Print &amp; export records</text>
+  </g>
+
+  <!-- Arrows between modules -->
+  <line x1="335" y1="155" x2="360" y2="155" class="arrow"/>
+  <line x1="645" y1="155" x2="670" y2="155" class="arrow"/>
+  <line x1="955" y1="155" x2="980" y2="155" class="arrow"/>
+  <line x1="1265" y1="155" x2="1290" y2="155" class="arrow"/>
+
+  <!-- ===================== DATA FLOW LAYER ===================== -->
+  <line x1="192" y1="331" x2="192" y2="360" class="arrow"/>
+  <line x1="502" y1="331" x2="502" y2="360" class="arrow"/>
+  <line x1="812" y1="331" x2="812" y2="360" class="arrow"/>
+  <line x1="1122" y1="331" x2="1122" y2="360" class="arrow"/>
+  <line x1="1432" y1="331" x2="1432" y2="360" class="arrow"/>
+
+  <g transform="translate(50, 360)">
+    <rect width="285" height="85" fill="#ecfdf5" stroke="#10b981" stroke-width="1" rx="6"/>
+    <text x="15" y="22" class="step-title">DB Inputs</text>
+    <text x="15" y="38" class="step-text">- burial_records</text>
+    <text x="15" y="52" class="step-text">- available_plots, visitors</text>
+    <text x="15" y="66" class="step-text">- plot_grids, grid cells</text>
+  </g>
+
+  <g transform="translate(360, 360)">
+    <rect width="285" height="85" fill="#ecfdf5" stroke="#10b981" stroke-width="1" rx="6"/>
+    <text x="15" y="22" class="step-title">Admin Actions</text>
+    <text x="15" y="38" class="step-text">- Add / edit / assign</text>
+    <text x="15" y="52" class="step-text">- Set expiration dates</text>
+    <text x="15" y="66" class="step-text">- Direct renewals</text>
+  </g>
+
+  <g transform="translate(670, 360)">
+    <rect width="285" height="85" fill="#ecfdf5" stroke="#10b981" stroke-width="1" rx="6"/>
+    <text x="15" y="22" class="step-title">Visitor Interaction</text>
+    <text x="15" y="38" class="step-text">- Search, reserve, ask AI</text>
+    <text x="15" y="52" class="step-text">- View map &amp; route</text>
+    <text x="15" y="66" class="step-text">- Request renewal</text>
+  </g>
+
+  <g transform="translate(980, 360)">
+    <rect width="285" height="85" fill="#ecfdf5" stroke="#10b981" stroke-width="1" rx="6"/>
+    <text x="15" y="22" class="step-title">Request Processing</text>
+    <text x="15" y="38" class="step-text">- Reservation queue</text>
+    <text x="15" y="52" class="step-text">- Payment verification</text>
+    <text x="15" y="66" class="step-text">- Renewal approval</text>
+  </g>
+
+  <g transform="translate(1290, 360)">
+    <rect width="285" height="85" fill="#ecfdf5" stroke="#10b981" stroke-width="1" rx="6"/>
+    <text x="15" y="22" class="step-title">Outputs</text>
+    <text x="15" y="38" class="step-text">- Dashboard statistics</text>
+    <text x="15" y="52" class="step-text">- Expiration alerts</text>
+    <text x="15" y="66" class="step-text">- Printable reports</text>
+  </g>
+
+  <!-- ===================== SYSTEM ARCHITECTURE ===================== -->
+  <rect x="50" y="475" width="1500" height="410" fill="#f8fafc" stroke="#e5e7eb" stroke-width="1" rx="12"/>
+  <text x="80" y="510" class="title" font-size="18" fill="#111827">System Architecture &amp; Data Flow</text>
+
+  <!-- User / Admin -->
+  <g transform="translate(120, 535)">
+    <rect width="240" height="120" fill="#047857" rx="8"/>
+    <text x="120" y="30" text-anchor="middle" class="arch-title">USERS / ADMIN</text>
+    <text x="120" y="56" text-anchor="middle" class="arch-sub">Desktop / Mobile Browser</text>
+    <text x="120" y="82" text-anchor="middle" class="arch-sub">Visitor + Admin Portals</text>
+  </g>
+
+  <!-- Web Server -->
+  <g transform="translate(400, 535)">
+    <rect width="240" height="120" fill="#047857" rx="8"/>
+    <text x="120" y="24" text-anchor="middle" class="arch-title">WAMP WEB SERVER</text>
+    <text x="120" y="42" text-anchor="middle" class="arch-sub">Apache 2.4 + PHP 8.3</text>
+    <text x="120" y="58" text-anchor="middle" class="arch-sub">Admin / Visitor Pages</text>
+    <text x="120" y="74" text-anchor="middle" class="arch-sub">REST-style JSON APIs</text>
+    <text x="120" y="90" text-anchor="middle" class="arch-sub">File-based Routing</text>
+  </g>
+
+  <!-- Database -->
+  <g transform="translate(680, 535)">
+    <rect width="240" height="120" fill="#047857" rx="8"/>
+    <text x="120" y="30" text-anchor="middle" class="arch-title">DATABASE</text>
+    <text x="120" y="52" text-anchor="middle" class="arch-sub">MySQL 8 / MariaDB</text>
+    <text x="120" y="72" text-anchor="middle" class="arch-sub">InnoDB Tables</text>
+    <text x="120" y="92" text-anchor="middle" class="arch-sub">Burial, Plot, Grid Data</text>
+  </g>
+
+  <!-- External -->
+  <g transform="translate(960, 535)">
+    <rect width="240" height="120" fill="#047857" rx="8"/>
+    <text x="120" y="24" text-anchor="middle" class="arch-title">EXTERNAL SERVICES</text>
+    <text x="120" y="42" text-anchor="middle" class="arch-sub">Google Satellite Tiles</text>
+    <text x="120" y="58" text-anchor="middle" class="arch-sub">Groq AI API</text>
+    <text x="120" y="74" text-anchor="middle" class="arch-sub">Leaflet.js 1.9.4</text>
+    <text x="120" y="90" text-anchor="middle" class="arch-sub">Tailwind CSS CDN</text>
+  </g>
+
+  <!-- Notifications -->
+  <g transform="translate(1240, 535)">
+    <rect width="240" height="120" fill="#047857" rx="8"/>
+    <text x="120" y="30" text-anchor="middle" class="arch-title">ALERTS</text>
+    <text x="120" y="56" text-anchor="middle" class="arch-sub">Renewal Warnings</text>
+    <text x="120" y="82" text-anchor="middle" class="arch-sub">Reservation Status</text>
+  </g>
+
+  <!-- Architecture arrows -->
+  <line x1="360" y1="595" x2="400" y2="595" class="arrow"/>
+  <line x1="640" y1="595" x2="680" y2="595" class="arrow"/>
+  <line x1="920" y1="595" x2="960" y2="595" class="arrow"/>
+  <line x1="1200" y1="595" x2="1240" y2="595" class="arrow"/>
+
+  <!-- Tech stack boxes -->
+  <g transform="translate(170, 690)">
+    <rect width="240" height="190" fill="#ffffff" stroke="#10b981" stroke-width="1" rx="8"/>
+    <text x="15" y="25" class="step-title">Mapping Stack</text>
+    <text x="15" y="44" class="step-text">- Leaflet.js 1.9.4</text>
+    <text x="15" y="60" class="step-text">- Leaflet-Rotate</text>
+    <text x="15" y="76" class="step-text">- Fullscreen &amp; Cluster</text>
+    <text x="15" y="92" class="step-text">- Satellite overlay</text>
+    <text x="15" y="108" class="step-text">- Tailwind CSS</text>
+    <text x="15" y="124" class="step-text">- Poppins + Lucide</text>
+    <text x="15" y="140" class="step-text">- Vanilla ES6 JS</text>
+    <text x="15" y="156" class="step-text">- PHP 7.4+</text>
+  </g>
+
+  <g transform="translate(510, 690)">
+    <rect width="240" height="190" fill="#ffffff" stroke="#10b981" stroke-width="1" rx="8"/>
+    <text x="15" y="25" class="step-title">Database Tables</text>
+    <text x="15" y="44" class="step-text">- burial_records</text>
+    <text x="15" y="60" class="step-text">- available_plots</text>
+    <text x="15" y="76" class="step-text">- plot_grids</text>
+    <text x="15" y="92" class="step-text">- plot_grid_cells</text>
+    <text x="15" y="108" class="step-text">- plot_reservations</text>
+    <text x="15" y="124" class="step-text">- plot_renewal_requests</text>
+    <text x="15" y="140" class="step-text">- visitors</text>
+    <text x="15" y="156" class="step-text">- visitor_activity_log</text>
+  </g>
+
+  <g transform="translate(850, 690)">
+    <rect width="240" height="190" fill="#ffffff" stroke="#10b981" stroke-width="1" rx="8"/>
+    <text x="15" y="25" class="step-title">Core API Endpoints</text>
+    <text x="15" y="44" class="step-text">- add_record.php</text>
+    <text x="15" y="60" class="step-text">- update_record.php</text>
+    <text x="15" y="76" class="step-text">- search.php</text>
+    <text x="15" y="92" class="step-text">- assistant_api.php</text>
+    <text x="15" y="108" class="step-text">- create_reservation.php</text>
+    <text x="15" y="124" class="step-text">- renew_plot.php</text>
+    <text x="15" y="140" class="step-text">- direct_renew.php</text>
+    <text x="15" y="156" class="step-text">- process_renewal.php</text>
+  </g>
+
+  <g transform="translate(1190, 690)">
+    <rect width="240" height="190" fill="#ffffff" stroke="#10b981" stroke-width="1" rx="8"/>
+    <text x="15" y="25" class="step-title">Security &amp; Rules</text>
+    <text x="15" y="44" class="step-text">- Session auth (admin / visitor)</text>
+    <text x="15" y="60" class="step-text">- PDO prepared statements</text>
+    <text x="15" y="76" class="step-text">- uploads/.htaccess</text>
+    <text x="15" y="92" class="step-text">- Hide groq_key.local.php</text>
+    <text x="15" y="108" class="step-text">- Boundary validation</text>
+    <text x="15" y="124" class="step-text">- SQL injection protection</text>
+    <text x="15" y="140" class="step-text">- 30-min session timeout</text>
+    <text x="15" y="156" class="step-text">- WAMP / XAMPP ready</text>
+  </g>
+</svg>

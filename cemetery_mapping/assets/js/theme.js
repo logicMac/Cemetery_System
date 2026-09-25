@@ -253,6 +253,146 @@ function formatDistance(meters) {
     }
 }
 
+// Polygon drawer for admin plot/record pages
+// Lets admins click on a map to draw a free-form polygon around a plot.
+function createPolygonDrawer(containerId, options = {}) {
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error('Polygon drawer container not found:', containerId);
+        return null;
+    }
+
+    const center = options.center || [6.18344118743717, 125.08457146469357];
+    const zoom = options.zoom || 17;
+    const onChange = options.onChange || function() {};
+
+    const mapOpts = {};
+    if (options.bearing !== undefined) {
+        mapOpts.rotate = true;
+        mapOpts.touchRotate = true;
+        mapOpts.bearing = options.bearing;
+    }
+    const map = L.map(containerId, mapOpts).setView(center, zoom);
+
+    L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+        maxZoom: 22,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+    }).addTo(map);
+
+    if (options.bearing !== undefined) {
+        setTimeout(() => {
+            container.querySelectorAll('.leaflet-control-rotate').forEach(el => el.style.display = 'none');
+        }, 50);
+    }
+
+    let points = [];
+    let previewLine = null;
+    let previewPolygon = null;
+    let savedPolygon = null;
+    let clickHandler = null;
+    let isDrawing = false;
+
+    function clearPreview() {
+        if (previewLine) { map.removeLayer(previewLine); previewLine = null; }
+        if (previewPolygon) { map.removeLayer(previewPolygon); previewPolygon = null; }
+    }
+
+    function updatePreview() {
+        clearPreview();
+        if (points.length < 2) return;
+
+        if (points.length === 2) {
+            previewLine = L.polyline(points, { color: '#10b981', weight: 2, dashArray: '5, 5' }).addTo(map);
+        } else {
+            previewPolygon = L.polygon(points, {
+                color: '#10b981',
+                weight: 2,
+                fillColor: '#10b981',
+                fillOpacity: 0.15
+            }).addTo(map);
+        }
+    }
+
+    function startDrawing() {
+        points = savedPolygon ? [...savedPolygon] : [];
+        isDrawing = true;
+        updatePreview();
+
+        if (clickHandler) map.off('click', clickHandler);
+        clickHandler = function(e) {
+            points.push([e.latlng.lat, e.latlng.lng]);
+            updatePreview();
+            onChange(points);
+        };
+        map.on('click', clickHandler);
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        if (clickHandler) {
+            map.off('click', clickHandler);
+            clickHandler = null;
+        }
+    }
+
+    function finishPolygon() {
+        if (points.length < 3) {
+            showAlert('A polygon needs at least 3 points', 'warning');
+            return null;
+        }
+        savedPolygon = points;
+        stopDrawing();
+        onChange(points);
+        return points;
+    }
+
+    function clearPolygon() {
+        points = [];
+        savedPolygon = null;
+        clearPreview();
+        onChange(null);
+    }
+
+    function setPolygon(coords) {
+        savedPolygon = null;
+        if (Array.isArray(coords) && coords.length >= 3) {
+            savedPolygon = coords.map(p => Array.isArray(p) ? [parseFloat(p[0]), parseFloat(p[1])] : [parseFloat(p.lat), parseFloat(p.lng)]);
+            points = [...savedPolygon];
+        } else if (typeof coords === 'string' && coords.trim()) {
+            try {
+                const parsed = JSON.parse(coords);
+                if (Array.isArray(parsed) && parsed.length >= 3) {
+                    savedPolygon = parsed.map(p => Array.isArray(p) ? [parseFloat(p[0]), parseFloat(p[1])] : [parseFloat(p.lat), parseFloat(p.lng)]);
+                    points = [...savedPolygon];
+                }
+            } catch (e) { console.error('Invalid polygon data', e); }
+        }
+        updatePreview();
+    }
+
+    function getPolygon() {
+        return savedPolygon;
+    }
+
+    function invalidate() {
+        map.invalidateSize();
+    }
+
+    // Ensure map renders correctly in hidden/containers
+    setTimeout(() => map.invalidateSize(), 150);
+
+    return {
+        map,
+        startDrawing,
+        stopDrawing,
+        finishPolygon,
+        clearPolygon,
+        setPolygon,
+        getPolygon,
+        invalidate
+    };
+}
+
 // Export to global scope
 window.themeUtils = {
     showAlert,
@@ -268,5 +408,6 @@ window.themeUtils = {
     checkPasswordStrength,
     updatePasswordStrength,
     calculateDistance,
-    formatDistance
+    formatDistance,
+    createPolygonDrawer
 };
