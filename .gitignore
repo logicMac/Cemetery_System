@@ -8,3 +8,5 @@ cemetery_mapping/uploads/*
 
 # Windows reserved device name file (accidentally created, cannot be deleted or indexed)
 nul
+# Local secrets — never commit
+cemetery_mapping/config/groq_key.local.php

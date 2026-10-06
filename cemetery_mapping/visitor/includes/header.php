@@ -65,7 +65,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
 
     <!-- Custom Styles -->
     <link rel="stylesheet" href="../assets/css/theme.css?v=8">
-    <link rel="stylesheet" href="../assets/css/admin.css?v=19">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=20">
     <link rel="stylesheet" href="../assets/css/mobile-responsive.css?v=3">
 
     <style>
