@@ -877,7 +877,7 @@ function displaySearchResults(results) {
     
     panel.classList.add('active');
     
-    container.innerHTML = results.map(result => {
+    container.innerHTML = results.map((result, idx) => {
         const photoHtml = result.photo 
             ? `<img src="../uploads/photos/${result.photo}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 12px;" />`
             : `<div style="width: 60px; height: 60px; background: linear-gradient(135deg, #00c853 0%, #059669 100%); border-radius: 8px; margin-right: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -888,31 +888,118 @@ function displaySearchResults(results) {
         
         const birthYear = result.birth_date ? new Date(result.birth_date).getFullYear() : '?';
         const deathYear = result.death_date ? new Date(result.death_date).getFullYear() : '?';
-        const compartmentLine = (result.grid_name && result.cell_row)
+        const compartmentLine = (result.grid_name && result.cell_row !== null)
             ? `<p style="margin: 2px 0 0 0; font-size: 0.75rem; color: #2563eb; font-weight: 600;">
                 🏢 ${result.grid_name} • Row ${result.cell_row}, Col ${result.cell_col}
             </p>`
             : '';
 
-        return `
-            <div class="search-result-item" onclick="showSearchResult(${result.latitude}, ${result.longitude}, ${result.id})" style="display: flex; align-items: center; cursor: pointer;">
-                ${photoHtml}
-                <div style="flex: 1; min-width: 0;">
-                    <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 600;">${result.decedent_name}</h4>
-                    <p style="margin: 0; font-size: 0.8rem; color: var(--zinc-400);">
-                        ${birthYear} - ${deathYear} | Plot: ${result.plot_number || 'N/A'}
-                    </p>
-                    ${compartmentLine}
-                    <p style="margin: 2px 0 0 0; font-size: 0.75rem; color: var(--zinc-500);">
-                        ${result.barangay || 'N/A'} ${result.family_name ? '• ' + result.family_name : ''}
-                    </p>
+        // Check if this result is in a compartment/fenced plot
+        const hasGrid = result.grid_id && result.grid_name;
+        const isFenced = result.is_fenced == 1 || result.is_fenced === '1';
+        const showDropdown = hasGrid || isFenced;
+
+        const dropdownHtml = showDropdown ? `
+            <div style="margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                <button onclick="toggleCompartmentDropdown(event, ${result.grid_id || 0}, ${result.id}, ${idx})" style="display: flex; align-items: center; gap: 6px; background: #f0fdf4; border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 0.78rem; font-weight: 600; color: #047857; transition: all 0.2s ease; width: 100%;" onmouseover="this.style.background='#d1fae5'" onmouseout="this.style.background='#f0fdf4'">
+                    <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    <span id="dropdownLabel-${idx}">View all deceased in ${result.grid_name || 'this plot'}</span>
+                    <svg id="dropdownChevron-${idx}" style="width: 14px; height: 14px; margin-left: auto; transition: transform 0.2s ease;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                </button>
+                <div id="compartmentDropdown-${idx}" style="display: none; margin-top: 6px; max-height: 200px; overflow-y: auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 6px;">
+                    <p style="text-align: center; color: #94a3b8; font-size: 0.78rem; padding: 8px;">Loading...</p>
                 </div>
-                <svg style="width: 20px; height: 20px; color: #00c853; flex-shrink: 0; margin-left: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
+            </div>
+        ` : '';
+
+        return `
+            <div class="search-result-item" style="display: flex; flex-direction: column; cursor: pointer; padding: 12px;">
+                <div style="display: flex; align-items: center;" onclick="showSearchResult(${result.latitude}, ${result.longitude}, ${result.id})">
+                    ${photoHtml}
+                    <div style="flex: 1; min-width: 0;">
+                        <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 600;">${result.decedent_name}</h4>
+                        <p style="margin: 0; font-size: 0.8rem; color: var(--zinc-400);">
+                            ${birthYear} - ${deathYear} | Plot: ${result.plot_number || 'N/A'}
+                        </p>
+                        ${compartmentLine}
+                        <p style="margin: 2px 0 0 0; font-size: 0.75rem; color: var(--zinc-500);">
+                            ${result.barangay || 'N/A'} ${result.family_name ? '• ' + result.family_name : ''}
+                        </p>
+                    </div>
+                    <svg style="width: 20px; height: 20px; color: #00c853; flex-shrink: 0; margin-left: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                ${dropdownHtml}
             </div>
         `;
     }).join('');
+}
+
+// Toggle compartment dropdown — fetches all deceased in the same grid/compartment
+window.toggleCompartmentDropdown = async function(event, gridId, recordId, idx) {
+    event.stopPropagation();
+    const dropdown = document.getElementById(`compartmentDropdown-${idx}`);
+    const chevron = document.getElementById(`dropdownChevron-${idx}`);
+    const label = document.getElementById(`dropdownLabel-${idx}`);
+
+    if (!dropdown) return;
+
+    // Toggle visibility
+    if (dropdown.style.display === 'none') {
+        dropdown.style.display = 'block';
+        if (chevron) chevron.style.transform = 'rotate(180deg)';
+
+        // Only fetch if not already loaded
+        if (!dropdown.dataset.loaded) {
+            try {
+                const url = gridId > 0
+                    ? `../api/get_grid_deceased.php?grid_id=${gridId}`
+                    : null;
+
+                if (!url) {
+                    dropdown.innerHTML = '<p style="text-align: center; color: #94a3b8; font-size: 0.78rem; padding: 8px;">No compartment data available</p>';
+                    dropdown.dataset.loaded = 'true';
+                    return;
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success && data.deceased && data.deceased.length > 0) {
+                    if (label) label.textContent = `${data.deceased.length} deceased in ${data.grid?.name || 'this plot'}`;
+                    dropdown.innerHTML = data.deceased.map(d => {
+                        const birthYear = d.birth_date ? new Date(d.birth_date).getFullYear() : '?';
+                        const deathYear = d.death_date ? new Date(d.death_date).getFullYear() : '?';
+                        const isCurrent = d.id === recordId;
+                        const photoHtml = d.photo
+                            ? `<img src="../uploads/photos/${d.photo}" style="width: 36px; height: 36px; object-fit: cover; border-radius: 6px; flex-shrink: 0;" />`
+                            : `<div style="width: 36px; height: 36px; background: #e2e8f0; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                <svg style="width: 18px; height: 18px; color: #94a3b8;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            </div>`;
+                        return `
+                            <div onclick="showSearchResult(${d.latitude}, ${d.longitude}, ${d.id}); event.stopPropagation();" style="display: flex; align-items: center; gap: 8px; padding: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; ${isCurrent ? 'background: #f0fdf4; border: 1px solid rgba(16, 185, 129, 0.2);' : ''}" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='${isCurrent ? '#f0fdf4' : 'transparent'}'">
+                                ${photoHtml}
+                                <div style="flex: 1; min-width: 0;">
+                                    <p style="margin: 0; font-size: 0.82rem; font-weight: 600; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${d.decedent_name} ${isCurrent ? '<span style="color: #10b981; font-size: 0.7rem;">(current)</span>' : ''}</p>
+                                    <p style="margin: 2px 0 0 0; font-size: 0.72rem; color: #64748b;">${birthYear} - ${deathYear} ${d.cell_row !== null ? '• Row ' + d.cell_row + ', Col ' + d.cell_col : ''}</p>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    dropdown.innerHTML = '<p style="text-align: center; color: #94a3b8; font-size: 0.78rem; padding: 8px;">No other deceased found in this plot</p>';
+                }
+                dropdown.dataset.loaded = 'true';
+            } catch (err) {
+                console.error('Error fetching grid deceased:', err);
+                dropdown.innerHTML = '<p style="text-align: center; color: #ef4444; font-size: 0.78rem; padding: 8px;">Failed to load deceased list</p>';
+            }
+        }
+    } else {
+        dropdown.style.display = 'none';
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+    }
 }
 
 // Show search result on map — drops a prominent 📍 pin at the grave location.

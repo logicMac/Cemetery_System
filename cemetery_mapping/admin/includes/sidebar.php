@@ -13,6 +13,12 @@
                 </button>
             </div>
 
+            <div class="sidebar-search">
+                <i data-lucide="search" width="14" height="14"></i>
+                <input type="text" id="sidebarSearch" placeholder="Search" autocomplete="off">
+                <kbd>/</kbd>
+            </div>
+
             <?php
             $groups = [
                 'Main' => [
@@ -23,6 +29,7 @@
                 ],
                 'Records' => [
                     'icon' => 'file-plus',
+                    'add' => 'add-record.php',
                     'items' => [
                         ['records.php', 'records', 'All Records', 'file-text'],
                         ['burial-calendar.php', 'burial-calendar', 'Burial Calendar', 'calendar-days'],
@@ -30,6 +37,7 @@
                 ],
                 'Cemetery Map' => [
                     'icon' => 'map',
+                    'add' => 'available-plots.php',
                     'items' => [
                         ['map-view.php', 'map-view', 'Map View', 'map'],
                         ['available-plots.php', 'available-plots', 'Available Plots', 'map-pin'],
@@ -64,28 +72,39 @@
                     ],
                 ],
             ];
+
+            // Live counts shown beside nav items (like task counters)
+            $navCounts = [];
+            if (isset($pdo)) {
+                try {
+                    $navCounts['records'] = (int)$pdo->query("SELECT COUNT(*) FROM burial_records")->fetchColumn();
+                    $navCounts['available-plots'] = (int)$pdo->query("SELECT COUNT(*) FROM available_plots")->fetchColumn();
+                    $navCounts['expiring-plots'] =
+                        (int)$pdo->query("SELECT COUNT(*) FROM burial_records WHERE expiration_date IS NOT NULL AND expiration_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)")->fetchColumn()
+                        + (int)$pdo->query("SELECT COUNT(*) FROM available_plots WHERE expiration_date IS NOT NULL AND expiration_date <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)")->fetchColumn();
+                } catch (Throwable $e) {
+                    $navCounts = [];
+                }
+            }
             ?>
             
             <ul class="sidebar-nav" id="sidebarNav">
                 <?php foreach ($groups as $groupName => $group): 
                     $groupIcon = $group['icon'];
                     $items = $group['items'];
-                    $hasActive = false;
-                    foreach ($items as $item) {
-                        if ($current_page === $item[1]) {
-                            $hasActive = true;
-                            break;
-                        }
-                    }
                 ?>
-                <li class="sidebar-group <?php echo $hasActive ? 'is-open' : ''; ?>">
-                    <button type="button" class="sidebar-group-toggle" aria-expanded="<?php echo $hasActive ? 'true' : 'false'; ?>">
-                        <span class="sidebar-group-left">
-                            <i data-lucide="<?php echo $groupIcon; ?>" width="18" height="18"></i>
+                <li class="sidebar-group <?php echo in_array($current_page, array_column($items, 1), true) ? 'has-active' : ''; ?>">
+                    <div class="sidebar-group-head">
+                        <a href="<?php echo $items[0][0]; ?>" class="sidebar-group-label" title="<?php echo htmlspecialchars($groupName, ENT_QUOTES, 'UTF-8'); ?>">
+                            <i data-lucide="<?php echo $groupIcon; ?>" class="sidebar-group-icon" width="17" height="17"></i>
                             <span class="sidebar-group-title"><?php echo $groupName; ?></span>
-                        </span>
-                        <i data-lucide="chevron-down" class="sidebar-chevron" width="16" height="16"></i>
-                    </button>
+                        </a>
+                        <?php if (!empty($group['add'])): ?>
+                            <a href="<?php echo $group['add']; ?>" class="sidebar-group-add" title="Add new" aria-label="Add new">
+                                <i data-lucide="plus" width="13" height="13"></i>
+                            </a>
+                        <?php endif; ?>
+                    </div>
                     <ul class="sidebar-group-menu" data-group-label="<?php echo $groupName; ?>">
                         <?php foreach ($items as $item): 
                             $href = $item[0];
@@ -93,13 +112,17 @@
                             $label = $item[2];
                             $icon = $item[3];
                             $isActive = $current_page === $page;
+                            $count = $navCounts[$page] ?? null;
                         ?>
                         <li>
                             <a href="<?php echo $href; ?>" class="<?php echo $isActive ? 'active' : ''; ?>">
                                 <i data-lucide="<?php echo $icon; ?>" width="18" height="18"></i>
                                 <?php echo $label; ?>
                                 <?php if ($page === 'assistant'): ?>
-                                    <span style="position: absolute; top: 8px; right: 12px; background: #10b981; color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; font-weight: 700;">AI</span>
+                                    <span class="sidebar-link-badge">AI</span>
+                                <?php endif; ?>
+                                <?php if ($count !== null): ?>
+                                    <span class="sidebar-link-count"><?php echo $count; ?></span>
                                 <?php endif; ?>
                             </a>
                         </li>
@@ -108,16 +131,6 @@
                 </li>
                 <?php endforeach; ?>
             </ul>
-
-            <div class="sidebar-user">
-                <div class="sidebar-user-avatar">
-                    <?php echo strtoupper(substr($admin_username, 0, 1)); ?>
-                </div>
-                <div class="sidebar-user-info">
-                    <span class="sidebar-user-name"><?php echo $admin_username; ?></span>
-                    <span class="sidebar-user-role">Administrator</span>
-                </div>
-            </div>
         </aside>
 
         <main class="admin-main">
@@ -144,16 +157,9 @@
             function toggleSidebarCollapse() {
                 const layout = document.querySelector('.admin-layout');
                 layout.classList.toggle('collapsed');
-
-                // Re-calculate open menus after transition so they don't get cut off
-                window.setTimeout(() => {
-                    document.querySelectorAll('.sidebar-group.is-open .sidebar-group-menu').forEach(menu => {
-                        menu.style.maxHeight = menu.scrollHeight + 'px';
-                    });
-                }, 360);
             }
 
-            // Initialize Lucide icons first, then set up accordion heights
+            // Initialize Lucide icons first, then set up sidebar navigation
             function initLucideIcons() {
                 if (typeof lucide !== 'undefined') {
                     lucide.createIcons();
@@ -162,40 +168,7 @@
                 return false;
             }
 
-            // Sidebar Accordion — runs immediately (sidebar DOM is already parsed)
-            function initSidebarAccordion() {
-                const toggles = document.querySelectorAll('.sidebar-group-toggle');
-
-                toggles.forEach(toggle => {
-                    // Skip if already initialized (prevents double-binding on reloads)
-                    if (toggle.dataset.initialized === 'true') return;
-
-                    const group = toggle.closest('.sidebar-group');
-
-                    toggle.addEventListener('click', function() {
-                        const isOpen = group.classList.contains('is-open');
-
-                        // Close others (accordion behavior)
-                        document.querySelectorAll('.sidebar-group.is-open').forEach(openGroup => {
-                            if (openGroup !== group) {
-                                openGroup.classList.remove('is-open');
-                                openGroup.querySelector('.sidebar-group-toggle').setAttribute('aria-expanded', 'false');
-                            }
-                        });
-
-                        if (isOpen) {
-                            group.classList.remove('is-open');
-                            toggle.setAttribute('aria-expanded', 'false');
-                        } else {
-                            group.classList.add('is-open');
-                            toggle.setAttribute('aria-expanded', 'true');
-                        }
-                    });
-
-                    toggle.dataset.initialized = 'true';
-                });
-
-                // Close menu when clicking on a link
+            function initSidebarLinks() {
                 const sidebarLinks = document.querySelectorAll('.sidebar-group-menu a');
                 sidebarLinks.forEach(link => {
                     if (link.dataset.initialized === 'true') return;
@@ -207,9 +180,6 @@
                     link.dataset.initialized = 'true';
                 });
             }
-
-            // Recalculate open menu heights after icons render (no longer needed with CSS approach)
-            function recalcOpenMenuHeights() {}
 
             // Mobile/desktop toggle visibility
             function updateMenuToggle() {
@@ -228,36 +198,63 @@
                 }
             }
 
+            // Sidebar search — filters nav links, "/" focuses it
+            function initSidebarSearch() {
+                var input = document.getElementById('sidebarSearch');
+                if (!input) return;
+
+                input.addEventListener('input', function() {
+                    var q = input.value.trim().toLowerCase();
+                    document.querySelectorAll('#sidebarNav .sidebar-group').forEach(function(group) {
+                        var anyVisible = false;
+                        group.querySelectorAll('.sidebar-group-menu > li').forEach(function(li) {
+                            var show = q === '' || li.textContent.toLowerCase().indexOf(q) !== -1;
+                            li.style.display = show ? '' : 'none';
+                            if (show) anyVisible = true;
+                        });
+                        group.style.display = anyVisible ? '' : 'none';
+                    });
+                });
+
+                document.addEventListener('keydown', function(e) {
+                    var tag = (document.activeElement && document.activeElement.tagName) || '';
+                    if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(tag)) {
+                        e.preventDefault();
+                        input.focus();
+                    }
+                    if (e.key === 'Escape' && document.activeElement === input) {
+                        input.value = '';
+                        input.dispatchEvent(new Event('input'));
+                        input.blur();
+                    }
+                });
+            }
+
             // --- Initialize immediately (sidebar DOM is already available) ---
-            initSidebarAccordion();
+            initSidebarLinks();
+            initSidebarSearch();
             updateMenuToggle();
             window.addEventListener('resize', updateMenuToggle);
 
             // --- Handle Lucide icons (may not be loaded yet on first visit) ---
             if (!initLucideIcons()) {
-                // Lucide not loaded yet — poll until it's ready, then render icons and fix heights
+                // Lucide not loaded yet — poll until it's ready, then render icons
                 var lucideAttempts = 0;
                 var lucidePoll = setInterval(function() {
                     lucideAttempts++;
                     if (initLucideIcons()) {
                         clearInterval(lucidePoll);
-                        // Icons are now rendered — recalculate heights since icons changed layout
-                        recalcOpenMenuHeights();
+                        // Icons are now rendered
                     } else if (lucideAttempts > 50) {
                         clearInterval(lucidePoll); // give up after ~5s
                     }
                 }, 100);
-            } else {
-                // Lucide was already loaded — icons rendered, recalc heights to be safe
-                recalcOpenMenuHeights();
             }
 
             // --- Also run on DOMContentLoaded as a safety net ---
             document.addEventListener('DOMContentLoaded', function() {
-                initSidebarAccordion();
-                if (initLucideIcons()) {
-                    recalcOpenMenuHeights();
-                }
+                initSidebarLinks();
+                initLucideIcons();
                 updateMenuToggle();
             });
             </script>

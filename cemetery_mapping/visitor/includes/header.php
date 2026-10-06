@@ -28,7 +28,29 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     <link rel="shortcut icon" type="image/x-icon" href="../assets/images/favicon.ico?v=2">
     <link rel="icon" type="image/png" href="../assets/images/favicon.png?v=2">
     <title><?php echo ucfirst(str_replace('-', ' ', $current_page)); ?> - Visitor Portal</title>
-    <title><?php echo ucfirst(str_replace('-', ' ', $current_page)); ?> - Visitor Portal</title>
+
+    <script>
+    // Apply saved theme before first paint (prevents flash of wrong theme)
+    (function () {
+        try {
+            var t = localStorage.getItem('cm-theme');
+            if (t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        } catch (e) {}
+    })();
+    function toggleTheme() {
+        var el = document.documentElement;
+        var dark = el.getAttribute('data-theme') === 'dark';
+        if (dark) {
+            el.removeAttribute('data-theme');
+            try { localStorage.setItem('cm-theme', 'light'); } catch (e) {}
+        } else {
+            el.setAttribute('data-theme', 'dark');
+            try { localStorage.setItem('cm-theme', 'dark'); } catch (e) {}
+        }
+    }
+    </script>
 
     <!-- Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,8 +64,8 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="../assets/css/theme.css?v=5">
-    <link rel="stylesheet" href="../assets/css/admin.css?v=9">
+    <link rel="stylesheet" href="../assets/css/theme.css?v=8">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=19">
     <link rel="stylesheet" href="../assets/css/mobile-responsive.css?v=3">
 
     <style>
@@ -53,11 +75,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
         .admin-sidebar { z-index: 200; }
         .admin-header {
             z-index: 10000 !important;
-            background: #ffffff !important;
-            height: 80px !important;
-            min-height: 80px !important;
-            padding: 10px 32px !important;
-            box-sizing: border-box !important;
+            background: var(--surface) !important;
         }
     </style>
 </head>

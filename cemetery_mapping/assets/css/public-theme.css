@@ -1,0 +1,302 @@
+/**
+ * Public pages (landing, login, register) — theme variables + dark mode.
+ * Only activates under html[data-theme="dark"]; light appearance untouched.
+ * Shares the cm-theme localStorage key with admin/visitor portals.
+ */
+
+:root {
+    --bg-page: #f7f8fa;
+    --surface: #ffffff;
+    --bg-subtle: #f8fafc;
+    --border-subtle: #f1f5f9;
+    --glass-border: #e2e8f0;
+    --text-strong: #0f172a;
+    --text-body: #334155;
+    --text-muted: #64748b;
+}
+
+html[data-theme="dark"] {
+    --bg-page: #0f172a;
+    --surface: #1e293b;
+    --bg-subtle: #16202f;
+    --border-subtle: #24344d;
+    --glass-border: #334155;
+    --text-strong: #f1f5f9;
+    --text-body: #cbd5e1;
+    --text-muted: #94a3b8;
+}
+
+/* Theme toggle icons */
+.theme-icon-sun { display: none; }
+html[data-theme="dark"] .theme-icon-sun { display: inline-flex; }
+html[data-theme="dark"] .theme-icon-moon { display: none; }
+
+/* ============================================================
+   Dark-mode remaps — Tailwind utilities used on public pages
+   ============================================================ */
+
+html[data-theme="dark"] body {
+    background-color: var(--bg-page);
+    color: var(--text-body);
+}
+
+/* Backgrounds */
+html[data-theme="dark"] .bg-white {
+    background-color: #1e293b;
+}
+
+html[data-theme="dark"] .bg-white\/80 {
+    background-color: rgba(15, 23, 42, 0.85);
+}
+
+html[data-theme="dark"] .bg-white\/90 {
+    background-color: rgba(30, 41, 59, 0.92);
+}
+
+html[data-theme="dark"] .bg-slate-50 {
+    background-color: #16202f;
+}
+
+html[data-theme="dark"] .bg-slate-50\/50,
+html[data-theme="dark"] .bg-slate-50\/60 {
+    background-color: rgba(22, 32, 47, 0.6);
+}
+
+html[data-theme="dark"] .bg-slate-100 {
+    background-color: #24344d;
+}
+
+html[data-theme="dark"] .bg-emerald-50 {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+html[data-theme="dark"] .bg-emerald-50\/40,
+html[data-theme="dark"] .bg-emerald-50\/50 {
+    background-color: rgba(16, 185, 129, 0.08);
+}
+
+html[data-theme="dark"] .bg-emerald-100 {
+    background-color: rgba(16, 185, 129, 0.18);
+}
+
+html[data-theme="dark"] .bg-emerald-100\/40 {
+    background-color: rgba(16, 185, 129, 0.12);
+}
+
+html[data-theme="dark"] .bg-rose-50 {
+    background-color: rgba(244, 63, 94, 0.1);
+}
+
+html[data-theme="dark"] .bg-violet-50 {
+    background-color: rgba(139, 92, 246, 0.1);
+}
+
+html[data-theme="dark"] .from-slate-50 {
+    --tw-gradient-from: #16202f var(--tw-gradient-from-position);
+    --tw-gradient-to: rgba(22, 32, 47, 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+html[data-theme="dark"] .to-white {
+    --tw-gradient-to: #0f172a var(--tw-gradient-to-position);
+}
+
+/* Text */
+html[data-theme="dark"] .text-slate-900 {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .text-slate-800 {
+    color: #e2e8f0;
+}
+
+html[data-theme="dark"] .text-slate-700 {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .text-slate-600 {
+    color: #a3b0c2;
+}
+
+html[data-theme="dark"] .text-slate-500 {
+    color: #8b99ae;
+}
+
+html[data-theme="dark"] .text-slate-400 {
+    color: #64748b;
+}
+
+html[data-theme="dark"] .text-emerald-600,
+html[data-theme="dark"] .text-emerald-700 {
+    color: #34d399;
+}
+
+html[data-theme="dark"] .text-rose-700 {
+    color: #fb7185;
+}
+
+html[data-theme="dark"] .text-violet-600 {
+    color: #a78bfa;
+}
+
+/* Borders */
+html[data-theme="dark"] .border-slate-100 {
+    border-color: #24344d;
+}
+
+html[data-theme="dark"] .border-slate-200,
+html[data-theme="dark"] .border-slate-200\/70 {
+    border-color: #2b3a55;
+}
+
+html[data-theme="dark"] .border-slate-300 {
+    border-color: #334155;
+}
+
+html[data-theme="dark"] .border-emerald-100,
+html[data-theme="dark"] .border-emerald-200 {
+    border-color: rgba(52, 211, 153, 0.3);
+}
+
+html[data-theme="dark"] .border-emerald-200 {
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+html[data-theme="dark"] .border-rose-200 {
+    border-color: rgba(244, 63, 94, 0.35);
+}
+
+html[data-theme="dark"] .border-violet-100 {
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+html[data-theme="dark"] .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+html[data-theme="dark"] .divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #24344d;
+}
+
+/* Rings */
+html[data-theme="dark"] .ring-emerald-100 {
+    --tw-ring-color: rgba(52, 211, 153, 0.2);
+}
+
+html[data-theme="dark"] .ring-emerald-200 {
+    --tw-ring-color: rgba(52, 211, 153, 0.3);
+}
+
+/* Hover states */
+html[data-theme="dark"] .hover\:bg-slate-50:hover {
+    background-color: #24344d;
+}
+
+html[data-theme="dark"] .hover\:bg-slate-100:hover {
+    background-color: #2e405c;
+}
+
+html[data-theme="dark"] .hover\:bg-emerald-50:hover {
+    background-color: rgba(16, 185, 129, 0.14);
+}
+
+html[data-theme="dark"] .hover\:bg-emerald-100:hover {
+    background-color: rgba(16, 185, 129, 0.22);
+}
+
+html[data-theme="dark"] .hover\:text-slate-900:hover,
+html[data-theme="dark"] .hover\:text-slate-700:hover {
+    color: #f1f5f9;
+}
+
+html[data-theme="dark"] .hover\:text-emerald-600:hover {
+    color: #34d399;
+}
+
+html[data-theme="dark"] .hover\:border-emerald-200:hover,
+html[data-theme="dark"] .hover\:border-emerald-300:hover {
+    border-color: rgba(52, 211, 153, 0.45);
+}
+
+/* Focus rings on inputs */
+html[data-theme="dark"] .focus\:bg-white:focus {
+    background-color: #0f172a;
+}
+
+html[data-theme="dark"] .focus\:border-emerald-500:focus {
+    border-color: #10b981;
+}
+
+html[data-theme="dark"] .focus\:ring-emerald-100:focus {
+    --tw-ring-color: rgba(16, 185, 129, 0.25);
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+    color-scheme: dark;
+}
+
+html[data-theme="dark"] .placeholder-slate-400::placeholder {
+    color: #64748b;
+}
+
+/* Shadows — darker neutrals */
+html[data-theme="dark"] .shadow-sm,
+html[data-theme="dark"] .shadow,
+html[data-theme="dark"] .shadow-md,
+html[data-theme="dark"] .shadow-lg,
+html[data-theme="dark"] .shadow-xl,
+html[data-theme="dark"] .shadow-2xl {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .shadow-emerald-100,
+html[data-theme="dark"] .shadow-emerald-200,
+html[data-theme="dark"] .shadow-emerald-300,
+html[data-theme="dark"] .shadow-emerald-100\/50 {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Decorative blurs on the login panel — dim, don't glow */
+html[data-theme="dark"] .blur-3xl {
+    opacity: 0.25;
+}
+
+/* Leaflet map preview */
+html[data-theme="dark"] .leaflet-tile-pane {
+    filter: brightness(0.85) saturate(0.8);
+}
+
+html[data-theme="dark"] .leaflet-container {
+    background: #0f172a;
+}
+
+html[data-theme="dark"] .leaflet-popup-content-wrapper {
+    background: #1e293b;
+    color: #e2e8f0;
+    border: 1px solid #334155;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+
+html[data-theme="dark"] .leaflet-popup-content {
+    color: #e2e8f0;
+}
+
+html[data-theme="dark"] .leaflet-popup-tip {
+    background: #1e293b;
+}
+
+html[data-theme="dark"] .leaflet-bar a {
+    background: #1e293b;
+    color: #cbd5e1;
+    border-color: #334155;
+}
+
+html[data-theme="dark"] .leaflet-bar a:hover {
+    background: #24344d;
+}
+
+html[data-theme="dark"] .leaflet-control-attribution,
+html[data-theme="dark"] .leaflet-control-layers {
+    background: rgba(30, 41, 59, 0.92);
+    color: #94a3b8;
+    border-color: #334155;
+}

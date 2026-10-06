@@ -168,7 +168,7 @@ try {
         
         .bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #22c55e 0%, #059669 100%);
+            background: #059669;
         }
         
         .percentage-value {

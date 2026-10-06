@@ -38,6 +38,11 @@ if (isset($title_overrides[$current_page])) {
         </div>
     </div>
     <div class="admin-header-actions" style="position: relative;">
+        <?php if (!empty($header_action)) echo $header_action; ?>
+        <button type="button" class="admin-header-btn" title="Toggle dark mode" aria-label="Toggle dark mode" onclick="toggleTheme()">
+            <i data-lucide="moon" width="17" height="17" class="theme-icon-moon"></i>
+            <i data-lucide="sun" width="17" height="17" class="theme-icon-sun"></i>
+        </button>
         <button type="button" class="admin-header-btn" title="Notifications" id="notifBtn" aria-label="Notifications" onclick="toggleNotifDropdown()">
             <i data-lucide="bell" width="20" height="20"></i>
             <span class="admin-header-badge" id="notifBadge">0</span>
@@ -51,9 +56,22 @@ if (isset($title_overrides[$current_page])) {
                 <div class="notif-empty">No new notifications</div>
             </div>
         </div>
-        <a href="logout.php" class="admin-header-btn" title="Logout" aria-label="Logout">
-            <i data-lucide="log-out" width="20" height="20"></i>
-        </a>
+        <div class="header-user">
+            <button type="button" class="header-user-btn" id="userMenuBtn" onclick="toggleUserMenu()" aria-label="Account menu" title="<?php echo $admin_username; ?>">
+                <span class="header-user-avatar"><?php echo strtoupper(substr($admin_username, 0, 1)); ?></span>
+                <span class="header-user-status"></span>
+            </button>
+            <div class="header-user-menu" id="userMenu">
+                <div class="header-user-meta">
+                    <span class="header-user-name"><?php echo $admin_username; ?></span>
+                    <span class="header-user-role">Administrator</span>
+                </div>
+                <a href="logout.php" class="header-user-item">
+                    <i data-lucide="log-out" width="15" height="15"></i>
+                    <span>Log out</span>
+                </a>
+            </div>
+        </div>
     </div>
 </header>
 
@@ -187,6 +205,19 @@ document.addEventListener('click', function(e) {
     if (notifDropdownOpen && !btn.contains(e.target) && !dropdown.contains(e.target)) {
         dropdown.style.display = 'none';
         notifDropdownOpen = false;
+    }
+});
+
+// Account menu
+function toggleUserMenu() {
+    document.getElementById('userMenu').classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('userMenu');
+    const btn = document.getElementById('userMenuBtn');
+    if (menu && menu.classList.contains('open') && !btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.remove('open');
     }
 });
 

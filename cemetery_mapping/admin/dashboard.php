@@ -5,56 +5,76 @@ require_once '../config/database.php';
 
 // Get statistics
 try {
-    // Total burial records
-    $totalRecords = $pdo->query("SELECT COUNT(*) FROM burial_records")->fetchColumn();
+ // Total burial records
+ $totalRecords = $pdo->query("SELECT COUNT(*) FROM burial_records")->fetchColumn();
 
-    // Available plots
-    $availablePlots = $pdo->query("SELECT COUNT(*) FROM available_plots")->fetchColumn();
+ // Available plots
+ $availablePlots = $pdo->query("SELECT COUNT(*) FROM available_plots")->fetchColumn();
 
-    // Records this month
-    $thisMonth = $pdo->query("SELECT COUNT(*) FROM burial_records WHERE MONTH(date_added) = MONTH(CURRENT_DATE()) AND YEAR(date_added) = YEAR(CURRENT_DATE())")->fetchColumn();
+ // Records this month / last month (for the delta badge)
+ $thisMonth = $pdo->query("SELECT COUNT(*) FROM burial_records WHERE MONTH(date_added) = MONTH(CURRENT_DATE()) AND YEAR(date_added) = YEAR(CURRENT_DATE())")->fetchColumn();
+ $lastMonthRecords = $pdo->query("SELECT COUNT(*) FROM burial_records WHERE date_added >= DATE_FORMAT(CURRENT_DATE() - INTERVAL 1 MONTH, '%Y-%m-01') AND date_added < DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')")->fetchColumn();
 
-    // Total visitors
-    $totalVisitors = $pdo->query("SELECT COUNT(*) FROM visitors WHERE is_active = 1")->fetchColumn();
+ // Total visitors + new this/last month
+ $totalVisitors = $pdo->query("SELECT COUNT(*) FROM visitors WHERE is_active = 1")->fetchColumn();
+ $visitorsThisMonth = $pdo->query("SELECT COUNT(*) FROM visitors WHERE created_at >= DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')")->fetchColumn();
+ $visitorsLastMonth = $pdo->query("SELECT COUNT(*) FROM visitors WHERE created_at >= DATE_FORMAT(CURRENT_DATE() - INTERVAL 1 MONTH, '%Y-%m-01') AND created_at < DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')")->fetchColumn();
 
-    // Recent records
-    $recentRecords = $pdo->query("SELECT decedent_name, plot_number, date_added FROM burial_records ORDER BY date_added DESC LIMIT 5")->fetchAll();
+ // Recent records (with barangay + burial status for the table)
+ $recentRecords = $pdo->query("SELECT decedent_name, plot_number, barangay, is_buried, date_added FROM burial_records ORDER BY date_added DESC LIMIT 8")->fetchAll();
 
-    // Records by barangay
-    $byBarangay = $pdo->query("SELECT barangay, COUNT(*) as count FROM burial_records WHERE barangay IS NOT NULL GROUP BY barangay ORDER BY count DESC LIMIT 5")->fetchAll();
+ // Burials added per day over the last 90 days (chart series)
+ $burialSeries = [];
+ $seriesRows = $pdo->query("SELECT DATE(date_added) AS d, COUNT(*) AS c FROM burial_records WHERE date_added >= CURDATE() - INTERVAL 89 DAY GROUP BY DATE(date_added)")->fetchAll();
+ foreach ($seriesRows as $r) { $burialSeries[$r['d']] = (int)$r['c']; }
 
-    // Scheduled burials this week (not yet done)
-    $scheduledBurials = $pdo->query("
-        SELECT id, decedent_name, plot_number, barangay, burial_date, burial_time
-        FROM burial_records
-        WHERE burial_date IS NOT NULL
-          AND is_buried = 0
-          AND YEARWEEK(burial_date, 1) = YEARWEEK(CURDATE(), 1)
-        ORDER BY burial_date ASC, burial_time ASC
-    ")->fetchAll();
+ // Scheduled this week vs last week
+ $schedLastWeek = $pdo->query("SELECT COUNT(*) FROM burial_records WHERE burial_date IS NOT NULL AND YEARWEEK(burial_date, 1) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)")->fetchColumn();
 
-    // All scheduled burials for the current month (for calendar view)
-    $calMonth = isset($_GET['cal_month']) ? (int)$_GET['cal_month'] : (int)date('n');
-    $calYear  = isset($_GET['cal_year']) ? (int)$_GET['cal_year'] : (int)date('Y');
-    if ($calMonth < 1 || $calMonth > 12) { $calMonth = (int)date('n'); }
-    if ($calYear < 2000 || $calYear > 2100) { $calYear = (int)date('Y'); }
-    $calStmt = $pdo->prepare("
-        SELECT id, decedent_name, plot_number, burial_date, burial_time, is_buried
-        FROM burial_records
-        WHERE burial_date IS NOT NULL
-          AND MONTH(burial_date) = ? AND YEAR(burial_date) = ?
-        ORDER BY burial_date ASC, burial_time ASC
-    ");
-    $calStmt->execute([$calMonth, $calYear]);
-    $calendarBurials = [];
-    foreach ($calStmt->fetchAll() as $row) {
-        $day = (int)date('j', strtotime($row['burial_date']));
-        $calendarBurials[$day][] = $row;
-    }
+ // Records by barangay
+ $byBarangay = $pdo->query("SELECT barangay, COUNT(*) as count FROM burial_records WHERE barangay IS NOT NULL GROUP BY barangay ORDER BY count DESC LIMIT 5")->fetchAll();
+
+ // Scheduled burials this week (not yet done)
+ $scheduledBurials = $pdo->query("
+ SELECT id, decedent_name, plot_number, barangay, burial_date, burial_time
+ FROM burial_records
+ WHERE burial_date IS NOT NULL
+ AND is_buried = 0
+ AND YEARWEEK(burial_date, 1) = YEARWEEK(CURDATE(), 1)
+ ORDER BY burial_date ASC, burial_time ASC
+ ")->fetchAll();
+
+ // All scheduled burials for the current month (for calendar view)
+ $calMonth = isset($_GET['cal_month']) ? (int)$_GET['cal_month'] : (int)date('n');
+ $calYear = isset($_GET['cal_year']) ? (int)$_GET['cal_year'] : (int)date('Y');
+ if ($calMonth < 1 || $calMonth > 12) { $calMonth = (int)date('n'); }
+ if ($calYear < 2000 || $calYear > 2100) { $calYear = (int)date('Y'); }
+ $calStmt = $pdo->prepare("
+ SELECT id, decedent_name, plot_number, burial_date, burial_time, is_buried
+ FROM burial_records
+ WHERE burial_date IS NOT NULL
+ AND MONTH(burial_date) = ? AND YEAR(burial_date) = ?
+ ORDER BY burial_date ASC, burial_time ASC
+ ");
+ $calStmt->execute([$calMonth, $calYear]);
+ $calendarBurials = [];
+ foreach ($calStmt->fetchAll() as $row) {
+ $day = (int)date('j', strtotime($row['burial_date']));
+ $calendarBurials[$day][] = $row;
+ }
 
 } catch (PDOException $e) {
-    error_log("Dashboard stats error: " . $e->getMessage());
+ error_log("Dashboard stats error: " . $e->getMessage());
 }
+
+// Delta badge values (% change vs previous period)
+$recDelta = ($lastMonthRecords ?? 0) > 0 ? round((($thisMonth ?? 0) - $lastMonthRecords) / $lastMonthRecords * 100) : (($thisMonth ?? 0) > 0 ? 100 : 0);
+$visDelta = ($visitorsLastMonth ?? 0) > 0 ? round((($visitorsThisMonth ?? 0) - $visitorsLastMonth) / $visitorsLastMonth * 100) : (($visitorsThisMonth ?? 0) > 0 ? 100 : 0);
+$schedThisWeek = count($scheduledBurials ?? []);
+$schedDelta = ($schedLastWeek ?? 0) > 0 ? round(($schedThisWeek - $schedLastWeek) / $schedLastWeek * 100) : ($schedThisWeek > 0 ? 100 : 0);
+
+// Header quick action — rendered by the shared topbar
+$header_action = '<a href="add-record.php" class="header-action-btn"><i data-lucide="plus" width="15" height="15"></i> Quick Create</a>';
 ?>
 
 <?php require_once 'includes/sidebar.php'; ?>
@@ -62,771 +82,968 @@ try {
 <style>
 /* Dashboard v2 — mint green + white */
 .admin-layout {
-    background: #ffffff;
+ background: var(--surface);
 }
 
 .admin-layout::after {
-    display: none;
+ display: none;
 }
 
 
 
-/* Animations */
-@keyframes dv2FadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes dv2Pop {
-    0%   { opacity: 0; transform: scale(0.94); }
-    100% { opacity: 1; transform: scale(1); }
-}
-
-.dv2 > * {
-    opacity: 0;
-    animation: dv2FadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.dv2 > *:nth-child(1) { animation-delay: 0.04s; }
-.dv2 > *:nth-child(2) { animation-delay: 0.10s; }
-.dv2 > *:nth-child(3) { animation-delay: 0.16s; }
-.dv2 > *:nth-child(4) { animation-delay: 0.22s; }
-
-.dv2-stat,
-.dv2-card,
-.dv2-qa {
-    animation: dv2Pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.dv2-stats .dv2-stat:nth-child(1) { animation-delay: 0.12s; }
-.dv2-stats .dv2-stat:nth-child(2) { animation-delay: 0.20s; }
-.dv2-stats .dv2-stat:nth-child(3) { animation-delay: 0.28s; }
-.dv2-stats .dv2-stat:nth-child(4) { animation-delay: 0.36s; }
-
-.dv2-grid .dv2-card:nth-child(1) { animation-delay: 0.24s; }
-.dv2-grid .dv2-card:nth-child(2) { animation-delay: 0.34s; }
-
-.dv2-qa-row .dv2-qa:nth-child(1) { animation-delay: 0.30s; }
-.dv2-qa-row .dv2-qa:nth-child(2) { animation-delay: 0.38s; }
-.dv2-qa-row .dv2-qa:nth-child(3) { animation-delay: 0.46s; }
-.dv2-qa-row .dv2-qa:nth-child(4) { animation-delay: 0.54s; }
-
-/* Hero banner */
-.dv2-hero {
-    border-radius: 20px;
-    padding: 40px 40px;
-    color: #fff;
-    margin-bottom: 28px;
-    box-shadow: 0 12px 40px rgba(16,185,129,0.22);
-    position: relative;
-    overflow: hidden;
-    background-image: url('../assets/images/cemetery-banner.jpg');
-    background-size: cover;
-    background-position: center;
-    text-align: center;
-}
-
-.dv2-hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0.5) 100%);
-    z-index: 0;
-}
-
-.dv2-hero-svg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-}
-
-.dv2-hero-left { position: relative; z-index: 2; }
-
-.dv2-hero-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.18);
-    color: #fff;
-    padding: 5px 12px;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-bottom: 14px;
-    backdrop-filter: blur(6px);
-    text-shadow: 0 1px 3px rgba(0,0,0,0.25);
-}
-
-.dv2-hero h1 {
-    font-size: 2.3rem;
-    font-weight: 800;
-    margin: 0 0 6px;
-    color: #fff;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-}
-
-.dv2-hero-date {
-    opacity: 0.9;
-    font-size: 0.95rem;
-    margin-bottom: 18px;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.25);
-}
-
-.dv2-hero-badges {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-    justify-content: center;
-}
-
-.dv2-hero-badges span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.25);
-}
-
-.dv2-hero-badges svg {
-    width: 14px;
-    height: 14px;
-}
-
-.dv2-hero-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.dv2-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 20px;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.dv2-btn-light {
-    background: #fff;
-    color: #059669;
-}
-
-.dv2-btn-light:hover {
-    background: #f0fdf4;
-    transform: translateY(-2px);
-}
-
-.dv2-btn-outline {
-    background: rgba(255,255,255,0.12);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,0.35);
-}
-
-.dv2-btn-outline:hover {
-    background: rgba(255,255,255,0.22);
-}
-
-.dv2-hero-right {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.dv2-hero-avatar {
-    width: 130px;
-    height: 130px;
-    border-radius: 50%;
-    border: 4px solid rgba(255,255,255,0.35);
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3.2rem;
-    font-weight: 800;
-    color: #10b981;
-    box-shadow: 0 16px 40px rgba(0,0,0,0.12);
-    overflow: hidden;
-}
-
-.dv2-hero-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* Stats row */
+/* Stat cards — label + delta badge, big number, trend line */
 .dv2-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-    gap: 16px;
-    margin-bottom: 28px;
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+ gap: 16px;
+ margin-bottom: 20px;
 }
 
 .dv2-stat {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.03);
-    transition: transform 0.2s, box-shadow 0.2s;
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
+ border-radius: 12px;
+ padding: 18px 20px 16px;
 }
 
-.dv2-stat:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(0,0,0,0.06);
-}
-
-.dv2-stat-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: #f0fdf4;
-    color: #10b981;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 14px;
-}
-
-.dv2-stat-icon svg {
-    width: 18px;
-    height: 18px;
-}
-
-.dv2-stat-value {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #0f172a;
-    margin-bottom: 2px;
+.dv2-stat-head {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 8px;
+ margin-bottom: 8px;
 }
 
 .dv2-stat-label {
-    font-size: 0.85rem;
-    color: #10b981;
-    font-weight: 600;
+ font-size: 0.78rem;
+ font-weight: 500;
+ color: var(--text-muted);
 }
+
+.dv2-delta {
+ display: inline-flex;
+ align-items: center;
+ gap: 3px;
+ padding: 2px 8px;
+ border-radius: 999px;
+ border: 1px solid var(--border-subtle);
+ font-size: 0.68rem;
+ font-weight: 600;
+ font-variant-numeric: tabular-nums;
+ white-space: nowrap;
+}
+
+.dv2-delta svg { width: 11px; height: 11px; }
+.dv2-delta.up { color: #047857; }
+.dv2-delta.down { color: #dc2626; }
+.dv2-delta.flat { color: var(--text-muted); }
+
+.dv2-stat-value {
+ font-size: 1.7rem;
+ font-weight: 700;
+ color: var(--text-strong);
+ letter-spacing: -0.02em;
+ font-variant-numeric: tabular-nums;
+ line-height: 1.15;
+ margin-bottom: 8px;
+}
+
+.dv2-stat-trend {
+ display: flex;
+ align-items: center;
+ gap: 5px;
+ font-size: 0.76rem;
+ font-weight: 600;
+ color: var(--text-body);
+}
+
+.dv2-stat-trend svg { width: 13px; height: 13px; }
+.dv2-stat-trend.up { color: #047857; }
+.dv2-stat-trend.down { color: #dc2626; }
+
+.dv2-stat-sub {
+ font-size: 0.72rem;
+ color: var(--text-muted);
+ margin-top: 2px;
+}
+
+/* Chart card */
+.dv2-chart-card {
+ margin-bottom: 20px;
+}
+
+.dv2-chart-head {
+ display: flex;
+ align-items: flex-start;
+ justify-content: space-between;
+ gap: 16px;
+ flex-wrap: wrap;
+ margin-bottom: 6px;
+}
+
+.dv2-chart-head h3 {
+ margin: 0 0 2px;
+ font-size: 0.95rem;
+ font-weight: 700;
+ color: var(--text-strong);
+}
+
+.dv2-chart-head p {
+ margin: 0;
+ font-size: 0.76rem;
+ color: var(--text-muted);
+}
+
+.dv2-range-tabs {
+ display: inline-flex;
+ gap: 2px;
+ background: var(--bg-subtle);
+ border: 1px solid var(--border-subtle);
+ border-radius: 8px;
+ padding: 3px;
+}
+
+.dv2-range-tabs button {
+ border: none;
+ background: transparent;
+ padding: 5px 12px;
+ border-radius: 6px;
+ font-size: 0.75rem;
+ font-weight: 500;
+ color: var(--text-muted);
+ cursor: pointer;
+ font-family: 'Poppins', sans-serif;
+ transition: background 0.12s ease, color 0.12s ease;
+}
+
+.dv2-range-tabs button:hover { color: var(--text-strong); }
+
+.dv2-range-tabs button.active {
+ background: var(--surface);
+ color: var(--text-strong);
+ font-weight: 600;
+ box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.dv2-chart-wrap {
+ position: relative;
+ height: 260px;
+}
+
+/* Table card with tabs */
+.dv2-table-card {
+ padding: 0;
+ overflow: hidden;
+ margin-bottom: 20px;
+}
+
+.dv2-tabs {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 12px;
+ padding: 12px 16px;
+ border-bottom: 1px solid var(--border-subtle);
+}
+
+.dv2-tab-group {
+ display: inline-flex;
+ gap: 4px;
+}
+
+.dv2-tab {
+ border: none;
+ background: transparent;
+ padding: 6px 14px;
+ border-radius: 999px;
+ font-size: 0.78rem;
+ font-weight: 500;
+ color: var(--text-muted);
+ cursor: pointer;
+ font-family: 'Poppins', sans-serif;
+ transition: background 0.12s ease, color 0.12s ease;
+}
+
+.dv2-tab:hover { color: var(--text-strong); }
+
+.dv2-tab.active {
+ background: var(--bg-subtle);
+ color: var(--text-strong);
+ font-weight: 600;
+}
+
+.dv2-table-card .dv2-table {
+ margin: 0;
+}
+
+.dv2-table-card .dv2-table th:first-child,
+.dv2-table-card .dv2-table td:first-child {
+ padding-left: 18px;
+}
+
+.dv2-table-card .dv2-table th:last-child,
+.dv2-table-card .dv2-table td:last-child {
+ padding-right: 18px;
+}
+
+.dv2-status {
+ display: inline-flex;
+ align-items: center;
+ gap: 5px;
+ padding: 2px 9px;
+ border-radius: 999px;
+ font-size: 0.68rem;
+ font-weight: 600;
+ border: 1px solid transparent;
+}
+
+.dv2-status::before {
+ content: '';
+ width: 6px;
+ height: 6px;
+ border-radius: 50%;
+}
+
+.dv2-status.done { color: #047857; border-color: rgba(5,150,105,0.3); }
+.dv2-status.done::before { background: #10b981; }
+.dv2-status.sched { color: #b45309; border-color: rgba(217,119,6,0.3); }
+.dv2-status.sched::before { background: #f59e0b; }
+
+.dv2-tab-link {
+ color: #059669;
+ font-size: 0.78rem;
+ font-weight: 600;
+ text-decoration: none;
+ white-space: nowrap;
+}
+
+.dv2-tab-link:hover { text-decoration: underline; }
 
 /* Grid cards */
 .dv2-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-    gap: 20px;
-    margin-bottom: 28px;
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+ gap: 20px;
+ margin-bottom: 28px;
 }
 
 .dv2-card {
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 22px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.03);
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
+ border-radius: 12px;
+ padding: 22px;
 }
 
 .dv2-card h3 {
-    margin: 0 0 16px;
-    font-size: 1rem;
-    color: #0f172a;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-weight: 700;
+ margin: 0 0 16px;
+ font-size: 1rem;
+ color: var(--text-strong);
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ font-weight: 700;
 }
 
 .dv2-card h3 > span {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
+ display: inline-flex;
+ align-items: center;
+ gap: 10px;
 }
 
 .dv2-card h3 svg {
-    width: 18px;
-    height: 18px;
-    color: #10b981;
+ width: 18px;
+ height: 18px;
+ color: #10b981;
 }
 
 .dv2-card a {
-    color: #10b981;
-    font-size: 0.82rem;
-    font-weight: 600;
-    text-decoration: none;
+ color: #10b981;
+ font-size: 0.82rem;
+ font-weight: 600;
+ text-decoration: none;
 }
 
 .dv2-card a:hover {
-    text-decoration: underline;
+ text-decoration: underline;
 }
 
 .dv2-table {
-    width: 100%;
-    border-collapse: collapse;
+ width: 100%;
+ border-collapse: collapse;
 }
 
 .dv2-table th {
-    text-align: left;
-    padding: 10px 12px;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #94a3b8;
-    border-bottom: 1px solid #f1f5f9;
-    font-weight: 700;
+ text-align: left;
+ padding: 10px 12px;
+ font-size: 0.7rem;
+ text-transform: uppercase;
+ letter-spacing: 0.05em;
+ color: #94a3b8;
+ border-bottom: 1px solid var(--border-subtle);
+ font-weight: 700;
 }
 
 .dv2-table td {
-    padding: 12px;
-    border-bottom: 1px solid #f1f5f9;
-    color: #334155;
-    font-size: 0.92rem;
+ padding: 12px;
+ border-bottom: 1px solid var(--border-subtle);
+ color: var(--text-body);
+ font-size: 0.92rem;
 }
 
 .dv2-table tr:last-child td {
-    border-bottom: none;
+ border-bottom: none;
 }
 
 .dv2-empty {
-    text-align: center;
-    color: #94a3b8;
-    padding: 24px;
-    font-size: 0.9rem;
+ text-align: center;
+ color: #94a3b8;
+ padding: 24px;
+ font-size: 0.9rem;
 }
 
 /* Quick access tiles */
 .dv2-qa-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+ font-size: 1rem;
+ font-weight: 700;
+ color: var(--text-strong);
+ margin: 0 0 16px;
+ display: flex;
+ align-items: center;
+ gap: 10px;
 }
 
 .dv2-qa-title svg {
-    width: 18px;
-    height: 18px;
-    color: #10b981;
+ width: 18px;
+ height: 18px;
+ color: #10b981;
 }
 
 .dv2-qa-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+ gap: 16px;
 }
 
 .dv2-qa {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: #fff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 18px;
-    text-decoration: none;
-    color: #0f172a;
-    transition: all 0.2s;
+ display: flex;
+ align-items: center;
+ gap: 14px;
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
+ border-radius: 12px;
+ padding: 16px;
+ text-decoration: none;
+ color: var(--text-strong);
+ transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .dv2-qa:hover {
-    border-color: #10b981;
-    box-shadow: 0 10px 28px rgba(16,185,129,0.10);
-    transform: translateY(-3px);
+ border-color: #a7f3d0;
+ background: var(--bg-subtle);
 }
 
 .dv2-qa-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: #f0fdf4;
-    color: #10b981;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+ width: 40px;
+ height: 40px;
+ border-radius: 10px;
+ background: #f0fdf4;
+ color: #10b981;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ flex-shrink: 0;
 }
 
 .dv2-qa-icon svg {
-    width: 20px;
-    height: 20px;
+ width: 20px;
+ height: 20px;
 }
 
 .dv2-qa-title-text {
-    font-weight: 700;
-    font-size: 0.95rem;
-    display: block;
-    margin-bottom: 2px;
+ font-weight: 700;
+ font-size: 0.95rem;
+ display: block;
+ margin-bottom: 2px;
 }
 
 .dv2-qa-desc {
-    font-size: 0.8rem;
-    color: #64748b;
+ font-size: 0.8rem;
+ color: var(--text-muted);
+}
+
+/* Mini calendar + schedule — single emerald accent, no rainbow */
+.dv2-card-count {
+ font-size: 0.78rem;
+ color: var(--text-muted);
+ font-weight: 600;
+}
+
+.dv2-cal-head {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ margin-bottom: 12px;
+}
+
+.dv2-cal-nav {
+ padding: 4px 10px;
+ border: 1px solid var(--glass-border);
+ border-radius: 8px;
+ color: #059669;
+ font-weight: 700;
+ text-decoration: none;
+ transition: background 0.15s ease;
+}
+
+.dv2-cal-nav:hover {
+ background: #ecfdf5;
+}
+
+.dv2-cal-month {
+ color: var(--text-strong);
+ font-size: 0.92rem;
+}
+
+.dv2-cal {
+ width: 100%;
+ border-collapse: collapse;
+ table-layout: fixed;
+}
+
+.dv2-cal-dow {
+ padding: 6px 2px;
+ font-size: 0.62rem;
+ text-transform: uppercase;
+ color: #94a3b8;
+ font-weight: 600;
+ text-align: center;
+ letter-spacing: 0.06em;
+}
+
+.dv2-cal-cell {
+ min-height: 52px;
+ border-radius: 8px;
+ padding: 4px;
+ border: 1px solid var(--border-subtle);
+}
+
+.dv2-cal-cell.has-burial {
+ border-color: #a7f3d0;
+ background: #f8fffb;
+}
+
+.dv2-cal-cell.is-today {
+ border-color: #10b981;
+ background: #ecfdf5;
+}
+
+.dv2-cal-num {
+ font-size: 0.75rem;
+ font-weight: 600;
+ color: var(--text-muted);
+ text-align: center;
+}
+
+.dv2-cal-num.is-today {
+ color: #047857;
+ font-weight: 800;
+}
+
+.dv2-cal-pill {
+ font-size: 0.6rem;
+ line-height: 1.2;
+ margin-top: 2px;
+ padding: 1px 4px;
+ border-radius: 4px;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ white-space: nowrap;
+}
+
+.dv2-cal-pill.pend {
+ background: var(--surface);
+ border: 1px solid #6ee7b7;
+ color: #047857;
+}
+
+.dv2-cal-pill.done {
+ background: #d1fae5;
+ color: #065f46;
+}
+
+.dv2-cal-legend {
+ display: flex;
+ gap: 14px;
+ margin-top: 10px;
+ font-size: 0.7rem;
+ color: var(--text-muted);
+}
+
+.dv2-cal-dot {
+ display: inline-block;
+ width: 10px;
+ height: 10px;
+ border-radius: 3px;
+ margin-right: 4px;
+ vertical-align: -1px;
+}
+
+.dv2-cal-dot.pend { background: var(--surface); border: 1px solid #6ee7b7; }
+.dv2-cal-dot.done { background: #d1fae5; }
+
+.dv2-week-label {
+ font-size: 0.72rem;
+ font-weight: 700;
+ color: var(--text-muted);
+ text-transform: uppercase;
+ letter-spacing: 0.06em;
+ margin-bottom: 10px;
+}
+
+.dv2-week-row {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 10px;
+ padding: 10px 12px;
+ border: 1px solid var(--border-subtle);
+ border-radius: 10px;
+ margin-bottom: 8px;
+ background: var(--surface);
+}
+
+.dv2-week-name {
+ font-weight: 600;
+ font-size: 0.88rem;
+ color: var(--text-strong);
+}
+
+.dv2-week-meta {
+ font-size: 0.76rem;
+ color: var(--text-muted);
+}
+
+.dv2-done-btn {
+ padding: 6px 16px;
+ background: #059669;
+ color: #fff;
+ border: none;
+ border-radius: 8px;
+ font-weight: 600;
+ font-size: 0.78rem;
+ cursor: pointer;
+ transition: background 0.15s ease;
+ flex-shrink: 0;
+ font-family: 'Poppins', sans-serif;
+}
+
+.dv2-done-btn:hover {
+ background: #047857;
+}
+
+/* Dark mode — dashboard components */
+html[data-theme="dark"] .dv2-card,
+html[data-theme="dark"] .dv2-qa {
+ background: #1e293b;
+ border-color: var(--text-body);
+}
+
+html[data-theme="dark"] .dv2-qa:hover {
+ border-color: rgba(52, 211, 153, 0.4);
+ background: #16202f;
+}
+
+html[data-theme="dark"] .dv2-card h3,
+html[data-theme="dark"] .dv2-qa-title-text,
+html[data-theme="dark"] .dv2-cal-month,
+html[data-theme="dark"] .dv2-week-name {
+ color: #f1f5f9;
+}
+
+html[data-theme="dark"] .dv2-table td {
+ color: #cbd5e1;
+ border-bottom-color: #24344d;
+}
+
+html[data-theme="dark"] .dv2-table th {
+ color: #94a3b8;
+ border-bottom-color: #24344d;
+}
+
+html[data-theme="dark"] .dv2-card a,
+html[data-theme="dark"] .dv2-cal-nav {
+ color: #34d399;
+}
+
+html[data-theme="dark"] .dv2-cal-nav {
+ border-color: var(--text-body);
+}
+
+html[data-theme="dark"] .dv2-cal-nav:hover {
+ background: rgba(16, 185, 129, 0.12);
+}
+
+html[data-theme="dark"] .dv2-cal-cell {
+ border-color: #24344d;
+}
+
+html[data-theme="dark"] .dv2-cal-cell.has-burial {
+ border-color: rgba(52, 211, 153, 0.35);
+ background: rgba(16, 185, 129, 0.08);
+}
+
+html[data-theme="dark"] .dv2-cal-cell.is-today {
+ border-color: #10b981;
+ background: rgba(16, 185, 129, 0.14);
+}
+
+html[data-theme="dark"] .dv2-cal-num {
+ color: #94a3b8;
+}
+
+html[data-theme="dark"] .dv2-cal-num.is-today {
+ color: #6ee7b7;
+}
+
+html[data-theme="dark"] .dv2-cal-pill.pend {
+ background: transparent;
+ border-color: rgba(52, 211, 153, 0.45);
+ color: #6ee7b7;
+}
+
+html[data-theme="dark"] .dv2-cal-pill.done {
+ background: rgba(16, 185, 129, 0.2);
+ color: #a7f3d0;
+}
+
+html[data-theme="dark"] .dv2-cal-dot.pend {
+ background: transparent;
+ border-color: rgba(52, 211, 153, 0.45);
+}
+
+html[data-theme="dark"] .dv2-cal-dot.done {
+ background: rgba(16, 185, 129, 0.4);
+}
+
+html[data-theme="dark"] .dv2-card-count,
+html[data-theme="dark"] .dv2-cal-legend,
+html[data-theme="dark"] .dv2-week-label,
+html[data-theme="dark"] .dv2-week-meta,
+html[data-theme="dark"] .dv2-qa-desc,
+html[data-theme="dark"] .dv2-empty {
+ color: var(--text-muted);
+}
+
+html[data-theme="dark"] .dv2-week-row {
+ background: #16202f;
+ border-color: #24344d;
+}
+
+html[data-theme="dark"] .dv2-qa-icon,
+html[data-theme="dark"] .dv2-card h3 svg,
+html[data-theme="dark"] .dv2-qa-title svg {
+ background: rgba(16, 185, 129, 0.14);
+ color: #34d399;
 }
 
 @media (max-width: 900px) {
-    .dv2-hero {
-        grid-template-columns: 1fr;
-        padding: 28px;
-    }
-    .dv2-hero-right {
-        justify-content: flex-start;
-    }
-    .admin-main {
-        padding: 20px;
-    }
-    .burial-schedule-grid {
-        grid-template-columns: 1fr !important;
-    }
+ .dv2-hero {
+ grid-template-columns: 1fr;
+ padding: 28px;
+ }
+ .dv2-hero-right {
+ justify-content: flex-start;
+ }
+ .admin-main {
+ padding: 20px;
+ }
+ .burial-schedule-grid {
+ grid-template-columns: 1fr !important;
+ }
 }
 </style>
 
 <div class="dv2">
-    <div class="dv2-hero">
-        <!-- Dark overlay on top of photo for text readability -->
-        <div class="dv2-hero-overlay"></div>
-        <!-- Decorative SVG background -->
-        <svg class="dv2-hero-svg" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <!-- Soft circles -->
-            <circle cx="680" cy="80" r="120" fill="rgba(255,255,255,0.06)"/>
-            <circle cx="720" cy="320" r="80" fill="rgba(255,255,255,0.05)"/>
-            <circle cx="120" cy="350" r="60" fill="rgba(255,255,255,0.04)"/>
-            <!-- Dot grid pattern (top-right) -->
-            <g fill="rgba(255,255,255,0.08)">
-                <circle cx="560" cy="40" r="2"/><circle cx="590" cy="40" r="2"/><circle cx="620" cy="40" r="2"/><circle cx="650" cy="40" r="2"/><circle cx="680" cy="40" r="2"/><circle cx="710" cy="40" r="2"/><circle cx="740" cy="40" r="2"/><circle cx="770" cy="40" r="2"/>
-                <circle cx="560" cy="70" r="2"/><circle cx="590" cy="70" r="2"/><circle cx="620" cy="70" r="2"/><circle cx="650" cy="70" r="2"/><circle cx="680" cy="70" r="2"/><circle cx="710" cy="70" r="2"/><circle cx="740" cy="70" r="2"/><circle cx="770" cy="70" r="2"/>
-                <circle cx="560" cy="100" r="2"/><circle cx="590" cy="100" r="2"/><circle cx="620" cy="100" r="2"/><circle cx="650" cy="100" r="2"/><circle cx="680" cy="100" r="2"/><circle cx="710" cy="100" r="2"/><circle cx="740" cy="100" r="2"/><circle cx="770" cy="100" r="2"/>
-                <circle cx="560" cy="130" r="2"/><circle cx="590" cy="130" r="2"/><circle cx="620" cy="130" r="2"/><circle cx="650" cy="130" r="2"/><circle cx="680" cy="130" r="2"/><circle cx="710" cy="130" r="2"/><circle cx="740" cy="130" r="2"/><circle cx="770" cy="130" r="2"/>
-            </g>
-            <!-- Wave paths (bottom) -->
-            <path d="M0,340 Q150,310 300,340 T600,340 T900,340 L900,400 L0,400 Z" fill="rgba(255,255,255,0.05)"/>
-            <path d="M0,360 Q150,335 300,360 T600,360 T900,360 L900,400 L0,400 Z" fill="rgba(255,255,255,0.04)"/>
-            <!-- Decorative lines (left side) -->
-            <g stroke="rgba(255,255,255,0.06)" stroke-width="1">
-                <line x1="0" y1="60" x2="180" y2="60"/>
-                <line x1="0" y1="80" x2="120" y2="80"/>
-                <line x1="0" y1="100" x2="150" y2="100"/>
-            </g>
-        </svg>
-        <div class="dv2-hero-left">
-            <div class="dv2-hero-tag">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Admin Panel
-            </div>
-            <h1>Welcome, <?php echo $admin_username; ?>!</h1>
-            <div class="dv2-hero-date"><?php echo date('l, F d, Y'); ?></div>
-            <div class="dv2-hero-badges">
-                <span>
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <?php echo number_format($totalRecords); ?> Records
-                </span>
-                <span>
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <?php echo number_format($availablePlots); ?> Plots
-                </span>
-                <span>
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                    <?php echo number_format($totalVisitors); ?> Visitors
-                </span>
-            </div>
-            <div class="dv2-hero-actions">
-                <a href="records.php" class="dv2-btn dv2-btn-light">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    View Records
-                </a>
-                <a href="reports.php" class="dv2-btn dv2-btn-outline">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    Reports
-                </a>
-            </div>
-        </div>
-    </div>
+ <div class="dv2-hero">
+ <!-- Dark overlay on top of photo for text readability -->
+ <div class="dv2-hero-overlay"></div>
+ <div class="dv2-hero-left">
+ <div class="dv2-hero-tag">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="12" height="12"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+ Admin Panel
+ </div>
+ <h1>Welcome, <?php echo $admin_username; ?>!</h1>
+ <div class="dv2-hero-date"><?php echo date('l, F d, Y'); ?></div>
+ <div class="dv2-hero-badges">
+ <span>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+ <?php echo number_format($totalRecords); ?> Records
+ </span>
+ <span>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+ <?php echo number_format($availablePlots); ?> Plots
+ </span>
+ <span>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+ <?php echo number_format($totalVisitors); ?> Visitors
+ </span>
+ </div>
+ <div class="dv2-hero-actions">
+ <a href="records.php" class="dv2-btn dv2-btn-light">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+ View Records
+ </a>
+ <a href="reports.php" class="dv2-btn dv2-btn-outline">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+ Reports
+ </a>
+ </div>
+ </div>
+ </div>
 
-    <div class="dv2-stats">
-        <div class="dv2-stat">
-            <div class="dv2-stat-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            </div>
-            <div class="dv2-stat-value"><?php echo number_format($totalRecords); ?></div>
-            <div class="dv2-stat-label">Total Records</div>
-        </div>
-        <div class="dv2-stat">
-            <div class="dv2-stat-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            </div>
-            <div class="dv2-stat-value"><?php echo number_format($availablePlots); ?></div>
-            <div class="dv2-stat-label">Available Plots</div>
-        </div>
-        <div class="dv2-stat">
-            <div class="dv2-stat-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            </div>
-            <div class="dv2-stat-value"><?php echo number_format($thisMonth); ?></div>
-            <div class="dv2-stat-label">Records This Month</div>
-        </div>
-        <div class="dv2-stat">
-            <div class="dv2-stat-icon">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-            </div>
-            <div class="dv2-stat-value"><?php echo number_format($totalVisitors); ?></div>
-            <div class="dv2-stat-label">Active Visitors</div>
-        </div>
-    </div>
+ <div class="dv2-card" style="margin-bottom: 24px;">
+ <h3>
+ <span>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+ Burial Schedule
+ </span>
+ <span class="dv2-card-count"><?php echo count($scheduledBurials ?? []); ?> scheduled this week</span>
+ </h3>
 
-    <div class="dv2-card" style="margin-bottom: 28px;">
-        <h3>
-            <span>
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                Burial Schedule
-            </span>
-            <span style="font-size:0.82rem; color:#64748b; font-weight:600;"><?php echo count($scheduledBurials ?? []); ?> scheduled this week</span>
-        </h3>
+ <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px;" class="burial-schedule-grid">
+ <!-- Mini Calendar -->
+ <div>
+ <?php
+ $prevM = $calMonth - 1; $prevY = $calYear; if ($prevM < 1) { $prevM = 12; $prevY--; }
+ $nextM = $calMonth + 1; $nextY = $calYear; if ($nextM > 12) { $nextM = 1; $nextY++; }
+ $firstDay = mktime(0, 0, 0, $calMonth, 1, $calYear);
+ $daysInMonth = (int)date('t', $firstDay);
+ $startDow = (int)date('N', $firstDay); // 1=Mon
+ $monthName = date('F Y', $firstDay);
+ $today = (int)date('j'); $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
+ ?>
+ <div class="dv2-cal-head">
+ <a href="?cal_month=<?php echo $prevM; ?>&cal_year=<?php echo $prevY; ?>" class="dv2-cal-nav">&lsaquo;</a>
+ <strong class="dv2-cal-month"><?php echo $monthName; ?></strong>
+ <a href="?cal_month=<?php echo $nextM; ?>&cal_year=<?php echo $nextY; ?>" class="dv2-cal-nav">&rsaquo;</a>
+ </div>
+ <table class="dv2-cal">
+ <thead>
+ <tr>
+ <?php foreach (['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $d): ?>
+ <th class="dv2-cal-dow"><?php echo $d; ?></th>
+ <?php endforeach; ?>
+ </tr>
+ </thead>
+ <tbody>
+ <?php
+ $dayNum = 1;
+ for ($w = 0; $w < 6 && $dayNum <= $daysInMonth; $w++) {
+ echo '<tr>';
+ for ($d = 1; $d <= 7; $d++) {
+ if (($w === 0 && $d < $startDow) || $dayNum > $daysInMonth) {
+ echo '<td style="padding:2px;"></td>';
+ continue;
+ }
+ $hasBurial = isset($calendarBurials[$dayNum]);
+ $isToday = $isCurrentMonth && $dayNum === $today;
+ $cellCls = 'dv2-cal-cell' . ($hasBurial ? ' has-burial' : '') . ($isToday ? ' is-today' : '');
+ $numCls = 'dv2-cal-num' . ($isToday ? ' is-today' : '');
+ echo '<td style="padding:2px; vertical-align:top;">';
+ echo '<div class="' . $cellCls . '">';
+ echo '<div class="' . $numCls . '">' . $dayNum . '</div>';
+ if ($hasBurial) {
+ foreach ($calendarBurials[$dayNum] as $cb) {
+ $time = $cb['burial_time'] ? date('g:i A', strtotime($cb['burial_time'])) : '';
+ $done = $cb['is_buried'] == 1;
+ echo '<div class="dv2-cal-pill ' . ($done ? 'done' : 'pend') . '" title="' . htmlspecialchars($cb['decedent_name'] . ($time ? ' @ ' . $time : ''), ENT_QUOTES) . '">' . htmlspecialchars($cb['decedent_name']) . ($time ? ' ' . $time : '') . '</div>';
+ }
+ }
+ echo '</div></td>';
+ $dayNum++;
+ }
+ echo '</tr>';
+ }
+ ?>
+ </tbody>
+ </table>
+ <div class="dv2-cal-legend">
+ <span><span class="dv2-cal-dot pend"></span> Scheduled</span>
+ <span><span class="dv2-cal-dot done"></span> Done</span>
+ </div>
+ </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px;" class="burial-schedule-grid">
-            <!-- Mini Calendar -->
-            <div>
-                <?php
-                $prevM = $calMonth - 1; $prevY = $calYear; if ($prevM < 1) { $prevM = 12; $prevY--; }
-                $nextM = $calMonth + 1; $nextY = $calYear; if ($nextM > 12) { $nextM = 1; $nextY++; }
-                $firstDay = mktime(0, 0, 0, $calMonth, 1, $calYear);
-                $daysInMonth = (int)date('t', $firstDay);
-                $startDow = (int)date('N', $firstDay); // 1=Mon
-                $monthName = date('F Y', $firstDay);
-                $today = (int)date('j'); $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
-                ?>
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
-                    <a href="?cal_month=<?php echo $prevM; ?>&cal_year=<?php echo $prevY; ?>" style="padding:4px 10px; border:1px solid #e2e8f0; border-radius:8px; color:#10b981; font-weight:700; text-decoration:none;">&lsaquo;</a>
-                    <strong style="color:#0f172a; font-size:0.95rem;"><?php echo $monthName; ?></strong>
-                    <a href="?cal_month=<?php echo $nextM; ?>&cal_year=<?php echo $nextY; ?>" style="padding:4px 10px; border:1px solid #e2e8f0; border-radius:8px; color:#10b981; font-weight:700; text-decoration:none;">&rsaquo;</a>
-                </div>
-                <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
-                    <thead>
-                        <tr>
-                            <?php foreach (['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $d): ?>
-                                <th style="padding:6px 2px; font-size:0.65rem; text-transform:uppercase; color:#94a3b8; font-weight:700; text-align:center;"><?php echo $d; ?></th>
-                            <?php endforeach; ?>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        $dayNum = 1;
-                        for ($w = 0; $w < 6 && $dayNum <= $daysInMonth; $w++) {
-                            echo '<tr>';
-                            for ($d = 1; $d <= 7; $d++) {
-                                if (($w === 0 && $d < $startDow) || $dayNum > $daysInMonth) {
-                                    echo '<td style="padding:4px;"></td>';
-                                    continue;
-                                }
-                                $hasBurial = isset($calendarBurials[$dayNum]);
-                                $isToday = $isCurrentMonth && $dayNum === $today;
-                                $cellBg = $hasBurial ? '#fef3c7' : ($isToday ? '#ecfdf5' : 'transparent');
-                                $cellBorder = $hasBurial ? '1px solid #f59e0b' : ($isToday ? '1px solid #10b981' : '1px solid #f1f5f9');
-                                echo '<td style="padding:2px; vertical-align:top;">';
-                                echo '<div style="min-height:52px; border-radius:8px; padding:4px; background:' . $cellBg . '; border:' . $cellBorder . ';">';
-                                echo '<div style="font-size:0.75rem; font-weight:' . ($isToday ? '800' : '600') . '; color:' . ($isToday ? '#059669' : '#64748b') . '; text-align:center;">' . $dayNum . '</div>';
-                                if ($hasBurial) {
-                                    foreach ($calendarBurials[$dayNum] as $cb) {
-                                        $time = $cb['burial_time'] ? date('g:i A', strtotime($cb['burial_time'])) : '';
-                                        $done = $cb['is_buried'] == 1;
-                                        echo '<div title="' . htmlspecialchars($cb['decedent_name'] . ($time ? ' @ ' . $time : ''), ENT_QUOTES) . '" style="font-size:0.6rem; line-height:1.2; margin-top:2px; padding:1px 4px; border-radius:4px; background:' . ($done ? '#d1fae5' : '#fde68a') . '; color:' . ($done ? '#065f46' : '#92400e') . '; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' . htmlspecialchars($cb['decedent_name']) . ($time ? ' ' . $time : '') . '</div>';
-                                    }
-                                }
-                                echo '</div></td>';
-                                $dayNum++;
-                            }
-                            echo '</tr>';
-                        }
-                        ?>
-                    </tbody>
-                </table>
-                <div style="display:flex; gap:14px; margin-top:10px; font-size:0.7rem; color:#64748b;">
-                    <span><span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:#fde68a; border:1px solid #f59e0b;"></span> Scheduled</span>
-                    <span><span style="display:inline-block; width:10px; height:10px; border-radius:3px; background:#d1fae5;"></span> Done</span>
-                </div>
-            </div>
+ <!-- This Week list -->
+ <div>
+ <div class="dv2-week-label">This Week</div>
+ <?php if (empty($scheduledBurials)): ?>
+ <div class="dv2-empty">No burials scheduled this week</div>
+ <?php else: ?>
+ <?php foreach ($scheduledBurials as $b): ?>
+ <div id="burial-row-<?php echo (int)$b['id']; ?>" class="dv2-week-row">
+ <div style="min-width:0;">
+ <div class="dv2-week-name"><?php echo htmlspecialchars($b['decedent_name'], ENT_QUOTES, 'UTF-8'); ?></div>
+ <div class="dv2-week-meta">
+ <?php echo date('D, M d', strtotime($b['burial_date'])); ?>
+ <?php echo $b['burial_time'] ? ' @ ' . date('g:i A', strtotime($b['burial_time'])) : ''; ?>
+ · Plot <?php echo htmlspecialchars($b['plot_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?>
+ · <?php echo htmlspecialchars($b['barangay'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?>
+ </div>
+ </div>
+ <button type="button" onclick="markBurialDone(<?php echo (int)$b['id']; ?>, this)" class="dv2-done-btn">DONE</button>
+ </div>
+ <?php endforeach; ?>
+ <?php endif; ?>
+ </div>
+ </div>
+ </div>
 
-            <!-- This Week list -->
-            <div>
-                <div style="font-size:0.8rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">This Week</div>
-                <?php if (empty($scheduledBurials)): ?>
-                    <div class="dv2-empty">No burials scheduled this week</div>
-                <?php else: ?>
-                    <?php foreach ($scheduledBurials as $b): ?>
-                        <div id="burial-row-<?php echo (int)$b['id']; ?>" style="display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border:1px solid #f1f5f9; border-radius:10px; margin-bottom:8px; background:#fffbeb;">
-                            <div style="min-width:0;">
-                                <div style="font-weight:700; font-size:0.9rem; color:#0f172a;"><?php echo htmlspecialchars($b['decedent_name'], ENT_QUOTES, 'UTF-8'); ?></div>
-                                <div style="font-size:0.78rem; color:#64748b;">
-                                    <?php echo date('D, M d', strtotime($b['burial_date'])); ?>
-                                    <?php echo $b['burial_time'] ? ' @ ' . date('g:i A', strtotime($b['burial_time'])) : ''; ?>
-                                    · Plot <?php echo htmlspecialchars($b['plot_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?>
-                                    · <?php echo htmlspecialchars($b['barangay'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?>
-                                </div>
-                            </div>
-                            <button type="button" onclick="markBurialDone(<?php echo (int)$b['id']; ?>, this)" style="padding:6px 16px; background:#10b981; color:#fff; border:none; border-radius:8px; font-weight:700; font-size:0.8rem; cursor:pointer; transition:all 0.2s; flex-shrink:0;" onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">DONE</button>
-                        </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
+ <div class="dv2-grid">
+ <div class="dv2-card">
+ <h3>
+ <span>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+ Recent Records
+ </span>
+ <a href="records.php">View All →</a>
+ </h3>
+ <table class="dv2-table">
+ <thead>
+ <tr>
+ <th>Name</th>
+ <th>Plot</th>
+ <th>Date Added</th>
+ </tr>
+ </thead>
+ <tbody>
+ <?php if (empty($recentRecords)): ?>
+ <tr>
+ <td colspan="3" class="dv2-empty">No records found</td>
+ </tr>
+ <?php else: ?>
+ <?php foreach ($recentRecords as $record): ?>
+ <tr>
+ <td><?php echo htmlspecialchars($record['decedent_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+ <td><?php echo htmlspecialchars($record['plot_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?></td>
+ <td><?php echo date('M d, Y', strtotime($record['date_added'])); ?></td>
+ </tr>
+ <?php endforeach; ?>
+ <?php endif; ?>
+ </tbody>
+ </table>
+ </div>
 
-    <div class="dv2-grid">
-        <div class="dv2-card">
-            <h3>
-                <span>
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    Recent Records
-                </span>
-                <a href="records.php">View All →</a>
-            </h3>
-            <table class="dv2-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Plot</th>
-                        <th>Date Added</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($recentRecords)): ?>
-                        <tr>
-                            <td colspan="3" class="dv2-empty">No records found</td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($recentRecords as $record): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($record['decedent_name'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo htmlspecialchars($record['plot_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo date('M d, Y', strtotime($record['date_added'])); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
+ <div class="dv2-card">
+ <h3>
+ <span>
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+ Records by Barangay
+ </span>
+ <a href="statistics.php">View Stats →</a>
+ </h3>
+ <table class="dv2-table">
+ <thead>
+ <tr>
+ <th>Barangay</th>
+ <th>Count</th>
+ </tr>
+ </thead>
+ <tbody>
+ <?php if (empty($byBarangay)): ?>
+ <tr>
+ <td colspan="2" class="dv2-empty">No data available</td>
+ </tr>
+ <?php else: ?>
+ <?php foreach ($byBarangay as $item): ?>
+ <tr>
+ <td><?php echo htmlspecialchars($item['barangay'], ENT_QUOTES, 'UTF-8'); ?></td>
+ <td><?php echo number_format($item['count']); ?></td>
+ </tr>
+ <?php endforeach; ?>
+ <?php endif; ?>
+ </tbody>
+ </table>
+ </div>
+ </div>
 
-        <div class="dv2-card">
-            <h3>
-                <span>
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-                    Records by Barangay
-                </span>
-                <a href="statistics.php">View Stats →</a>
-            </h3>
-            <table class="dv2-table">
-                <thead>
-                    <tr>
-                        <th>Barangay</th>
-                        <th>Count</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (empty($byBarangay)): ?>
-                        <tr>
-                            <td colspan="2" class="dv2-empty">No data available</td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($byBarangay as $item): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($item['barangay'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                <td><?php echo number_format($item['count']); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="dv2-card" style="margin-bottom: 24px;">
-        <h3 class="dv2-qa-title">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-            Quick Access
-        </h3>
-        <div class="dv2-qa-row">
-            <a href="add-record.php" class="dv2-qa">
-                <div class="dv2-qa-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                </div>
-                <div>
-                    <span class="dv2-qa-title-text">Add Record</span>
-                    <span class="dv2-qa-desc">Register a burial record</span>
-                </div>
-            </a>
-            <a href="available-plots.php" class="dv2-qa">
-                <div class="dv2-qa-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
-                </div>
-                <div>
-                    <span class="dv2-qa-title-text">Manage Plots</span>
-                    <span class="dv2-qa-desc">View available plots</span>
-                </div>
-            </a>
-            <a href="map-view.php" class="dv2-qa">
-                <div class="dv2-qa-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-                </div>
-                <div>
-                    <span class="dv2-qa-title-text">View Map</span>
-                    <span class="dv2-qa-desc">Interactive cemetery map</span>
-                </div>
-            </a>
-            <a href="expiring-plots.php" class="dv2-qa">
-                <div class="dv2-qa-icon">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                </div>
-                <div>
-                    <span class="dv2-qa-title-text">Expiring Plots</span>
-                    <span class="dv2-qa-desc">Renewals due soon</span>
-                </div>
-            </a>
-        </div>
-    </div>
+ <div class="dv2-card" style="margin-bottom: 24px;">
+ <h3 class="dv2-qa-title">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+ Quick Access
+ </h3>
+ <div class="dv2-qa-row">
+ <a href="add-record.php" class="dv2-qa">
+ <div class="dv2-qa-icon">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+ </div>
+ <div>
+ <span class="dv2-qa-title-text">Add Record</span>
+ <span class="dv2-qa-desc">Register a burial record</span>
+ </div>
+ </a>
+ <a href="available-plots.php" class="dv2-qa">
+ <div class="dv2-qa-icon">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+ </div>
+ <div>
+ <span class="dv2-qa-title-text">Manage Plots</span>
+ <span class="dv2-qa-desc">View available plots</span>
+ </div>
+ </a>
+ <a href="map-view.php" class="dv2-qa">
+ <div class="dv2-qa-icon">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+ </div>
+ <div>
+ <span class="dv2-qa-title-text">View Map</span>
+ <span class="dv2-qa-desc">Interactive cemetery map</span>
+ </div>
+ </a>
+ <a href="expiring-plots.php" class="dv2-qa">
+ <div class="dv2-qa-icon">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+ </div>
+ <div>
+ <span class="dv2-qa-title-text">Expiring Plots</span>
+ <span class="dv2-qa-desc">Renewals due soon</span>
+ </div>
+ </a>
+ </div>
+ </div>
 </div>
 
-        </main>
-    </div>
+ </main>
+ </div>
 
-    <!-- Scripts -->
-    <script src="../assets/js/theme.js"></script>
-    <script>
-    async function markBurialDone(recordId, btn) {
-        btn.disabled = true;
-        btn.textContent = '...';
-        try {
-            const fd = new FormData();
-            fd.append('record_id', recordId);
-            const res = await fetch('../api/mark_buried.php', { method: 'POST', body: fd });
-            const data = await res.json();
-            if (data.success) {
-                const row = document.getElementById('burial-row-' + recordId);
-                if (row) {
-                    row.style.transition = 'opacity 0.4s';
-                    row.style.opacity = '0';
-                    setTimeout(() => row.remove(), 400);
-                }
-            } else {
-                alert(data.message || 'Failed to mark burial as done');
-                btn.disabled = false;
-                btn.textContent = 'DONE';
-            }
-        } catch (e) {
-            alert('Network error');
-            btn.disabled = false;
-            btn.textContent = 'DONE';
-        }
-    }
-    </script>
+ <!-- Scripts -->
+ <script src="../assets/js/theme.js"></script>
+ <script>
+ async function markBurialDone(recordId, btn) {
+ btn.disabled = true;
+ btn.textContent = '...';
+ try {
+ const fd = new FormData();
+ fd.append('record_id', recordId);
+ const res = await fetch('../api/mark_buried.php', { method: 'POST', body: fd });
+ const data = await res.json();
+ if (data.success) {
+ const row = document.getElementById('burial-row-' + recordId);
+ if (row) {
+ row.style.transition = 'opacity 0.4s';
+ row.style.opacity = '0';
+ setTimeout(() => row.remove(), 400);
+ }
+ } else {
+ alert(data.message || 'Failed to mark burial as done');
+ btn.disabled = false;
+ btn.textContent = 'DONE';
+ }
+ } catch (e) {
+ alert('Network error');
+ btn.disabled = false;
+ btn.textContent = 'DONE';
+ }
+ }
+ </script>
 </body>
 </html>

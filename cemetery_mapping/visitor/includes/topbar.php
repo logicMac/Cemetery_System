@@ -21,6 +21,10 @@ if ($page_title === 'Available Plots') { $page_title = 'Available Plots'; }
         </div>
     </div>
     <div class="admin-header-actions">
+        <button type="button" class="admin-header-btn" title="Toggle dark mode" aria-label="Toggle dark mode" onclick="toggleTheme()">
+            <i data-lucide="moon" width="17" height="17" class="theme-icon-moon"></i>
+            <i data-lucide="sun" width="17" height="17" class="theme-icon-sun"></i>
+        </button>
         <!-- Notifications -->
         <div class="visitor-notifications">
             <button type="button" class="admin-header-btn" id="visitorNotifBtn" onclick="toggleVisitorNotifications(event)" title="Notifications" aria-label="Notifications">
@@ -41,9 +45,22 @@ if ($page_title === 'Available Plots') { $page_title = 'Available Plots'; }
                 <a href="dashboard.php" class="visitor-notif-footer">View cemetery map</a>
             </div>
         </div>
-        <a href="logout.php" class="admin-header-btn" title="Logout" aria-label="Logout">
-            <i data-lucide="log-out" width="20" height="20"></i>
-        </a>
+        <div class="header-user">
+            <button type="button" class="header-user-btn" id="userMenuBtn" onclick="toggleUserMenu()" aria-label="Account menu" title="<?php echo $visitor_name; ?>">
+                <span class="header-user-avatar"><?php echo strtoupper(substr($visitor_name, 0, 1)); ?></span>
+                <span class="header-user-status"></span>
+            </button>
+            <div class="header-user-menu" id="userMenu">
+                <div class="header-user-meta">
+                    <span class="header-user-name"><?php echo $visitor_name; ?></span>
+                    <span class="header-user-role"><?php echo $visitor_email ?: 'Visitor'; ?></span>
+                </div>
+                <a href="logout.php" class="header-user-item">
+                    <i data-lucide="log-out" width="15" height="15"></i>
+                    <span>Log out</span>
+                </a>
+            </div>
+        </div>
     </div>
 </header>
 
@@ -274,40 +291,15 @@ function initLucideIcons() {
     return false;
 }
 
-function initSidebarAccordion() {
-    const toggles = document.querySelectorAll('.sidebar-group-toggle');
-    toggles.forEach(toggle => {
-        if (toggle.dataset.initialized === 'true') return;
-        const group = toggle.closest('.sidebar-group');
-        toggle.addEventListener('click', function() {
-            const isOpen = group.classList.contains('is-open');
-            document.querySelectorAll('.sidebar-group.is-open').forEach(openGroup => {
-                if (openGroup !== group) {
-                    openGroup.classList.remove('is-open');
-                    openGroup.querySelector('.sidebar-group-toggle').setAttribute('aria-expanded', 'false');
-                }
-            });
-            if (isOpen) {
-                group.classList.remove('is-open');
-                toggle.setAttribute('aria-expanded', 'false');
-            } else {
-                group.classList.add('is-open');
-                toggle.setAttribute('aria-expanded', 'true');
-            }
-        });
-        toggle.dataset.initialized = 'true';
-    });
-
-    document.querySelectorAll('.sidebar-group-menu a').forEach(link => {
+function initSidebarLinks() {
+    document.querySelectorAll('.visitor-nav-item a').forEach(link => {
         if (link.dataset.initialized === 'true') return;
         link.addEventListener('click', function() {
-            if (window.innerWidth <= 1024) toggleMobileMenu();
+            if (window.innerWidth <= 1024 && document.getElementById('adminSidebar').classList.contains('open')) toggleMobileMenu();
         });
         link.dataset.initialized = 'true';
     });
 }
-
-function recalcOpenMenuHeights() {}
 
 function updateMenuToggle() {
     const toggleBtn = document.getElementById('mobileMenuToggle');
@@ -325,7 +317,56 @@ function updateMenuToggle() {
     }
 }
 
-initSidebarAccordion();
+// Sidebar search — filters nav links, "/" focuses it
+function initSidebarSearch() {
+    var input = document.getElementById('sidebarSearch');
+    if (!input) return;
+
+    input.addEventListener('input', function() {
+        var q = input.value.trim().toLowerCase();
+        document.querySelectorAll('#sidebarNav .visitor-nav-item').forEach(function(item) {
+            item.style.display = !q || item.textContent.toLowerCase().includes(q) ? '' : 'none';
+        });
+        document.querySelectorAll('#sidebarNav .visitor-nav-heading').forEach(function(heading) {
+            var item = heading.nextElementSibling;
+            var visible = false;
+            while (item && !item.classList.contains('visitor-nav-heading')) {
+                if (item.style.display !== 'none') visible = true;
+                item = item.nextElementSibling;
+            }
+            heading.style.display = visible ? '' : 'none';
+        });
+    });
+
+    document.addEventListener('keydown', function(e) {
+        var tag = (document.activeElement && document.activeElement.tagName) || '';
+        if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(tag)) {
+            e.preventDefault();
+            input.focus();
+        }
+        if (e.key === 'Escape' && document.activeElement === input) {
+            input.value = '';
+            input.dispatchEvent(new Event('input'));
+            input.blur();
+        }
+    });
+}
+
+// Account menu
+function toggleUserMenu() {
+    document.getElementById('userMenu').classList.toggle('open');
+}
+
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('userMenu');
+    const btn = document.getElementById('userMenuBtn');
+    if (menu && menu.classList.contains('open') && !btn.contains(e.target) && !menu.contains(e.target)) {
+        menu.classList.remove('open');
+    }
+});
+
+initSidebarLinks();
+initSidebarSearch();
 updateMenuToggle();
 window.addEventListener('resize', updateMenuToggle);
 
@@ -333,16 +374,14 @@ if (!initLucideIcons()) {
     let attempts = 0;
     const poll = setInterval(() => {
         attempts++;
-        if (initLucideIcons()) { clearInterval(poll); recalcOpenMenuHeights(); }
+        if (initLucideIcons()) clearInterval(poll);
         else if (attempts > 50) clearInterval(poll);
     }, 100);
-} else {
-    recalcOpenMenuHeights();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    initSidebarAccordion();
-    if (initLucideIcons()) recalcOpenMenuHeights();
+    initSidebarLinks();
+    initLucideIcons();
     updateMenuToggle();
     loadVisitorNotifications();
     // Refresh notifications every 60 seconds

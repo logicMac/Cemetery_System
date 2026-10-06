@@ -32,8 +32,34 @@ $percentage = $counts['plots'] > 0 ? round(($available_count / $counts['plots'])
     <title>Matinao Memorial Cemetery — Mapping & Management System</title>
     <meta name="description" content="Matinao Memorial Cemetery in Polomolok, South Cotabato — find loved ones, reserve plots, and explore our grounds with GPS-enabled interactive mapping.">
 
+    <script>
+    // Apply saved theme before first paint (prevents flash of wrong theme)
+    (function () {
+        try {
+            var t = localStorage.getItem('cm-theme');
+            if (t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        } catch (e) {}
+    })();
+    function toggleTheme() {
+        var el = document.documentElement;
+        var dark = el.getAttribute('data-theme') === 'dark';
+        if (dark) {
+            el.removeAttribute('data-theme');
+            try { localStorage.setItem('cm-theme', 'light'); } catch (e) {}
+        } else {
+            el.setAttribute('data-theme', 'dark');
+            try { localStorage.setItem('cm-theme', 'dark'); } catch (e) {}
+        }
+    }
+    </script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Public theme (light/dark) -->
+    <link rel="stylesheet" href="assets/css/public-theme.css?v=1">
 
     <!-- Google Fonts: Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -122,6 +148,10 @@ $percentage = $counts['plots'] > 0 ? round(($available_count / $counts['plots'])
 
             <!-- CTA -->
             <div class="flex items-center gap-3">
+                <button type="button" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
+                    <i data-lucide="moon" class="w-4 h-4 theme-icon-moon"></i>
+                    <i data-lucide="sun" class="w-4 h-4 theme-icon-sun"></i>
+                </button>
                 <a href="login.php" class="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-emerald-600 transition px-3 py-2">
                     <i data-lucide="log-in" class="w-4 h-4"></i> Sign In
                 </a>

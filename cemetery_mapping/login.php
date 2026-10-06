@@ -100,8 +100,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Sign In — Matinao Memorial Cemetery</title>
     <meta name="description" content="Sign in to the Matinao Memorial Cemetery system — for visitors searching for loved ones and administrators managing cemetery records.">
 
+    <script>
+    // Apply saved theme before first paint (prevents flash of wrong theme)
+    (function () {
+        try {
+            var t = localStorage.getItem('cm-theme');
+            if (t === 'dark' || (!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        } catch (e) {}
+    })();
+    function toggleTheme() {
+        var el = document.documentElement;
+        var dark = el.getAttribute('data-theme') === 'dark';
+        if (dark) {
+            el.removeAttribute('data-theme');
+            try { localStorage.setItem('cm-theme', 'light'); } catch (e) {}
+        } else {
+            el.setAttribute('data-theme', 'dark');
+            try { localStorage.setItem('cm-theme', 'dark'); } catch (e) {}
+        }
+    }
+    </script>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Public theme (light/dark) -->
+    <link rel="stylesheet" href="assets/css/public-theme.css?v=1">
 
     <!-- Google Fonts: Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -191,6 +217,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- Right: Login form -->
         <div class="w-full lg:w-[30%] flex items-center justify-center p-6 sm:p-10 bg-gradient-to-b from-slate-50 to-white relative">
+            <!-- Theme toggle -->
+            <button type="button" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" class="absolute top-4 right-4 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition z-20">
+                <i data-lucide="moon" class="w-4 h-4 theme-icon-moon"></i>
+                <i data-lucide="sun" class="w-4 h-4 theme-icon-sun"></i>
+            </button>
+
             <!-- Subtle decorative accent -->
             <div class="absolute top-0 right-0 w-40 h-40 bg-emerald-100/40 rounded-full blur-3xl"></div>
             <div class="absolute bottom-0 left-0 w-32 h-32 bg-emerald-50/50 rounded-full blur-3xl"></div>
