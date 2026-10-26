@@ -42,16 +42,38 @@ $percentage = $counts['plots'] > 0 ? round(($available_count / $counts['plots'])
             }
         } catch (e) {}
     })();
-    function toggleTheme() {
+    function toggleTheme(e) {
         var el = document.documentElement;
         var dark = el.getAttribute('data-theme') === 'dark';
-        if (dark) {
-            el.removeAttribute('data-theme');
-            try { localStorage.setItem('cm-theme', 'light'); } catch (e) {}
-        } else {
-            el.setAttribute('data-theme', 'dark');
-            try { localStorage.setItem('cm-theme', 'dark'); } catch (e) {}
+        function applyTheme() {
+            if (dark) {
+                el.removeAttribute('data-theme');
+                try { localStorage.setItem('cm-theme', 'light'); } catch (err) {}
+            } else {
+                el.setAttribute('data-theme', 'dark');
+                try { localStorage.setItem('cm-theme', 'dark'); } catch (err) {}
+            }
         }
+
+        // Circular reveal via View Transitions API (falls back to instant switch)
+        if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            applyTheme();
+            return;
+        }
+        var x = window.innerWidth / 2, y = window.innerHeight / 2;
+        if (e && e.clientX) { x = e.clientX; y = e.clientY; }
+        else if (e && e.currentTarget) {
+            var r = e.currentTarget.getBoundingClientRect();
+            x = r.left + r.width / 2; y = r.top + r.height / 2;
+        }
+        var transition = document.startViewTransition(applyTheme);
+        transition.ready.then(function () {
+            var radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+            el.animate(
+                { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + radius + 'px at ' + x + 'px ' + y + 'px)'] },
+                { duration: 500, easing: 'ease-in-out', pseudoElement: '::view-transition-new(root)' }
+            );
+        }).catch(function () {});
     }
     </script>
 
@@ -68,6 +90,10 @@ $percentage = $counts['plots'] > 0 ? round(($available_count / $counts['plots'])
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+    <!-- Lenis smooth scroll -->
+    <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.11/dist/lenis.min.js"></script>
+    <script src="assets/js/lenis-init.js?v=1"></script>
 
     <!-- Leaflet -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -179,7 +205,7 @@ $percentage = $counts['plots'] > 0 ? round(($available_count / $counts['plots'])
 
             <!-- CTA -->
             <div class="flex items-center gap-3">
-                <button type="button" onclick="toggleTheme()" title="Toggle dark mode" aria-label="Toggle dark mode" class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
+                <button type="button" onclick="toggleTheme(event)" title="Toggle dark mode" aria-label="Toggle dark mode" class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
                     <i data-lucide="moon" class="w-4 h-4 theme-icon-moon"></i>
                     <i data-lucide="sun" class="w-4 h-4 theme-icon-sun"></i>
                 </button>

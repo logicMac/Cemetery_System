@@ -12,6 +12,9 @@ if ($page_title === 'Available Plots') { $page_title = 'Available Plots'; }
 
 <header class="admin-header">
     <div class="admin-header-left">
+        <button type="button" class="admin-header-desktop-menu" onclick="toggleSidebarCollapse()" aria-label="Collapse sidebar" title="Toggle sidebar">
+            <i data-lucide="panel-left" width="18" height="18"></i>
+        </button>
         <button type="button" class="admin-header-hamburger" id="mobileMenuToggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
             <i data-lucide="menu" width="20" height="20"></i>
         </button>
@@ -20,8 +23,12 @@ if ($page_title === 'Available Plots') { $page_title = 'Available Plots'; }
             <span class="admin-header-subtitle"><?php echo $page_subtitle; ?></span>
         </div>
     </div>
+    <label class="admin-header-search">
+        <i data-lucide="search" width="14" height="14"></i>
+        <input type="search" id="headerSearch" placeholder="Search sections..." aria-label="Search navigation" autocomplete="off">
+    </label>
     <div class="admin-header-actions">
-        <button type="button" class="admin-header-btn" title="Toggle dark mode" aria-label="Toggle dark mode" onclick="toggleTheme()">
+        <button type="button" class="admin-header-btn" title="Toggle dark mode" aria-label="Toggle dark mode" onclick="toggleTheme(event)">
             <i data-lucide="moon" width="17" height="17" class="theme-icon-moon"></i>
             <i data-lucide="sun" width="17" height="17" class="theme-icon-sun"></i>
         </button>
@@ -295,7 +302,7 @@ function initSidebarLinks() {
     document.querySelectorAll('.visitor-nav-item a').forEach(link => {
         if (link.dataset.initialized === 'true') return;
         link.addEventListener('click', function() {
-            if (window.innerWidth <= 1024 && document.getElementById('adminSidebar').classList.contains('open')) toggleMobileMenu();
+            if (window.innerWidth <= 900 && document.getElementById('adminSidebar').classList.contains('open')) toggleMobileMenu();
         });
         link.dataset.initialized = 'true';
     });
@@ -304,7 +311,7 @@ function initSidebarLinks() {
 function updateMenuToggle() {
     const toggleBtn = document.getElementById('mobileMenuToggle');
     const collapseBtn = document.getElementById('sidebarCollapse');
-    if (window.innerWidth <= 1024) {
+    if (window.innerWidth <= 900) {
         if (toggleBtn) toggleBtn.style.display = 'flex';
         if (collapseBtn) collapseBtn.style.display = 'none';
         document.querySelector('.admin-layout').classList.remove('collapsed');
@@ -321,6 +328,20 @@ function updateMenuToggle() {
 function initSidebarSearch() {
     var input = document.getElementById('sidebarSearch');
     if (!input) return;
+    var headerInput = document.getElementById('headerSearch');
+    if (headerInput) {
+        headerInput.addEventListener('input', function() {
+            input.value = headerInput.value;
+            input.dispatchEvent(new Event('input'));
+        });
+        headerInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                headerInput.value = '';
+                headerInput.dispatchEvent(new Event('input'));
+                headerInput.blur();
+            }
+        });
+    }
 
     input.addEventListener('input', function() {
         var q = input.value.trim().toLowerCase();

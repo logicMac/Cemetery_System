@@ -333,6 +333,11 @@ button svg, a svg, button i, a i { pointer-events: none; }
  document.getElementById('gridCols').value = data.grid.cols;
  document.getElementById('gridRows').disabled = true;
  document.getElementById('gridCols').disabled = true;
+ if (data.grid.scale) {
+ editorMapScale = parseFloat(data.grid.scale) || 1;
+ document.getElementById('editorGridScale').value = Math.round(editorMapScale * 100);
+ document.getElementById('editorScaleVal').textContent = Math.round(editorMapScale * 100) + '%';
+ }
  document.getElementById('saveGridBtnLabel').textContent = 'Update Grid';
  document.getElementById('deleteGridBtn').classList.remove('hidden');
  showEditorStatus('Loaded grid. Toggle satellite map to position it.');
@@ -409,7 +414,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  document.getElementById('saveGridBtnLabel').textContent = 'Save Grid to Database';
  document.getElementById('editorGridScale').value = 100;
  document.getElementById('editorScaleVal').textContent = '100%';
- document.getElementById('editorBearingValue').textContent = '45°';
+ document.getElementById('editorBearingValue').textContent = '315°';
  hideEditorStatus();
  if (gridCtx && gridCanvas) gridCtx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
  clearGridMap();
@@ -844,6 +849,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  const payload = {
  name: name,
  center_lat: newCenterLat, center_lng: newCenterLng,
+ grid_scale: editorMapScale,
  start_x: 0, start_y: 0,
  end_x: cols * 100, end_y: rows * 100,
  rows: rows, cols: cols

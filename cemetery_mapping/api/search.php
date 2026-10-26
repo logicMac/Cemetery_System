@@ -26,7 +26,8 @@ try {
                pg.id AS grid_id, pg.name AS grid_name,
                pgc.row_idx AS cell_row, pgc.col_idx AS cell_col,
                pg.center_lat AS grid_lat, pg.center_lng AS grid_lng,
-               pg.rows_count AS grid_rows, pg.cols_count AS grid_cols
+               pg.rows_count AS grid_rows, pg.cols_count AS grid_cols,
+               pg.grid_scale AS grid_scale
         FROM burial_records br
         LEFT JOIN (
             SELECT c.record_id, c.grid_id, c.row_idx, c.col_idx

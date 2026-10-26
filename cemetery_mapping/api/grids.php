@@ -174,14 +174,15 @@ function handleCreate(PDO $pdo) {
 
     $grid = computeGridGeometry($input);
     $grid['name'] = trim($input['name'] ?? '');
+    $scale = readGridScale($input, 1.0);
 
     $pdo->beginTransaction();
     try {
         $stmt = $pdo->prepare(
             "INSERT INTO plot_grids
                 (record_id, name, center_lat, center_lng, start_x, start_y, end_x, end_y,
-                 grid_width, grid_height, rows_count, cols_count, cell_width, cell_height, status)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')"
+                 grid_width, grid_height, rows_count, cols_count, grid_scale, cell_width, cell_height, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')"
         );
         $stmt->execute([
             $recordId,
@@ -191,6 +192,7 @@ function handleCreate(PDO $pdo) {
             $grid['start_x'], $grid['start_y'], $grid['end_x'], $grid['end_y'],
             $grid['grid_width'], $grid['grid_height'],
             $grid['rows_count'], $grid['cols_count'],
+            $scale,
             $grid['cell_width'], $grid['cell_height']
         ]);
         $gridId = (int)$pdo->lastInsertId();
@@ -234,6 +236,7 @@ function handleUpdate(PDO $pdo) {
     $grid['name'] = trim($input['name'] ?? $existing['name']);
     $centerLat = isset($input['center_lat']) && $input['center_lat'] !== '' ? (float)$input['center_lat'] : $existing['center_lat'];
     $centerLng = isset($input['center_lng']) && $input['center_lng'] !== '' ? (float)$input['center_lng'] : $existing['center_lng'];
+    $scale = readGridScale($input, (float)($existing['grid_scale'] ?? 1.0));
 
     $pdo->beginTransaction();
     try {
@@ -242,7 +245,7 @@ function handleUpdate(PDO $pdo) {
                 name = ?, center_lat = ?, center_lng = ?,
                 start_x = ?, start_y = ?, end_x = ?, end_y = ?,
                 grid_width = ?, grid_height = ?, rows_count = ?, cols_count = ?,
-                cell_width = ?, cell_height = ?, date_updated = NOW()
+                grid_scale = ?, cell_width = ?, cell_height = ?, date_updated = NOW()
              WHERE id = ?"
         );
         $stmt->execute([
@@ -251,6 +254,7 @@ function handleUpdate(PDO $pdo) {
             $grid['start_x'], $grid['start_y'], $grid['end_x'], $grid['end_y'],
             $grid['grid_width'], $grid['grid_height'],
             $grid['rows_count'], $grid['cols_count'],
+            $scale,
             $grid['cell_width'], $grid['cell_height'],
             $gridId
         ]);
@@ -453,6 +457,13 @@ function validateGridInput(array $input, bool $requireRecordId): array {
     return $errors;
 }
 
+function readGridScale(array $input, float $fallback): float {
+    $s = isset($input['grid_scale']) && $input['grid_scale'] !== ''
+        ? (float)$input['grid_scale']
+        : $fallback;
+    return max(0.25, min(2.0, $s));
+}
+
 function recordExists(PDO $pdo, int $id): bool {
     $stmt = $pdo->prepare("SELECT 1 FROM burial_records WHERE id = ?");
     $stmt->execute([$id]);
@@ -510,6 +521,7 @@ function normalizeGrid(array $g): array {
         'grid_height' => (float)$g['grid_height'],
         'rows' => (int)$g['rows_count'],
         'cols' => (int)$g['cols_count'],
+        'scale' => isset($g['grid_scale']) ? (float)$g['grid_scale'] : 1.0,
         'cell_width' => (float)$g['cell_width'],
         'cell_height' => (float)$g['cell_height'],
         'status' => $g['status'],

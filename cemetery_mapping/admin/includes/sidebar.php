@@ -173,7 +173,7 @@
                 sidebarLinks.forEach(link => {
                     if (link.dataset.initialized === 'true') return;
                     link.addEventListener('click', function() {
-                        if (window.innerWidth <= 1024) {
+                        if (window.innerWidth <= 900) {
                             toggleMobileMenu();
                         }
                     });
@@ -185,7 +185,7 @@
             function updateMenuToggle() {
                 const toggleBtn = document.getElementById('mobileMenuToggle');
                 const collapseBtn = document.getElementById('sidebarCollapse');
-                if (window.innerWidth <= 1024) {
+                if (window.innerWidth <= 900) {
                     if (toggleBtn) toggleBtn.style.display = 'flex';
                     if (collapseBtn) collapseBtn.style.display = 'none';
                     document.querySelector('.admin-layout').classList.remove('collapsed');
@@ -258,4 +258,3 @@
                 updateMenuToggle();
             });
             </script>
-

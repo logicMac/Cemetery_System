@@ -29,6 +29,9 @@ if (isset($title_overrides[$current_page])) {
 
 <header class="admin-header">
     <div class="admin-header-left">
+        <button type="button" class="admin-header-desktop-menu" onclick="toggleSidebarCollapse()" aria-label="Collapse sidebar" title="Toggle sidebar">
+            <i data-lucide="panel-left" width="18" height="18"></i>
+        </button>
         <button type="button" class="admin-header-hamburger" id="mobileMenuToggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
             <i data-lucide="menu" width="20" height="20"></i>
         </button>
@@ -37,9 +40,13 @@ if (isset($title_overrides[$current_page])) {
             <span class="admin-header-subtitle"><?php echo $page_subtitle; ?></span>
         </div>
     </div>
+    <div class="admin-header-search">
+        <i data-lucide="search" width="14" height="14"></i>
+        <input type="search" id="headerSearch" placeholder="Search sections..." aria-label="Search navigation" autocomplete="off">
+    </div>
     <div class="admin-header-actions" style="position: relative;">
         <?php if (!empty($header_action)) echo $header_action; ?>
-        <button type="button" class="admin-header-btn" title="Toggle dark mode" aria-label="Toggle dark mode" onclick="toggleTheme()">
+        <button type="button" class="admin-header-btn" title="Toggle dark mode" aria-label="Toggle dark mode" onclick="toggleTheme(event)">
             <i data-lucide="moon" width="17" height="17" class="theme-icon-moon"></i>
             <i data-lucide="sun" width="17" height="17" class="theme-icon-sun"></i>
         </button>
@@ -222,6 +229,21 @@ document.addEventListener('click', function(e) {
 });
 
 function esc(s) { return s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+
+// Header search pill — forwards to the sidebar nav filter
+(function() {
+    var hs = document.getElementById('headerSearch');
+    if (!hs) return;
+    hs.addEventListener('input', function() {
+        var ss = document.getElementById('sidebarSearch');
+        if (!ss) return;
+        ss.value = hs.value;
+        ss.dispatchEvent(new Event('input'));
+    });
+    hs.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') { hs.value = ''; hs.dispatchEvent(new Event('input')); hs.blur(); }
+    });
+})();
 
 // Load badge count on page load
 document.addEventListener('DOMContentLoaded', function() {

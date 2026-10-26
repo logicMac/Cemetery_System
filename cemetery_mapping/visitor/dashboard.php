@@ -2210,7 +2210,7 @@ transform: rotate(180deg);
  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
  
  <!-- Visitor map functionality -->
- <script src="../assets/js/visitor.js?v=34"></script>
+ <script src="../assets/js/visitor.js?v=35"></script>
  </main>
  </div>
  <script src="../assets/js/theme.js"></script>

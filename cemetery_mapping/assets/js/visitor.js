@@ -459,7 +459,7 @@ async function drawStandaloneGrid(grid) {
     const cols = parseInt(grid.cols);
     const centerLat = parseFloat(grid.center_lat);
     const centerLng = parseFloat(grid.center_lng);
-    const cellSize = 2; // 2 meters per cell (same as admin)
+    const cellSize = 2 * (parseFloat(grid.scale) || 1); // base 2m cells scaled by the saved editor scale
     const rotationAngle = 45; // degrees (same as admin/visitor grid rendering)
     const angleRad = rotationAngle * Math.PI / 180;
     const metersPerLat = 111320;
@@ -478,7 +478,7 @@ async function drawStandaloneGrid(grid) {
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
             const offsetX = (col - cols / 2 + 0.5) * cellSize;
-            const offsetY = (row - rows / 2 + 0.5) * cellSize;
+            const offsetY = ((rows - 1) / 2 - row) * cellSize; // row 0 = north edge, matching the grid editor
             const rotatedX = offsetX * Math.cos(angleRad) - offsetY * Math.sin(angleRad);
             const rotatedY = offsetX * Math.sin(angleRad) + offsetY * Math.cos(angleRad);
             const cellLat = centerLat + (rotatedY / metersPerLat);
@@ -1136,7 +1136,7 @@ function computeCellCenter(record) {
     const centerLng = parseFloat(record.grid_lng);
     if (!rows || !cols || isNaN(centerLat) || isNaN(centerLng)) return null;
 
-    const cellSize = 2;
+    const cellSize = 2 * (parseFloat(record.grid_scale) || 1);
     const angleRad = 45 * Math.PI / 180;
     const metersPerLat = 111320;
     const metersPerLng = 111320 * Math.cos(centerLat * Math.PI / 180);
@@ -1146,7 +1146,7 @@ function computeCellCenter(record) {
     const c = parseInt(record.cell_col) - 1;
 
     const offsetX = (c - cols / 2 + 0.5) * cellSize;
-    const offsetY = (r - rows / 2 + 0.5) * cellSize;
+    const offsetY = ((rows - 1) / 2 - r) * cellSize; // row 0 = north edge, matching the grid editor
     const rotatedX = offsetX * Math.cos(angleRad) - offsetY * Math.sin(angleRad);
     const rotatedY = offsetX * Math.sin(angleRad) + offsetY * Math.cos(angleRad);
     const cellLat = centerLat + (rotatedY / metersPerLat);
