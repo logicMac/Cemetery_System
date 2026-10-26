@@ -10,6 +10,7 @@ let markers = {
     burials: L.layerGroup(),
     available: L.layerGroup(),
     grids: L.layerGroup(),
+    relocation: L.layerGroup(),
     search: null,
     searchCell: null,
     userLocation: null,
@@ -20,6 +21,11 @@ let routingControl = null;
 let routeLine = null;
 let routeArrows = null;
 let routeInfoBadge = null;
+let routeEndLeg = null;
+let routeStartLeg = null;
+let userAccuracyCircle = null;
+let navigationId = 0;
+let pendingFixCancel = null;
 let allRecords = [];
 let allPlots = [];
 let lastSearchResults = [];
@@ -144,6 +150,7 @@ function initMap() {
     // Add marker layers
     map.addLayer(markers.burials);
     map.addLayer(markers.grids);
+    map.addLayer(markers.relocation);
 
     // Load data
     if (!AVAILABLE_PLOTS_ONLY) {
@@ -161,6 +168,7 @@ async function loadBurialRecords() {
         if (data.success) {
             allRecords = data.records;
             displayBurialMarkers(data.records);
+            displayRelocationArea(data.relocation_area);
             updateFilterCounts();
         }
     } catch (error) {
@@ -175,14 +183,12 @@ function displayBurialMarkers(records) {
     
     records.forEach(record => {
         if (record.latitude && record.longitude) {
-            const iconColor = record.is_fenced == 1 ? '#c9a86c' : '#5a87a8';
-            const rcBadge = (record.grid_name && record.cell_row)
-                ? `<div style="position:absolute;top:15px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;white-space:nowrap;border:1px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.4);">R${record.cell_row}-C${record.cell_col}</div>`
-                : '';
+            const iconColor = record.is_relocated == 1 ? '#64748b'
+                : (record.is_fenced == 1 ? '#c9a86c' : '#5a87a8');
 
             const icon = L.divIcon({
                 className: 'custom-marker',
-                html: `<div style="position:relative;width:12px;height:12px;"><div style="background: ${iconColor}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>${rcBadge}</div>`,
+                html: `<div style="background: ${iconColor}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"></div>`,
                 iconSize: [12, 12],
                 iconAnchor: [6, 6]
             });
@@ -229,6 +235,28 @@ function displayBurialMarkers(records) {
     });
 }
 
+// Draw an indicator on the relocation area — where all unrenewed plots are held
+function displayRelocationArea(area) {
+    markers.relocation.clearLayers();
+    if (!area || !area.latitude || !area.longitude) return;
+
+    const lat = parseFloat(area.latitude);
+    const lng = parseFloat(area.longitude);
+    const count = parseInt(area.count || 0, 10);
+
+    const label = L.divIcon({
+        className: '',
+        html: `<div style="width:28px;height:28px;background:#334155;border:2px solid #fff;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(15,23,42,.35);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+    });
+    L.marker([lat, lng], { icon: label, zIndexOffset: 500 })
+        .bindTooltip(`<b>Relocation Area</b><br>${count} unrenewed plot${count === 1 ? '' : 's'}`, { direction: 'top', offset: [0, -16] })
+        .addTo(markers.relocation);
+}
+
 // Helper to draw a free-form plot polygon on the visitor map
 function drawPolygon(polygonData, popupHtml, color = '#22c55e', targetLayer = markers.burials) {
     try {
@@ -259,8 +287,8 @@ function drawPolygon(polygonData, popupHtml, color = '#22c55e', targetLayer = ma
 // Create burial popup content with enhanced details and photo
 function createBurialPopup(record) {
     const photoHtml = record.photo 
-        ? `<img src="../uploads/photos/${record.photo}" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />`
-        : `<div style="width: 100%; height: 200px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center;">
+        ? `<img src="../uploads/photos/${record.photo}" class="popup-photo" style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 12px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);" />`
+        : `<div class="popup-photo popup-photo-placeholder" style="width: 100%; height: 200px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center;">
             <svg style="width: 80px; height: 80px; color: rgba(255,255,255,0.7);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
@@ -282,6 +310,13 @@ function createBurialPopup(record) {
                 <strong>${record.grid_name}</strong> — Row ${record.cell_row}, Column ${record.cell_col}
                 <span style="display:inline-block;margin-left:6px;padding:2px 8px;border-radius:10px;font-size:0.75rem;font-weight:700;background:#1e293b;color:#fff;">R${record.cell_row}-C${record.cell_col}</span>
             </p>
+        </div>` : '';
+
+    // Relocated marker — record was moved to the holding area
+    const relocatedHtml = record.is_relocated == 1 ? `
+        <div style="background: #f8fafc; border-left: 3px solid #64748b; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+            <p style="margin: 0; font-size: 0.75rem; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">Relocated</p>
+            <p style="margin: 6px 0 0 0; font-size: 0.82rem; color: #475569; line-height: 1.5;">This plot was not renewed and has been moved to the relocation area. Contact the cemetery office for details.</p>
         </div>` : '';
 
     // Renewal status based on expiration_date
@@ -314,16 +349,23 @@ function createBurialPopup(record) {
     const escapedName = (record.decedent_name || 'Unknown').replace(/'/g, "\\'").replace(/"/g, '&quot;');
     const subLabel = isCompartment ? `${record.grid_name} · R${record.cell_row}-C${record.cell_col}` : '';
     const escapedSub = subLabel.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+    // For compartment burials, navigate to the exact cell center — the raw
+    // record lat/lng is the structure coordinate and lands a few meters off.
+    const navCell = computeCellCenter(record);
+    const navLat = navCell ? navCell.center[0] : record.latitude;
+    const navLng = navCell ? navCell.center[1] : record.longitude;
     
     return `
-        <div style="min-width: 300px; max-width: 350px;">
+        <div class="burial-popup-card" style="width: min(340px, calc(100vw - 90px));">
             ${photoHtml}
             <div style="text-align: center; margin-bottom: 16px;">
-                <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; font-weight: 700; color: #0f172a;">${record.decedent_name}</h3>
+                <h3 class="popup-name" style="margin: 0 0 4px 0; font-size: 1.3rem; font-weight: 700; color: #0f172a;">${record.decedent_name}</h3>
                 <p style="margin: 0; font-size: 0.9rem; color: #475569;">${birthDate} - ${deathDate}</p>
                 <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">Lived ${age} years</p>
             </div>
             
+            ${relocatedHtml}
             ${compartmentHtml}
 
             <div style="background: #f8fafc; border-radius: 10px; padding: 12px; margin-bottom: 12px;">
@@ -364,7 +406,7 @@ function createBurialPopup(record) {
                 </div>
             ` : ''}
             
-            <button onclick="window.navigateToLocation(${record.latitude}, ${record.longitude}, '${escapedName}', '${escapedSub}')" class="btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none; border-radius: 12px; background: #10b981; color: white; font-weight: 600; transition: all 0.3s ease;"
+            <button onclick="window.navigateToLocation(${navLat}, ${navLng}, '${escapedName}', '${escapedSub}')" class="btn-primary" style="width: 100%; padding: 12px; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none; border-radius: 12px; background: #10b981; color: white; font-weight: 600; transition: all 0.3s ease;"
                 onmouseover="this.style.backgroundColor='#059669';"
                 onmouseout="this.style.backgroundColor='#10b981';">
                 <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -485,17 +527,6 @@ async function drawStandaloneGrid(grid) {
                 </div>
             `);
 
-            // Permanent row/column tag on occupied compartments so guests
-            // can see exactly where the deceased is located
-            if (isOccupied) {
-                cell.bindTooltip('R' + (row + 1) + '-C' + (col + 1), {
-                    permanent: true,
-                    direction: 'center',
-                    className: 'cell-rc-label',
-                    interactive: false
-                });
-            }
-
             cell.on('mouseover', function() {
                 this.setStyle({ fillOpacity: isOccupied ? 0.65 : 0.3, weight: 3 });
             });
@@ -615,7 +646,7 @@ function createPlotPopup(plot) {
     }
     
     return `
-        <div style="min-width: 280px; padding: 8px;">
+        <div style="width: min(300px, calc(100vw - 110px)); padding: 8px;">
             ${photoHtml}
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">
                 <div style="width: 40px; height: 40px; background: ${headerIconBg}; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
@@ -857,9 +888,35 @@ function displayAvailablePlotSearchResults(plots) {
     }).join('');
 }
 
-// Show an available plot search result on the map
+// Show an available plot search result on the map — drops a 📍 pin at the plot
 function showAvailablePlotResult(lat, lng, plotId) {
-    map.setView([lat, lng], 19);
+    if (markers.search) {
+        map.removeLayer(markers.search);
+        markers.search = null;
+    }
+    if (markers.searchCell) {
+        map.removeLayer(markers.searchCell);
+        markers.searchCell = null;
+    }
+
+    const pinIcon = L.divIcon({
+        className: 'search-pin-marker',
+        html: `<div style="position:relative;">
+            <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;background:rgba(234,67,53,0.18);animation:routePulseRing 2s ease-out infinite;"></div>
+            <div style="position:relative;font-size:34px;line-height:1;filter:drop-shadow(0 3px 4px rgba(0,0,0,0.45));">📍</div>
+        </div>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 32]
+    });
+
+    markers.search = L.marker([lat, lng], { icon: pinIcon, zIndexOffset: 1200 }).addTo(map);
+
+    const plot = allPlots.find(p => p.id == plotId);
+    if (plot) {
+        markers.search.bindPopup(createPlotPopup(plot)).openPopup();
+    }
+
+    map.flyTo([lat, lng], 19, { duration: 1.5 });
     document.getElementById('searchResultsPanel').classList.remove('active');
 }
 
@@ -927,7 +984,8 @@ function displaySearchResults(results) {
                         </p>
                     </div>
                     <svg style="width: 20px; height: 20px; color: #00c853; flex-shrink: 0; margin-left: 8px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
                 </div>
                 ${dropdownHtml}
@@ -1148,6 +1206,9 @@ function addRouteDirectionArrows(routeCoords) {
 
 // Show a floating info badge on the map with distance and time
 function showRouteInfoBadge(lat, lng, distanceText, timeText, destinationName) {
+    if (document.body.classList.contains('mobile-navigating')) {
+        setNavigationStatus(destinationName, `${distanceText} · ${timeText}`);
+    }
     if (routeInfoBadge) { map.removeLayer(routeInfoBadge); routeInfoBadge = null; }
     const badgeIcon = L.divIcon({
         className: 'route-info-badge',
@@ -1162,8 +1223,14 @@ function showRouteInfoBadge(lat, lng, distanceText, timeText, destinationName) {
 }
 
 // Clear the active route, navigation markers, and location watcher
-window.clearRoute = function() {
+window.clearRoute = function(notify = true) {
     console.log('Clearing route...');
+    navigationId++;
+    if (pendingFixCancel) {
+        pendingFixCancel();
+        pendingFixCancel = null;
+    }
+    document.body.classList.remove('mobile-navigating');
 
     // Remove OSRM routing control
     if (routingControl) {
@@ -1187,6 +1254,22 @@ window.clearRoute = function() {
         routeArrows = null;
     }
 
+    // Remove the dashed final-leg connector
+    if (routeEndLeg) {
+        map.removeLayer(routeEndLeg);
+        routeEndLeg = null;
+    }
+
+    if (routeStartLeg) {
+        map.removeLayer(routeStartLeg);
+        routeStartLeg = null;
+    }
+
+    if (userAccuracyCircle) {
+        map.removeLayer(userAccuracyCircle);
+        userAccuracyCircle = null;
+    }
+
     // Remove floating route info badge
     if (routeInfoBadge) {
         map.removeLayer(routeInfoBadge);
@@ -1206,7 +1289,7 @@ window.clearRoute = function() {
     }
 
     // Stop watching user location
-    if (userLocationWatcher) {
+    if (userLocationWatcher !== null) {
         navigator.geolocation.clearWatch(userLocationWatcher);
         userLocationWatcher = null;
     }
@@ -1215,8 +1298,13 @@ window.clearRoute = function() {
     const btn = document.getElementById('clearRouteBtn');
     if (btn) btn.style.display = 'none';
 
-    themeUtils.showAlert('Route cleared', 'info');
+    if (notify) themeUtils.showAlert('Route cleared', 'info');
 };
+
+function setNavigationStatus(destination, detail) {
+    document.getElementById('mobileNavDestination').textContent = destination;
+    document.getElementById('mobileNavDetail').textContent = detail;
+}
 
 // Show the floating "Clear Route" button (creates it if needed)
 function showClearRouteButton() {
@@ -1261,6 +1349,50 @@ function showClearRouteButton() {
     btn.style.display = 'flex';
 }
 
+// Acquire the best location fix available: the first reading is often a
+// coarse network estimate (±50 m or more). Keep refining until accuracy
+// reaches ±20 m or ~12 s elapse, then use the best fix seen.
+function acquireBestFix(onReady, onError) {
+    let best = null;
+    let lastError = null;
+    let finished = false;
+    let watchId = null;
+
+    const finish = () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timer);
+        if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+        if (best) onReady(best);
+        else onError(lastError || { code: 3 });
+    };
+
+    const timer = setTimeout(finish, 12000);
+
+    try {
+        watchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                if (finished) return;
+                if (!best || pos.coords.accuracy < best.coords.accuracy) best = pos;
+                if (pos.coords.accuracy <= 20) finish();
+            },
+            (err) => {
+                lastError = err;
+                // Keep waiting — a later fix may still succeed before the deadline.
+            },
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+        );
+    } catch (err) {
+        lastError = err;
+        finish();
+    }
+    return () => {
+        finished = true;
+        clearTimeout(timer);
+        if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+    };
+}
+
 // Navigation functionality with proper routing
 window.navigateToLocation = function(lat, lng, destinationName = 'Destination', subLabel = '') {
     console.log('Navigate called:', lat, lng, destinationName);
@@ -1271,13 +1403,29 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
     }
 
     // Show the clear-route button so the user can stop navigation without reloading
+    window.clearRoute(false);
+    const currentNavigation = ++navigationId;
+    document.body.classList.add('mobile-navigating');
+    // Hide search results once navigation starts
+    const searchPanel = document.getElementById('searchResultsPanel');
+    if (searchPanel) searchPanel.classList.remove('active');
+    setNavigationStatus(destinationName, 'Finding your location…');
+    map.closePopup();
+    if (window.matchMedia('(max-width: 768px)').matches && document.getElementById('chatContainer').style.display !== 'none') {
+        toggleChat();
+    }
     showClearRouteButton();
 
-    themeUtils.showAlert('Getting your location...', 'info');
-    
+    if (!window.matchMedia('(max-width: 768px)').matches) {
+        themeUtils.showAlert('Getting your precise location — this can take a few seconds...', 'info');
+    }
+
     // Get user's current location
-    navigator.geolocation.getCurrentPosition(
+    pendingFixCancel = acquireBestFix(
         (position) => {
+            if (currentNavigation !== navigationId) return;
+            pendingFixCancel = null;
+            setNavigationStatus(destinationName, 'Finding a route…');
             const userLat = position.coords.latitude;
             const userLng = position.coords.longitude;
             
@@ -1294,11 +1442,66 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                 routingControl = null;
             }
             
+            if (routeLine) {
+                map.removeLayer(routeLine);
+                routeLine = null;
+            }
+
             // Remove existing user location marker
             if (markers.userLocation) {
                 map.removeLayer(markers.userLocation);
             }
-            
+
+            // Remove previous final-leg connector
+            if (routeEndLeg) {
+                map.removeLayer(routeEndLeg);
+                routeEndLeg = null;
+            }
+            if (routeStartLeg) {
+                map.removeLayer(routeStartLeg);
+                routeStartLeg = null;
+            }
+            if (userAccuracyCircle) {
+                map.removeLayer(userAccuracyCircle);
+                userAccuracyCircle = null;
+            }
+
+            let currentFix = position;
+            let routeStartPoint = null;
+            let routedFrom = L.latLng(userLat, userLng);
+            let manualFix = false;
+            const updateStartLeg = () => {
+                if (routeStartLeg) {
+                    map.removeLayer(routeStartLeg);
+                    routeStartLeg = null;
+                }
+                if (!routeStartPoint) return;
+                const coords = currentFix.coords;
+                if (themeUtils.calculateDistance(coords.latitude, coords.longitude, routeStartPoint[0], routeStartPoint[1]) > 2) {
+                    routeStartLeg = L.polyline([[coords.latitude, coords.longitude], routeStartPoint], {
+                        color: '#4285F4', weight: 5, opacity: 0.85,
+                        dashArray: '1, 10', lineCap: 'round', className: 'route-start-leg'
+                    }).addTo(map);
+                }
+            };
+            const updateUserFix = (fix) => {
+                currentFix = fix;
+                const { latitude, longitude, accuracy } = fix.coords;
+                const accuracyText = Number.isFinite(accuracy) ? ` (accuracy ±${Math.round(accuracy)} m)` : '';
+                markers.userLocation.setLatLng([latitude, longitude]);
+                markers.userLocation.setPopupContent(`<strong>Your approximate location</strong>${accuracyText}`);
+                if (userAccuracyCircle) { map.removeLayer(userAccuracyCircle); userAccuracyCircle = null; }
+                // Only draw the accuracy circle when it adds useful information —
+                // a very rough fix would cover the whole map.
+                if (Number.isFinite(accuracy) && accuracy > 0 && accuracy <= 50) {
+                    userAccuracyCircle = L.circle([latitude, longitude], {
+                        radius: accuracy, color: '#4285F4', weight: 1,
+                        fillColor: '#4285F4', fillOpacity: 0.1, interactive: false
+                    }).addTo(map);
+                }
+                updateStartLeg();
+            };
+
             // Create user location marker — Google Maps style pulsing blue dot
             const userIcon = L.divIcon({
                 className: 'user-location-marker-custom',
@@ -1311,31 +1514,39 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                 iconAnchor: [10, 10]
             });
             
-            markers.userLocation = L.marker([userLat, userLng], { icon: userIcon })
-                .bindPopup('<strong>Your Location</strong>')
+            markers.userLocation = L.marker([userLat, userLng], { icon: userIcon, draggable: true })
+                .bindPopup('<strong>Your Location</strong><br><span style="font-size:0.8rem;color:#64748b;">Drag this dot to your exact spot if it looks wrong</span>')
                 .addTo(map);
-            
-            // Create destination marker with pin icon
+
+            // On devices without GPS (laptops/desktops) the reported position is
+            // only an estimate — let the user drag the dot to their real spot.
+            markers.userLocation.on('dragend', function(e) {
+                const p = e.target.getLatLng();
+                manualFix = true;
+                currentFix = { coords: { latitude: p.lat, longitude: p.lng, accuracy: 0 }, timestamp: Date.now() };
+                if (userAccuracyCircle) { map.removeLayer(userAccuracyCircle); userAccuracyCircle = null; }
+                markers.userLocation.setPopupContent('<strong>Your location (set manually)</strong>');
+                routedFrom = p;
+                if (routingControl) {
+                    routingControl.setWaypoints([p, L.latLng(lat, lng)]);
+                }
+                if (routeLine) {
+                    routeLine.eachLayer(layer => layer.setLatLngs([[p.lat, p.lng], [lat, lng]]));
+                }
+                updateStartLeg();
+                themeUtils.showAlert('Location set manually. Route updated.', 'info');
+            });
+            updateUserFix(position);
+            if (position.coords.accuracy > 20) {
+                themeUtils.showAlert(`Your location is approximate (±${Math.round(position.coords.accuracy)} m). You can drag the blue dot to your exact spot.`, 'info');
+            }
+
+            // Remove any stale destination marker (pin no longer shown during navigation)
             if (markers.destination) {
                 map.removeLayer(markers.destination);
+                markers.destination = null;
             }
-            
-            const destIcon = L.divIcon({
-                className: 'destination-marker',
-                html: `<div style="position: relative;">
-                    <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 50px; height: 50px; border-radius: 50%; background: rgba(234, 67, 53, 0.15); animation: routePulseRing 2s ease-out infinite;"></div>
-                    <svg style="width: 36px; height: 36px; filter: drop-shadow(0 3px 6px rgba(234,67,53,0.5)); position: relative; z-index: 1;" viewBox="0 0 24 24" fill="#EA4335">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                    </svg>
-                </div>`,
-                iconSize: [36, 36],
-                iconAnchor: [18, 36]
-            });
-            
-            markers.destination = L.marker([lat, lng], { icon: destIcon })
-                .bindPopup(`<div style="text-align:center;"><strong>${destinationName}</strong>${subLabel ? `<br><span style="font-size:0.85rem;color:#2563eb;font-weight:600;">${subLabel}</span>` : ''}</div>`)
-                .addTo(map);
-            
+
             console.log('User marker added');
             
             // Check if routing library is available
@@ -1391,6 +1602,7 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                 
                 // Customize routing instructions panel
                 routingControl.on('routesfound', function(e) {
+                    if (currentNavigation !== navigationId) return;
                     console.log('Route found!', e);
                     const routes = e.routes;
                     const summary = routes[0].summary;
@@ -1405,14 +1617,35 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                     const timeText = timeMin >= 1 ? `${timeMin} min` : `${Math.round(summary.totalTime)} sec`;
 
                     // Show success message
-                    themeUtils.showAlert(
-                        `Route found! Distance: ${distanceText}, Estimated time: ${timeText}`,
-                        'success'
-                    );
+                    if (!window.matchMedia('(max-width: 768px)').matches) {
+                        themeUtils.showAlert(
+                            `Route found! Distance: ${distanceText}, Estimated time: ${timeText}`,
+                            'success'
+                        );
+                    }
 
                     // Add direction arrows along the route
                     if (routeCoords.length > 0) {
                         addRouteDirectionArrows(routeCoords);
+                        routeStartPoint = routeCoords[0];
+                        updateStartLeg();
+
+                        // OSRM snaps the route endpoint to the nearest mapped
+                        // path, which can stop a few meters short of the grave.
+                        // Draw a dashed connector to the exact destination.
+                        if (routeEndLeg) { map.removeLayer(routeEndLeg); routeEndLeg = null; }
+                        const lastPt = routeCoords[routeCoords.length - 1];
+                        const gapMeters = themeUtils.calculateDistance(lastPt[0], lastPt[1], lat, lng);
+                        if (gapMeters > 2) {
+                            routeEndLeg = L.polyline([lastPt, [lat, lng]], {
+                                color: '#4285F4',
+                                weight: 5,
+                                opacity: 0.85,
+                                dashArray: '1, 10',
+                                lineCap: 'round',
+                                className: 'route-end-leg'
+                            }).addTo(map);
+                        }
                     }
 
                     // Show floating info badge near the midpoint of the route
@@ -1425,7 +1658,7 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                     if (markers.userLocation) {
                         markers.userLocation.setPopupContent(
                             `<div style="text-align: center;">
-                                <strong>Your Location</strong><br>
+                                <strong>Your approximate location (±${Math.round(currentFix.coords.accuracy)} m)</strong><br>
                                 <span style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">
                                     ${distanceText} to ${destinationName}
                                 </span>
@@ -1452,6 +1685,7 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                 
                 // Handle routing errors
                 routingControl.on('routingerror', function(e) {
+                    if (currentNavigation !== navigationId) return;
                     console.error('Routing error:', e);
                     handleRoutingFallback(userLat, userLng, lat, lng, destinationName);
                 });
@@ -1481,20 +1715,16 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                     routeLine = null;
                 }
 
-                // Draw smooth curved line as fallback (Google Maps style — layered)
+                // Remove final-leg connector if exists
+                if (routeEndLeg) {
+                    map.removeLayer(routeEndLeg);
+                    routeEndLeg = null;
+                }
+
+                // Draw a direct line rather than inventing a mapped route
                 const midLat = (userLat + lat) / 2;
                 const midLng = (userLng + lng) / 2;
-
-                // Create a slight curve
-                const offset = 0.001;
-                const curveLat = midLat + offset;
-                const curveLng = midLng + offset;
-
-                const routeCoords = [
-                    [userLat, userLng],
-                    [curveLat, curveLng],
-                    [lat, lng]
-                ];
+                const routeCoords = [[userLat, userLng], [lat, lng]];
 
                 // Layered polylines: casing + main + inner highlight
                 const routeCasing = L.polyline(routeCoords, {
@@ -1503,6 +1733,7 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                     opacity: 0.35,
                     smoothFactor: 3,
                     lineCap: 'round',
+                    dashArray: '4, 10',
                     className: 'route-casing'
                 });
 
@@ -1512,6 +1743,7 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                     opacity: 1,
                     smoothFactor: 3,
                     lineCap: 'round',
+                    dashArray: '4, 10',
                     className: 'route-main'
                 });
 
@@ -1521,6 +1753,7 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                     opacity: 0.9,
                     smoothFactor: 3,
                     lineCap: 'round',
+                    dashArray: '4, 10',
                     className: 'route-inner'
                 });
 
@@ -1536,17 +1769,18 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                 const distance = themeUtils.calculateDistance(userLat, userLng, lat, lng);
                 const formattedDistance = themeUtils.formatDistance(distance);
 
-                // Estimate walking time (~1.4 m/s)
-                const timeSec = Math.round(distance / 1.4);
-                const timeText = timeSec >= 60 ? `${Math.round(timeSec / 60)} min` : `${timeSec} sec`;
+                // A direct line has no reliable walking time
+                const timeText = 'No mapped path';
 
                 // Show floating info badge near the midpoint
-                showRouteInfoBadge(curveLat, curveLng, formattedDistance, timeText, name);
+                showRouteInfoBadge(midLat, midLng, formattedDistance, timeText, name);
 
-                themeUtils.showAlert(
-                    `Showing direct path to ${name}. Distance: ${formattedDistance}, Est. time: ${timeText}`,
-                    'info'
-                );
+                if (!window.matchMedia('(max-width: 768px)').matches) {
+                    themeUtils.showAlert(
+                        `No mapped route available. Dashed line shows straight-line direction to ${name} (${formattedDistance}), not a walking path.`,
+                        'info'
+                    );
+                }
                 
                 // Fit bounds to show both points
                 map.fitBounds([
@@ -1563,32 +1797,38 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                                 ${formattedDistance} to ${name}
                             </span>
                         </div>`
-                    ).openPopup();
+                    );
+                    if (!window.matchMedia('(max-width: 768px)').matches) markers.userLocation.openPopup();
                 }
             }
             
             // Start watching user location for real-time updates
-            if (userLocationWatcher) {
+            if (userLocationWatcher !== null) {
                 navigator.geolocation.clearWatch(userLocationWatcher);
             }
             
             userLocationWatcher = navigator.geolocation.watchPosition(
                 (pos) => {
+                    if (currentNavigation !== navigationId || !markers.userLocation || manualFix || pos.timestamp < currentFix.timestamp) return;
                     const newLat = pos.coords.latitude;
                     const newLng = pos.coords.longitude;
-                    
-                    // Update user marker position
-                    if (markers.userLocation) {
-                        markers.userLocation.setLatLng([newLat, newLng]);
+                    const shift = themeUtils.calculateDistance(currentFix.coords.latitude, currentFix.coords.longitude, newLat, newLng);
+                    // Keep a clearly better fix, or one outside the previous
+                    // uncertainty bubble; ignore worse nearby readings.
+                    const meaningfullyWorse = pos.coords.accuracy > currentFix.coords.accuracy + 5;
+                    if (meaningfullyWorse && shift <= currentFix.coords.accuracy) return;
+
+                    updateUserFix(pos);
+                    if (routeLine) {
+                        routeLine.eachLayer(layer => layer.setLatLngs([[newLat, newLng], [lat, lng]]));
+                        const directDistance = themeUtils.calculateDistance(newLat, newLng, lat, lng);
+                        showRouteInfoBadge((newLat + lat) / 2, (newLng + lng) / 2, themeUtils.formatDistance(directDistance), 'No mapped path', destinationName);
                     }
-                    
-                    // Update route if user moved significantly (more than 5 meters)
-                    const movedDistance = themeUtils.calculateDistance(userLat, userLng, newLat, newLng);
-                    if (movedDistance > 5 && routingControl) {
-                        routingControl.setWaypoints([
-                            L.latLng(newLat, newLng),
-                            L.latLng(lat, lng)
-                        ]);
+
+                    const movedDistance = themeUtils.calculateDistance(routedFrom.lat, routedFrom.lng, newLat, newLng);
+                    if (movedDistance > Math.max(10, pos.coords.accuracy) && routingControl) {
+                        routedFrom = L.latLng(newLat, newLng);
+                        routingControl.setWaypoints([routedFrom, L.latLng(lat, lng)]);
                     }
                 },
                 (error) => {
@@ -1596,13 +1836,15 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
                 },
                 { 
                     enableHighAccuracy: true, 
-                    maximumAge: 2000,  // Cache for 2 seconds max
+                    maximumAge: 0,  // Never reuse a cached fix — keep refining toward GPS
                     timeout: 15000  // Increased timeout
                 }
             );
             
         },
         (error) => {
+            if (currentNavigation !== navigationId) return;
+            window.clearRoute(false);
             console.error('Geolocation error:', error);
             let errorMessage = 'Unable to get your location. ';
             
@@ -1621,11 +1863,6 @@ window.navigateToLocation = function(lat, lng, destinationName = 'Destination', 
             }
             
             themeUtils.showAlert(errorMessage, 'error');
-        },
-        { 
-            enableHighAccuracy: true, 
-            maximumAge: 0,  // Don't use cached position
-            timeout: 15000  // Increased timeout for better accuracy
         }
     );
 };
@@ -1695,11 +1932,31 @@ async function sendMessage() {
             // Check for navigation command
             if (data.navigation) {
                 const destinationName = data.navigation.name || 'Destination';
+                let navLat = data.navigation.lat;
+                let navLng = data.navigation.lng;
+
+                // The AI echoes back the record's stored lat/lng, which for
+                // compartment burials is the structure coordinate. Match the
+                // record (by coords, then name) and snap to the exact cell.
+                const navName = (data.navigation.name || '').toLowerCase().trim();
+                const matchedRecord = allRecords.find(r =>
+                    Math.abs(parseFloat(r.latitude) - navLat) < 0.0001 &&
+                    Math.abs(parseFloat(r.longitude) - navLng) < 0.0001
+                ) || (navName && navName !== 'destination' ? allRecords.find(r => {
+                    const recName = (r.decedent_name || '').toLowerCase().trim();
+                    return recName && (recName.includes(navName) || navName.includes(recName));
+                }) : null);
+                const navCell = matchedRecord ? computeCellCenter(matchedRecord) : null;
+                if (navCell) {
+                    navLat = navCell.center[0];
+                    navLng = navCell.center[1];
+                }
+
                 // Automatically navigate with route
                 setTimeout(() => {
-                    navigateToLocation(data.navigation.lat, data.navigation.lng, destinationName);
                     // Close chat to show the map and route
-                    toggleChat();
+                    if (document.getElementById('chatContainer').style.display !== 'none') toggleChat();
+                    navigateToLocation(navLat, navLng, destinationName);
                 }, isVoiceMessage ? 3000 : 1500);
             }
         } else {
@@ -1858,6 +2115,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Update filter counts
     updateFilterCounts();
+
+    // Auto-minimize the map legend while search results are open (they overlap)
+    const searchPanel = document.getElementById('searchResultsPanel');
+    const mapLegend = document.getElementById('mapLegend');
+    if (searchPanel && mapLegend && window.MutationObserver) {
+        new MutationObserver(() => {
+            if (searchPanel.classList.contains('active')) {
+                if (!mapLegend.classList.contains('legend-minimized')) {
+                    mapLegend.dataset.legendAutoMin = '1';
+                }
+                mapLegend.classList.add('legend-minimized');
+            } else if (mapLegend.dataset.legendAutoMin === '1') {
+                delete mapLegend.dataset.legendAutoMin;
+                mapLegend.classList.remove('legend-minimized');
+            }
+        }).observe(searchPanel, { attributes: true, attributeFilter: ['class'] });
+    }
 });
 
 // Filter toggle function

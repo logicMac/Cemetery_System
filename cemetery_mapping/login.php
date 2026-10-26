@@ -168,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <!-- Left: Photo panel (desktop only) -->
         <div class="hidden lg:flex w-[70%] relative overflow-hidden">
             <!-- Background photo -->
-            <img src="assets/images/cemetery-banner.jpg" alt="Matinao Memorial Cemetery" class="absolute inset-0 w-full h-full object-cover">
+            <img src="https://ajkalingafoundation.org/wp-content/uploads/2023/03/336917291_205193515456175_2046179748757982000_n.jpg" alt="Matinao Memorial Cemetery" class="absolute inset-0 w-full h-full object-cover">
             <!-- Subtle dark gradient for text readability at top/bottom -->
             <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/50"></div>
 

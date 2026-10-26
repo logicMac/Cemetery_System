@@ -26,6 +26,11 @@ html[data-theme="dark"] {
     --text-muted: #94a3b8;
 }
 
+/* Hero mint wash — dimmed for dark mode */
+html[data-theme="dark"] .hero-bg {
+    background: radial-gradient(1100px 520px at 50% -60px, rgba(16, 185, 129, 0.14) 0%, rgba(16, 185, 129, 0.05) 38%, var(--bg-page) 78%);
+}
+
 /* Theme toggle icons */
 .theme-icon-sun { display: none; }
 html[data-theme="dark"] .theme-icon-sun { display: inline-flex; }
@@ -51,6 +56,10 @@ html[data-theme="dark"] .bg-white\/80 {
 
 html[data-theme="dark"] .bg-white\/90 {
     background-color: rgba(30, 41, 59, 0.92);
+}
+
+html[data-theme="dark"] .bg-white\/95 {
+    background-color: rgba(15, 23, 42, 0.95);
 }
 
 html[data-theme="dark"] .bg-slate-50 {
@@ -89,6 +98,38 @@ html[data-theme="dark"] .bg-rose-50 {
 
 html[data-theme="dark"] .bg-violet-50 {
     background-color: rgba(139, 92, 246, 0.1);
+}
+
+html[data-theme="dark"] .bg-violet-100 {
+    background-color: rgba(139, 92, 246, 0.18);
+}
+
+html[data-theme="dark"] .bg-blue-50 {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+html[data-theme="dark"] .bg-blue-100 {
+    background-color: rgba(59, 130, 246, 0.18);
+}
+
+html[data-theme="dark"] .bg-amber-50 {
+    background-color: rgba(245, 158, 11, 0.1);
+}
+
+html[data-theme="dark"] .bg-amber-100 {
+    background-color: rgba(245, 158, 11, 0.18);
+}
+
+html[data-theme="dark"] .bg-teal-50 {
+    background-color: rgba(20, 184, 166, 0.1);
+}
+
+html[data-theme="dark"] .bg-teal-100 {
+    background-color: rgba(20, 184, 166, 0.18);
+}
+
+html[data-theme="dark"] .bg-rose-100 {
+    background-color: rgba(244, 63, 94, 0.18);
 }
 
 html[data-theme="dark"] .from-slate-50 {
@@ -137,6 +178,22 @@ html[data-theme="dark"] .text-rose-700 {
 
 html[data-theme="dark"] .text-violet-600 {
     color: #a78bfa;
+}
+
+html[data-theme="dark"] .text-blue-600 {
+    color: #60a5fa;
+}
+
+html[data-theme="dark"] .text-amber-600 {
+    color: #fbbf24;
+}
+
+html[data-theme="dark"] .text-teal-600 {
+    color: #2dd4bf;
+}
+
+html[data-theme="dark"] .text-rose-600 {
+    color: #fb7185;
 }
 
 /* Borders */

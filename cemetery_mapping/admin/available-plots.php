@@ -216,7 +216,7 @@ $expiring = count(array_filter($plots, function($p) use ($today) { return $p['ex
 
 <!-- Direct Renew Modal (Admin) -->
 <div id="directRenewModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
- <div class="bg-white rounded-xl border border-slate-200 shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6">
+ <div class="bg-white rounded-xl border border-slate-200 shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6">
  <div class="flex items-center gap-3 mb-5">
  <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0">
  <i data-lucide="refresh-cw" class="w-5 h-5"></i>

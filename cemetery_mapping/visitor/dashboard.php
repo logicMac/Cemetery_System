@@ -16,33 +16,46 @@ require_once 'includes/header.php';
  /* Full-height map layout under the visitor topbar */
  html, body, .admin-layout, .admin-main { height: 100vh !important; overflow: hidden; }
  .admin-main { padding: 0 !important; }
- #map { position: absolute; top: 80px; left: 0; right: 0; bottom: 0; width: 100%; height: auto; }
+ #map { position: absolute; top: 60px; left: 0; right: 0; bottom: 0; width: 100%; height: auto; }
  .rotation-panel {
  top: 20px !important;
  right: 20px !important;
  left: auto !important;
- box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(16, 185, 129, 0.08) !important;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
  }
  .leaflet-top.leaflet-left { display: none !important; }
  .leaflet-top.leaflet-right { display: none !important; }
  .leaflet-control-attribution { display: none !important; }
  .leaflet-control-rotate { display: none !important; }
  .leaflet-control-layers {
- background: rgba(255, 255, 255, 0.95) !important;
- border: 1px solid rgba(16, 185, 129, 0.15) !important;
+ background: var(--surface) !important;
+ border: 1px solid var(--glass-border) !important;
  border-radius: 12px !important;
- box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
  }
  .leaflet-popup-content-wrapper {
  background: var(--surface);
- backdrop-filter: blur(20px);
- border: 1px solid rgba(16, 185, 129, 0.2);
+ border: 1px solid var(--glass-border);
  border-radius: 16px !important;
  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12) !important;
+ max-height: min(72vh, 660px);
+ overflow: hidden;
  }
- .leaflet-popup-content { color: var(--text-strong); margin: 16px; font-family: 'Poppins', sans-serif; }
+ .leaflet-popup-content { color: var(--text-strong); margin: 16px; font-family: 'Poppins', sans-serif; max-height: calc(min(72vh, 660px) - 32px); overflow-y: auto; }
  .leaflet-popup-tip { background: var(--surface); }
  .leaflet-popup-close-button { color: #94a3b8 !important; font-size: 20px !important; padding: 6px 8px !important; }
+
+ /* Compact burial popup on phones: shrink card, cap height, allow scrolling */
+ @media (max-width: 768px) {
+ .leaflet-popup { max-width: calc(100vw - 32px) !important; }
+ .leaflet-popup-content-wrapper { max-height: 62vh; overflow: hidden; }
+ .leaflet-popup-content { margin: 12px; max-height: calc(62vh - 24px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+ .burial-popup-card { width: min(300px, calc(100vw - 90px)) !important; }
+ .burial-popup-card .popup-photo { max-height: 130px !important; height: 130px !important; margin-bottom: 10px !important; }
+ .burial-popup-card .popup-photo svg { width: 48px !important; height: 48px !important; }
+ .burial-popup-card .popup-name { font-size: 1.05rem !important; }
+ .burial-popup-card > div { margin-bottom: 10px !important; padding: 9px !important; }
+ }
  
  /* Animated user location marker */
  .user-location-marker { 
@@ -122,13 +135,12 @@ require_once 'includes/header.php';
  max-width: 280px !important;
  max-height: 300px !important;
  overflow-y: auto !important;
- background: rgba(255, 255, 255, 0.98) !important;
- backdrop-filter: blur(24px);
- border: 1px solid rgba(16, 185, 129, 0.2) !important;
- border-radius: 18px !important;
- padding: 18px !important;
+ background: var(--surface) !important;
+ border: 1px solid var(--glass-border) !important;
+ border-radius: 12px !important;
+ padding: 14px !important;
  color: var(--text-strong) !important;
- box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(16, 185, 129, 0.08) !important;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
  z-index: 998 !important;
  }
  
@@ -164,9 +176,9 @@ require_once 'includes/header.php';
  }
  
  .leaflet-routing-alt {
- background: rgba(15, 23, 42, 0.05) !important;
- border: 1px solid rgba(16, 185, 129, 0.15) !important;
- border-radius: 12px !important;
+ background: var(--bg-subtle) !important;
+ border: 1px solid var(--border-subtle) !important;
+ border-radius: 10px !important;
  padding: 12px !important;
  margin: 8px 0 !important;
  color: var(--text-strong) !important;
@@ -182,15 +194,15 @@ require_once 'includes/header.php';
  
  /* Minimize routing panel button */
  .leaflet-routing-collapse-btn {
- background: rgba(16, 185, 129, 0.3) !important;
+ background: var(--bg-subtle) !important;
  border-radius: 8px !important;
- color: var(--text-strong) !important;
+ color: var(--text-body) !important;
  padding: 4px 8px !important;
  cursor: pointer !important;
  }
  
  .leaflet-routing-collapse-btn:hover {
- background: rgba(16, 185, 129, 0.5) !important;
+ background: var(--border-subtle) !important;
  }
  
  /* Widget Organization - Prevent Overlaps */
@@ -201,15 +213,14 @@ require_once 'includes/header.php';
  left: 50%;
  transform: translateX(-50%);
  z-index: 1001;
- background: rgba(255, 255, 255, 0.95);
- backdrop-filter: blur(20px);
- border: 1px solid rgba(16, 185, 129, 0.15);
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
  border-radius: 12px;
- padding: 12px 24px;
+ padding: 10px 20px;
  display: flex;
  align-items: center;
- gap: 20px;
- box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+ gap: 16px;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
  transition: all 0.3s ease;
  }
  
@@ -222,20 +233,21 @@ require_once 'includes/header.php';
  }
  
  .toggle-nav-btn {
- background: rgba(16, 185, 129, 0.2);
- border: 1px solid rgba(16, 185, 129, 0.3);
+ background: transparent;
+ border: 1px solid var(--glass-border);
  border-radius: 8px;
  padding: 6px 10px;
  cursor: pointer;
- transition: all 0.3s ease;
- color: var(--text-strong);
+ transition: background 0.15s ease, color 0.15s ease;
+ color: var(--text-muted);
  display: flex;
  align-items: center;
  gap: 6px;
  }
  
  .toggle-nav-btn:hover {
- background: rgba(16, 185, 129, 0.3);
+ background: var(--bg-subtle);
+ color: #059669;
  }
  
  /* SEARCH BAR - Top left, compact */
@@ -246,25 +258,23 @@ require_once 'includes/header.php';
  right: auto;
  transform: none;
  z-index: 1001;
- background: rgba(255, 255, 255, 0.98);
- backdrop-filter: blur(24px);
- border: 1px solid rgba(16, 185, 129, 0.2);
- border-radius: 16px;
- padding: 10px 14px;
- box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(16, 185, 129, 0.08);
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
+ border-radius: 12px;
+ padding: 8px 10px;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
  display: flex;
  align-items: center;
- gap: 10px;
+ gap: 8px;
  min-width: 280px;
  max-width: 380px;
  width: auto;
- transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ transition: border-color 0.15s ease, box-shadow 0.15s ease;
  }
  
  .search-bar-container:focus-within {
- border-color: rgba(16, 185, 129, 0.6);
- box-shadow: 0 12px 40px rgba(16, 185, 129, 0.2), 0 0 0 4px rgba(16, 185, 129, 0.08);
- transform: translateY(-1px);
+ border-color: #059669;
+ box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
  }
  
  .search-bar-container.collapsed {
@@ -280,13 +290,13 @@ require_once 'includes/header.php';
  .toggle-search-btn {
  width: 32px;
  height: 32px;
- background: #f0fdf4;
- border: 1px solid rgba(16, 185, 129, 0.25);
+ background: transparent;
+ border: 1px solid var(--glass-border);
  border-radius: 8px;
  padding: 0;
  cursor: pointer;
- transition: all 0.3s ease;
- color: #10b981;
+ transition: background 0.15s ease, color 0.15s ease;
+ color: var(--text-muted);
  display: flex;
  align-items: center;
  justify-content: center;
@@ -294,36 +304,38 @@ require_once 'includes/header.php';
  }
  
  .toggle-search-btn:hover {
- background: #d1fae5;
- color: #047857;
+ background: var(--bg-subtle);
+ color: #059669;
  }
  
  .search-bar-container input {
  flex: 1;
- padding: 10px 14px;
- background: rgba(15, 23, 42, 0.04);
- border: 1px solid rgba(15, 23, 42, 0.06);
- border-radius: 12px;
+ padding: 8px 12px;
+ background: var(--bg-subtle);
+ border: 1px solid transparent;
+ border-radius: 8px;
  color: var(--text-strong);
- font-size: 0.9rem;
+ font-size: 0.85rem;
  font-family: 'Poppins', sans-serif;
  min-width: 0;
- transition: all 0.3s ease;
+ transition: border-color 0.15s ease, background 0.15s ease;
  }
  
  .search-bar-container input:focus {
  outline: none;
- border-color: rgba(16, 185, 129, 0.5);
- background: rgba(16, 185, 129, 0.04);
+ border-color: #059669;
+ background: var(--surface);
  }
  
  .search-bar-container input::placeholder {
- color: rgba(15, 23, 42, 0.45);
+ color: var(--text-muted);
  font-weight: 400;
  }
  
  .search-bar-container button {
- padding: 10px 16px;
+ width: 34px;
+ height: 34px;
+ padding: 0;
  background: #059669;
  border: none;
  border-radius: 8px;
@@ -331,12 +343,11 @@ require_once 'includes/header.php';
  display: flex;
  align-items: center;
  justify-content: center;
- transition: all 0.3s ease;
+ transition: background 0.15s ease;
  }
  
  .search-bar-container button:hover {
- transform: translateY(-2px);
- box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+ background: #047857;
  }
  
  /* Leaflet Controls - Hidden, using custom controls */
@@ -344,70 +355,69 @@ require_once 'includes/header.php';
  .leaflet-top.leaflet-right { display: none !important; }
 
  .leaflet-control-layers {
- background: rgba(255, 255, 255, 0.95) !important;
- border: 1px solid rgba(16, 185, 129, 0.15) !important;
+ background: var(--surface) !important;
+ border: 1px solid var(--glass-border) !important;
  border-radius: 8px !important;
- box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
  }
 
  .leaflet-control-zoom {
- background: rgba(255, 255, 255, 0.98) !important;
- backdrop-filter: blur(20px);
- border: 1px solid rgba(16, 185, 129, 0.2) !important;
- border-radius: 14px !important;
- box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(16, 185, 129, 0.08) !important;
+ background: var(--surface) !important;
+ border: 1px solid var(--glass-border) !important;
+ border-radius: 10px !important;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
  margin-top: 0 !important;
  overflow: hidden;
  }
  
  .leaflet-control-zoom a {
  background: var(--surface) !important;
- color: #10b981 !important;
- width: 40px !important;
- height: 40px !important;
- line-height: 40px !important;
+ color: var(--text-body) !important;
+ width: 36px !important;
+ height: 36px !important;
+ line-height: 36px !important;
  border: none !important;
  border-bottom: 1px solid var(--border-subtle) !important;
- transition: all 0.2s ease !important;
- font-size: 1.2rem !important;
- font-weight: 700 !important;
+ transition: background 0.15s ease, color 0.15s ease !important;
+ font-size: 1.05rem !important;
+ font-weight: 600 !important;
  }
 
  .leaflet-control-zoom a:hover {
- background: #059669 !important;
- color: #ffffff !important;
+ background: var(--bg-subtle) !important;
+ color: #059669 !important;
  }
 
  .leaflet-control-zoom a:first-child {
  border-radius: 10px 10px 0 0 !important;
- border-bottom: 1px solid #d1fae5 !important;
+ border-bottom: 1px solid var(--border-subtle) !important;
  }
 
  .leaflet-control-zoom a:last-child {
  border-radius: 0 0 10px 10px !important;
+ border-bottom: none !important;
  }
  
  /* Rotation control styling - Position under zoom controls */
  .leaflet-control-rotate {
- background: rgba(255, 255, 255, 0.95) !important;
- backdrop-filter: blur(10px);
- border: 1px solid rgba(16, 185, 129, 0.15) !important;
+ background: var(--surface) !important;
+ border: 1px solid var(--glass-border) !important;
  border-radius: 8px !important;
- box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
  margin-top: 8px !important; /* Space below zoom control */
  }
  
  .leaflet-control-rotate a {
- color: var(--text-strong) !important;
- background: rgba(16, 185, 129, 0.2) !important;
+ color: var(--text-body) !important;
+ background: var(--surface) !important;
  border-radius: 6px !important;
- transition: all 0.3s ease !important;
+ transition: background 0.15s ease, color 0.15s ease !important;
  border: none !important;
  }
  
  .leaflet-control-rotate a:hover {
- background: rgba(16, 185, 129, 0.4) !important;
- color: var(--text-strong) !important;
+ background: var(--bg-subtle) !important;
+ color: #059669 !important;
  }
  
  .leaflet-control-rotate-toggle {
@@ -442,16 +452,15 @@ require_once 'includes/header.php';
  top: 150px;
  left: 20px;
  z-index: 1000;
- background: rgba(255, 255, 255, 0.98);
- backdrop-filter: blur(24px);
- border: 1px solid rgba(16, 185, 129, 0.2);
- border-radius: 18px;
- padding: 14px 20px;
- box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(16, 185, 129, 0.08);
- transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
+ border-radius: 12px;
+ padding: 10px 14px;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+ transition: border-color 0.15s ease;
  display: flex;
  align-items: center;
- gap: 18px;
+ gap: 14px;
  }
  
  .filter-panel.collapsed {
@@ -488,20 +497,18 @@ require_once 'includes/header.php';
  display: flex;
  align-items: center;
  gap: 8px;
- padding: 8px 14px;
- background: rgba(15, 23, 42, 0.04);
- border: 1px solid rgba(15, 23, 42, 0.06);
- border-radius: 12px;
+ padding: 7px 12px;
+ background: var(--bg-subtle);
+ border: 1px solid var(--border-subtle);
+ border-radius: 8px;
  cursor: pointer;
- transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ transition: background 0.15s ease, border-color 0.15s ease;
  white-space: nowrap;
  }
  
  .filter-option:hover {
- background: rgba(16, 185, 129, 0.1);
- border-color: rgba(16, 185, 129, 0.3);
- transform: translateY(-2px);
- box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
+ background: #f0fdf4;
+ border-color: #d1fae5;
  }
  
  .filter-option input[type="checkbox"] {
@@ -521,14 +528,13 @@ require_once 'includes/header.php';
  }
  
  .filter-count {
- background: #059669;
- padding: 3px 10px;
+ background: #ecfdf5;
+ padding: 2px 8px;
  border-radius: 999px;
- font-size: 0.7rem;
- font-weight: 700;
- color: #ffffff;
+ font-size: 0.68rem;
+ font-weight: 600;
+ color: #065f46;
  margin-left: 4px;
- box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
  }
  
  /* SEARCH RESULTS - Below filter panel */
@@ -543,12 +549,11 @@ require_once 'includes/header.php';
  max-height: calc(100vh - 250px);
  overflow-y: auto;
  display: none;
- background: rgba(255, 255, 255, 0.98);
- backdrop-filter: blur(24px);
- border: 1px solid rgba(16, 185, 129, 0.2);
- border-radius: 18px;
- padding: 14px;
- box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(16, 185, 129, 0.08);
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
+ border-radius: 12px;
+ padding: 12px;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
  }
  
  .search-panel.active {
@@ -579,43 +584,29 @@ require_once 'includes/header.php';
  bottom: 20px;
  left: 20px;
  z-index: 1000;
- background: rgba(255, 255, 255, 0.95);
- backdrop-filter: blur(20px);
- border: 1px solid rgba(16, 185, 129, 0.15);
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
  border-radius: 12px;
- padding: 16px;
+ padding: 12px 14px;
  min-width: 180px;
- box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
  }
  
- /* LEGEND - Bottom left, above filter panel visually */
- .map-legend {
- position: absolute;
- bottom: 20px;
- left: 20px;
- z-index: 1000;
- background: rgba(255, 255, 255, 0.98);
- backdrop-filter: blur(24px);
- border: 1px solid rgba(16, 185, 129, 0.2);
- border-radius: 18px;
- padding: 18px 20px;
- min-width: 200px;
- box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(16, 185, 129, 0.08);
- transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ .map-legend h4 {
+ margin: 0 0 10px;
  }
 
  .map-legend:hover {
- transform: translateY(-2px);
- box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(16, 185, 129, 0.12);
+ border-color: var(--border-subtle);
  }
 
  .legend-item {
  display: flex;
  align-items: center;
- gap: 12px;
- margin-bottom: 10px;
- color: var(--text-strong);
- font-size: 0.85rem;
+ gap: 10px;
+ margin-bottom: 8px;
+ color: var(--text-body);
+ font-size: 0.8rem;
  font-weight: 500;
  }
 
@@ -624,13 +615,35 @@ require_once 'includes/header.php';
  }
 
  .legend-color {
- width: 18px;
- height: 18px;
- border-radius: 50%;
+ width: 12px;
+ height: 12px;
+ border-radius: 4px;
  flex-shrink: 0;
- border: 2px solid rgba(255, 255, 255, 0.8);
- box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
  }
+ 
+ /* Legend minimize — header toggles .legend-minimized */
+.map-legend .legend-chevron {
+margin-left: auto;
+flex-shrink: 0;
+transition: transform 0.2s ease;
+}
+
+.map-legend.legend-minimized {
+min-width: 0;
+padding: 10px 12px;
+}
+
+.map-legend.legend-minimized h4 {
+margin-bottom: 0 !important;
+}
+
+.map-legend.legend-minimized .legend-body {
+display: none;
+}
+
+.map-legend.legend-minimized .legend-chevron {
+transform: rotate(180deg);
+}
 
  /* AI CHAT TOGGLE - Bottom right */
  .chat-toggle {
@@ -638,45 +651,31 @@ require_once 'includes/header.php';
  bottom: 20px;
  right: 20px;
  z-index: 999;
- width: 64px;
- height: 64px;
+ width: 52px;
+ height: 52px;
  border-radius: 50%;
  background: #059669;
- border: 3px solid rgba(255, 255, 255, 0.8);
+ border: none;
  cursor: pointer;
  display: flex;
  align-items: center;
  justify-content: center;
- box-shadow: 0 12px 36px rgba(16, 185, 129, 0.45), 0 4px 12px rgba(0, 0, 0, 0.1);
- transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.18);
+ transition: background 0.15s ease;
  }
  
  .chat-toggle:hover {
- transform: scale(1.1) translateY(-2px);
- box-shadow: 0 16px 48px rgba(16, 185, 129, 0.6), 0 6px 16px rgba(0, 0, 0, 0.12);
+ background: #047857;
  }
  
  .chat-toggle:active {
- transform: scale(1.05);
- }
- 
- .chat-toggle img {
- animation: floatLogo 3s ease-in-out infinite;
- }
- 
- @keyframes floatLogo {
- 0%, 100% {
- transform: translateY(0px);
- }
- 50% {
- transform: translateY(-5px);
- }
+ background: #065f46;
  }
  
  /* AI CHAT CONTAINER - Bottom right, above toggle */
  .chat-container {
  position: absolute;
- bottom: 100px;
+ bottom: 84px;
  right: 20px;
  z-index: 1000;
  width: 380px;
@@ -684,28 +683,11 @@ require_once 'includes/header.php';
  max-height: calc(100vh - 140px);
  display: flex;
  flex-direction: column;
- background: rgba(255, 255, 255, 0.98);
- backdrop-filter: blur(24px);
- border: 1px solid rgba(16, 185, 129, 0.18);
- border-radius: 24px;
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
+ border-radius: 12px;
  overflow: hidden;
- box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(16, 185, 129, 0.1);
- }
- 
- /* Enhance chat header with logo */
- .chat-header img {
- animation: pulse 2s ease-in-out infinite;
- }
- 
- @keyframes pulse {
- 0%, 100% {
- transform: scale(1);
- opacity: 1;
- }
- 50% {
- transform: scale(1.05);
- opacity: 0.9;
- }
+ box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
  }
  
  /* ROUTING CONTAINER - Left side, above legend */
@@ -718,13 +700,12 @@ require_once 'includes/header.php';
  max-width: 280px !important;
  max-height: calc(100vh - 300px) !important;
  overflow-y: auto !important;
- background: rgba(255, 255, 255, 0.98) !important;
- backdrop-filter: blur(24px);
- border: 1px solid rgba(16, 185, 129, 0.2) !important;
- border-radius: 18px !important;
- padding: 18px !important;
+ background: var(--surface) !important;
+ border: 1px solid var(--glass-border) !important;
+ border-radius: 12px !important;
+ padding: 14px !important;
  color: var(--text-strong) !important;
- box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(16, 185, 129, 0.08) !important;
+ box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08) !important;
  z-index: 998 !important;
  }
  
@@ -932,17 +913,20 @@ require_once 'includes/header.php';
  display: none !important;
  }
  
- /* Search Results Panel - Top right */
+ /* Search Results Panel - bottom sheet, anchored above the search bar */
  .search-panel {
- top: 65px;
- bottom: auto;
+ top: auto;
+ bottom: 150px;
+ bottom: calc(150px + env(safe-area-inset-bottom));
+ left: 10px;
  right: 10px;
- left: auto;
- width: 180px;
- max-width: 180px;
- max-height: 45vh;
- padding: 8px;
- font-size: 0.75rem;
+ width: auto;
+ max-width: none;
+ max-height: 42vh;
+ max-height: min(42vh, 340px);
+ padding: 10px;
+ font-size: 0.8rem;
+ border-radius: 16px;
  }
  
  .search-result-item {
@@ -987,20 +971,15 @@ require_once 'includes/header.php';
  height: 30px !important;
  line-height: 30px !important;
  }
- 
- /* Map Legend - Bottom left, compact */
- .map-legend {
- bottom: 10px;
- left: 10px;
- padding: 8px 10px;
- font-size: 0.7rem;
- min-width: 120px;
- border-radius: 8px;
+
+ /* Hide the whole map controls panel on mobile — pinch-to-zoom is enough */
+ #mapControlsPanel {
+ display: none !important;
  }
  
- .map-legend h4 {
- font-size: 0.75rem;
- margin-bottom: 6px;
+ /* Map Legend - hidden on mobile to keep the map clear */
+ .map-legend {
+ display: none;
  }
  
  .legend-item {
@@ -1209,6 +1188,14 @@ require_once 'includes/header.php';
  }
  }
  
+ /* Hide the legend on touch devices above the phone breakpoint too
+    (landscape phones and tablets ~769-1024px) */
+ @media (pointer: coarse) and (min-width: 769px) and (max-width: 1024px) {
+ .map-legend {
+ display: none;
+ }
+ }
+ 
  @media (max-width: 480px) {
  /* Extra small devices */
  .top-bar {
@@ -1245,11 +1232,6 @@ require_once 'includes/header.php';
  .filter-option {
  padding: 4px 8px;
  font-size: 0.75rem;
- }
- 
- .search-panel {
- width: 180px;
- max-width: 180px;
  }
  
  .map-legend {
@@ -1293,6 +1275,13 @@ require_once 'includes/header.php';
  .chat-container {
  max-height: 60vh;
  bottom: 120px;
+ }
+ 
+ /* Results sheet stays clear of the controls column in landscape */
+ .search-panel {
+ bottom: 120px;
+ right: 64px;
+ max-height: 46vh;
  }
  
  .filter-panel {
@@ -1343,11 +1332,6 @@ require_once 'includes/header.php';
  .rotation-panel {
  max-width: 140px;
  font-size: 0.7rem;
- }
- 
- .search-panel {
- width: 150px;
- max-width: 150px;
  }
  
  .map-legend {
@@ -1657,7 +1641,9 @@ require_once 'includes/header.php';
  color: var(--text-strong);
  }
 
- @media (max-width: 640px) {
+ /* Fullscreen chat on phones and any touch device up to tablet size —
+   width alone misses landscape phones (~840px) and small tablets (~820px) */
+ @media (max-width: 768px), (pointer: coarse) and (max-width: 1024px) {
  #chatToggle {
  bottom: 18px;
  right: 18px;
@@ -1675,27 +1661,25 @@ require_once 'includes/header.php';
 
  #chatContainer .chat-messages {
  padding: 14px;
+ /* Kill the legacy max-height caps (150-250px) that pinned the
+    input row near the top and left dead space below */
+ max-height: none;
+ min-height: 0;
+ }
+
+ #chatContainer .chat-message {
+ padding: 0;
+ margin-bottom: 0;
  }
 
  #chatContainer .chat-bubble {
  font-size: 0.82rem;
  }
- }
 
- /* Row/column tag shown on occupied grid compartments */
- .cell-rc-label {
- background: rgba(15, 23, 42, 0.85);
- color: #fff;
- border: 1px solid #fff;
- border-radius: 8px;
- font-size: 10px;
- font-weight: 700;
- padding: 1px 5px;
- box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
- white-space: nowrap;
+ /* 16px prevents focus zoom on mobile browsers */
+ #chatContainer .chat-input {
+ font-size: 16px;
  }
- .cell-rc-label::before {
- display: none;
  }
 
  /* Search pin marker */
@@ -1906,13 +1890,86 @@ require_once 'includes/header.php';
  html[data-theme="dark"] .legend-color {
  border-color: rgba(255, 255, 255, 0.25);
  }
+
+ /* ===== Mobile polish ===== */
+
+ /* Dynamic viewport height keeps bottom-anchored controls visible
+    when mobile browsers hide/show the URL bar */
+ @supports (height: 100dvh) {
+ html, body, .admin-layout, .admin-main { height: 100dvh !important; }
+ }
+
+ @media (max-width: 768px) {
+ /* Keep the fixed header a compact single row — admin.css stacks it
+    vertically on mobile, which would overlap the map UI */
+ .admin-header {
+ flex-direction: row !important;
+ height: 60px !important;
+ padding: 0 10px !important;
+ gap: 8px !important;
+ text-align: left !important;
+ }
+ .admin-header h1 { font-size: 0.95rem !important; white-space: nowrap !important; }
+ .admin-header-subtitle { display: none !important; }
+ .admin-header-actions { gap: 6px !important; }
+
+ /* Map controls hug the edge and stay thumb-friendly
+    (direct children only — the mode dropdown items keep their own size) */
+ #mapControlsPanel { top: 66px !important; right: 10px !important; }
+ #mapControlsPanel > button,
+ #mapControlsPanel > div > button { width: 44px !important; height: 44px !important; }
+
+ /* Welcome banner sits under the header, clear of the controls column */
+ #welcomeBanner { top: 70px !important; left: 10px !important; right: 70px !important; transform: none !important; max-width: none !important; padding: 10px 14px !important; }
+
+ /* Safe-area padding so bottom UI clears the phone home indicator */
+ #chatToggle { bottom: calc(24px + env(safe-area-inset-bottom)) !important; right: 16px !important; }
+ #clearRouteBtn { bottom: calc(24px + env(safe-area-inset-bottom)) !important; }
+ .search-bar-container { bottom: calc(85px + env(safe-area-inset-bottom)) !important; }
+ body.mobile-navigating #welcomeBanner,
+ body.mobile-navigating .search-bar-container,
+ body.mobile-navigating #searchResultsPanel,
+ body.mobile-navigating #filterPanel,
+ body.mobile-navigating .map-legend,
+ body.mobile-navigating #mapControlsPanel,
+ body.mobile-navigating #chatToggle,
+ body.mobile-navigating #chatTooltip,
+ body.mobile-navigating #chatContainer,
+ body.mobile-navigating .route-info-badge { display: none !important; }
+ body.mobile-navigating #mobileNavigationStatus { display: flex; }
+ #clearRouteBtn { width: min(240px, calc(100vw - 32px)); justify-content: center; }
+ }
+ #mobileNavigationStatus {
+ display: none;
+ position: fixed;
+ top: 68px;
+ left: 12px;
+ right: 12px;
+ z-index: 1400;
+ align-items: center;
+ gap: 12px;
+ padding: 10px 14px;
+ border-radius: 12px;
+ background: var(--surface);
+ color: var(--text-strong);
+ border: 1px solid var(--border-subtle);
+ box-shadow: 0 4px 16px rgba(15, 23, 42, 0.18);
+ pointer-events: none;
+ }
+ #mobileNavigationStatus > div { min-width: 0; }
+ #mobileNavDestination { display: block; font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ #mobileNavDetail { display: block; font-size: 0.75rem; color: var(--text-muted); }
  </style>
  <!-- Map Container -->
  <div id="map"></div>
+ <div id="mobileNavigationStatus" role="status" aria-live="polite">
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex-shrink:0;color:#059669;"><path d="M12 21s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12Z"/><circle cx="12" cy="9" r="2"/></svg>
+ <div><span id="mobileNavDestination"></span><span id="mobileNavDetail"></span></div>
+ </div>
  
  <!-- Welcome Banner -->
- <div id="welcomeBanner" style="position: absolute; top: 100px; left: 50%; transform: translateX(-50%); z-index: 1001; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(24px); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 18px; padding: 14px 24px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(16, 185, 129, 0.1); display: flex; align-items: center; gap: 14px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1; max-width: 400px;">
- <div style="width: 40px; height: 40px; border-radius: 10px; background: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+ <div id="welcomeBanner" style="position: absolute; top: 100px; left: 50%; transform: translateX(-50%); z-index: 1001; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 18px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); display: flex; align-items: center; gap: 12px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1; max-width: 400px;">
+ <div style="width: 36px; height: 36px; border-radius: 8px; background: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
  <svg style="width: 22px; height: 22px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
  </div>
  <div>
@@ -1945,8 +2002,8 @@ require_once 'includes/header.php';
  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
  </svg>
  </button>
- <input type="text" id="searchInput" placeholder="Search by name, plot, or family...">
- <button onclick="performSearch()" title="Search" style="width: 38px; height: 38px; background: #059669; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); flex-shrink: 0;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)'">
+ <input type="text" id="searchInput" placeholder="Search by name, plot, or family..." enterkeyhint="search" autocomplete="off">
+ <button onclick="performSearch()" title="Search" style="width: 34px; height: 34px; background: #059669; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease; flex-shrink: 0;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
  <svg style="width: 18px; height: 18px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
  </button>
  </div>
@@ -1954,7 +2011,7 @@ require_once 'includes/header.php';
  
  <!-- Search Results Panel -->
  <div class="search-panel" id="searchResultsPanel">
- <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 14px 16px; background: rgba(16, 185, 129, 0.08); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.12);">
+ <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 8px 10px; border-radius: 8px; border-bottom: 1px solid var(--border-subtle);">
  <h4 style="margin: 0; font-size: 0.95rem; color: var(--text-strong); font-weight: 700; display: flex; align-items: center; gap: 8px;">
  <svg style="width: 18px; height: 18px; color: #10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
  Search Results
@@ -1969,11 +2026,13 @@ require_once 'includes/header.php';
  </div>
  
  <!-- Map Legend -->
- <div class="map-legend">
- <h4 style="margin-bottom: 14px; font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+ <div class="map-legend" id="mapLegend">
+ <h4 onclick="var l=document.getElementById('mapLegend'); l.classList.toggle('legend-minimized'); delete l.dataset.legendAutoMin;" title="Minimize legend" style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none;">
  <svg style="width: 16px; height: 16px; color: #10b981;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
  Legend
+ <svg class="legend-chevron" style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
  </h4>
+ <div class="legend-body">
  <div class="legend-item">
  <div class="legend-color" style="background: #5a87a8;"></div>
  <span>Standard Burial</span> 
@@ -1986,21 +2045,26 @@ require_once 'includes/header.php';
  <div class="legend-color" style="background: #b55a5a;"></div>
  <span>Search Result</span>
  </div>
+ <div class="legend-item">
+ <div class="legend-color" style="background: #64748b;"></div>
+ <span>Relocated Plot</span>
  </div>
- 
+ </div>
+ </div>
+   
 
  
  <!-- Map Controls Panel - Right side, below rotation -->
- <div id="mapControlsPanel" style="position: absolute; top: 72px; right: 20px; z-index: 1000; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(24px); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 14px; padding: 6px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(16, 185, 129, 0.08); display: flex; flex-direction: column; gap: 4px;">
+ <div id="mapControlsPanel" style="position: absolute; top: 72px; right: 20px; z-index: 1000; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 10px; padding: 4px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); display: flex; flex-direction: column; gap: 2px;">
  <!-- Zoom buttons -->
- <button onclick="customZoomIn()" title="Zoom in" style="width: 36px; height: 36px; background: #f0fdf4; border: none; border-radius: 8px; padding: 0; cursor: pointer; color: #047857; font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;" onmouseover="this.style.background='#059669'; this.style.color='#fff'" onmouseout="this.style.background='#f0fdf4'; this.style.color='#047857'">+</button>
- <button onclick="customZoomOut()" title="Zoom out" style="width: 36px; height: 36px; background: #f0fdf4; border: none; border-radius: 8px; padding: 0; cursor: pointer; color: #047857; font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;" onmouseover="this.style.background='#059669'; this.style.color='#fff'" onmouseout="this.style.background='#f0fdf4'; this.style.color='#047857'">&minus;</button>
+ <button onclick="customZoomIn()" title="Zoom in" class="zoom-ctrl-btn" style="width: 34px; height: 34px; background: transparent; border: none; border-radius: 8px; padding: 0; cursor: pointer; color: var(--text-body); font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease, color 0.15s ease;" onmouseover="this.style.background='var(--bg-subtle)'; this.style.color='#059669'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-body)'">+</button>
+ <button onclick="customZoomOut()" title="Zoom out" class="zoom-ctrl-btn" style="width: 34px; height: 34px; background: transparent; border: none; border-radius: 8px; padding: 0; cursor: pointer; color: var(--text-body); font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease, color 0.15s ease;" onmouseover="this.style.background='var(--bg-subtle)'; this.style.color='#059669'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-body)'">&minus;</button>
  <!-- Map mode dropdown -->
  <div style="position: relative;">
- <button onclick="toggleMapModeDropdown()" id="mapModeBtn" title="Map mode" style="width: 36px; height: 36px; background: #059669; border: none; border-radius: 8px; padding: 0; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+ <button onclick="toggleMapModeDropdown()" id="mapModeBtn" title="Map mode" style="width: 34px; height: 34px; background: #059669; border: none; border-radius: 8px; padding: 0; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
  <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
  </button>
- <div id="mapModeDropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 6px; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(24px); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 6px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12); min-width: 160px; flex-direction: column; gap: 2px;">
+ <div id="mapModeDropdown" style="display: none; position: absolute; top: 100%; right: 0; margin-top: 6px; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 10px; padding: 4px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12); min-width: 160px; flex-direction: column; gap: 2px;">
  <button onclick="switchMapMode('Google Satellite')" class="map-mode-item" style="background: var(--mi-active-bg); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: var(--mi-active); display: flex; align-items: center; gap: 8px; transition: all 0.2s; width: 100%; text-align: left;" onmouseover="this.style.background='var(--mi-active-bg)'" onmouseout="this.style.background='var(--mi-active-bg)'">
  <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
  Satellite
@@ -2111,7 +2175,7 @@ require_once 'includes/header.php';
  </div>
  </div>
  <div class="chat-input-container">
- <input type="text" id="chatInput" class="chat-input" placeholder="Ask me anything..." onkeypress="handleChatKeyPress(event)">
+ <input type="text" id="chatInput" class="chat-input" placeholder="Ask me anything..." enterkeyhint="send" autocomplete="off" onkeypress="handleChatKeyPress(event)">
  <button onclick="toggleVoiceInput()" id="voiceBtn" aria-label="Voice input" title="Voice input" class="chat-voice-btn">
  <svg id="voiceIcon" style="width:17px; height:17px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 016 0v6a3 3 0 01-3 3z"/></svg>
  </button>
@@ -2146,10 +2210,48 @@ require_once 'includes/header.php';
  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
  
  <!-- Visitor map functionality -->
- <script src="../assets/js/visitor.js?v=23"></script>
+ <script src="../assets/js/visitor.js?v=34"></script>
  </main>
  </div>
  <script src="../assets/js/theme.js"></script>
+ <script>
+ // Keep the chat panel above the on-screen keyboard on mobile.
+ // position:fixed doesn't track the visual viewport when the keyboard
+ // opens (especially iOS), so we size the panel to the visible area.
+ (function () {
+ var vv = window.visualViewport;
+ var input = document.getElementById('chatInput');
+ var container = document.getElementById('chatContainer');
+ var toggle = document.getElementById('chatToggle');
+
+ var mobileChatQuery = window.matchMedia('(max-width: 768px), (pointer: coarse) and (max-width: 1024px)');
+
+ function fitChatToViewport() {
+ if (!container || container.style.display === 'none' || !vv) return;
+ if (!mobileChatQuery.matches) { container.style.height = ''; container.style.top = ''; return; }
+ container.style.height = Math.max(0, vv.height - 60) + 'px';
+ container.style.top = (60 + Math.max(0, vv.offsetTop)) + 'px';
+ }
+
+ if (vv) {
+ vv.addEventListener('resize', fitChatToViewport);
+ vv.addEventListener('scroll', fitChatToViewport);
+ }
+ if (input) {
+ input.addEventListener('focus', function () {
+ setTimeout(fitChatToViewport, 300);
+ setTimeout(function () {
+ var m = document.getElementById('chatMessages');
+ if (m) m.scrollTop = m.scrollHeight;
+ }, 380);
+ });
+ }
+ if (toggle) {
+ toggle.addEventListener('click', function () { setTimeout(fitChatToViewport, 250); });
+ }
+ window.addEventListener('resize', fitChatToViewport);
+ })();
+ </script>
  <script>
  if (typeof lucide !== 'undefined') lucide.createIcons();
  <?php if (($_GET['open'] ?? '') === 'chat'): ?>

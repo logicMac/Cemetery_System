@@ -245,7 +245,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
 <!-- Add Record Modal -->
 <div id="addRecordModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
  <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeAddModal()"></div>
- <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[94vh] overflow-y-auto">
+ <div class="relative bg-white rounded-xl shadow-lg w-full max-w-7xl max-h-[94vh] overflow-y-auto">
  <!-- Modal header -->
  <div class="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
  <div class="flex items-center gap-3">
@@ -441,7 +441,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
 <!-- View Record Modal -->
 <div id="viewRecordModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
  <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeViewModal()"></div>
- <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+ <div class="relative bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
  <div class="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
  <div class="flex items-center gap-3">
  <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
@@ -463,7 +463,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
 <!-- Edit Record Modal -->
 <div id="editRecordModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
  <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeEditModal()"></div>
- <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[94vh] overflow-y-auto">
+ <div class="relative bg-white rounded-xl shadow-lg w-full max-w-7xl max-h-[94vh] overflow-y-auto">
  <div class="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
  <div class="flex items-center gap-3">
  <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
@@ -617,7 +617,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
 <!-- Direct Renew Modal (Admin) -->
 <!-- Import CSV Modal -->
 <div id="importModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
- <div class="bg-white rounded-xl border border-slate-200 shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
+ <div class="bg-white rounded-xl border border-slate-200 shadow-lg w-full max-w-lg max-h-[90vh] overflow-y-auto p-6">
  <div class="flex items-center gap-3 mb-5">
  <div class="w-10 h-10 rounded-xl bg-sky-600 text-white flex items-center justify-center shrink-0">
  <i data-lucide="upload" class="w-5 h-5"></i>
@@ -652,7 +652,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
 </div>
 
 <div id="directRenewModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
- <div class="bg-white rounded-xl border border-slate-200 shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto p-6">
+ <div class="bg-white rounded-xl border border-slate-200 shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto p-6">
  <div class="flex items-center gap-3 mb-5">
  <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0">
  <i data-lucide="refresh-cw" class="w-5 h-5"></i>
@@ -942,12 +942,40 @@ button svg, a svg, button i, a i { pointer-events: none; }
  btn.textContent = 'Import';
  });
 
+ // Auto-calculate plot expiration: burial date + 5 years (defaults to today + 5 years)
+ function setAddModalExpirationFrom(dateStr) {
+ const form = document.getElementById('addRecordForm');
+ const expInput = form.querySelector('[name="expiration_date"]');
+ if (expInput.dataset.manual === '1') return;
+ const d = new Date(dateStr + 'T00:00:00');
+ if (isNaN(d)) return;
+ d.setFullYear(d.getFullYear() + 5);
+ expInput.value = d.toISOString().slice(0, 10);
+ }
+ (function() {
+ const form = document.getElementById('addRecordForm');
+ const burialInput = form.querySelector('[name="burial_date"]');
+ const expInput = form.querySelector('[name="expiration_date"]');
+ function autoFill() { if (burialInput.value) setAddModalExpirationFrom(burialInput.value); }
+ burialInput.addEventListener('change', autoFill);
+ burialInput.addEventListener('input', autoFill);
+ expInput.addEventListener('input', function() {
+ if (this.value) { this.dataset.manual = '1'; } else { delete this.dataset.manual; }
+ });
+ })();
+
  function openAddModal() {
  const modal = document.getElementById('addRecordModal');
  modal.classList.remove('hidden');
  modal.classList.add('flex');
  document.body.style.overflow = 'hidden';
  loadGridsForRecord();
+
+ // Pre-fill expiration: today + 5 years
+ const _expInput = document.getElementById('addRecordForm').querySelector('[name="expiration_date"]');
+ delete _expInput.dataset.manual;
+ const _now = new Date();
+ setAddModalExpirationFrom(_now.getFullYear() + '-' + String(_now.getMonth() + 1).padStart(2, '0') + '-' + String(_now.getDate()).padStart(2, '0'));
 
  // Initialize map after modal is visible
  setTimeout(() => {

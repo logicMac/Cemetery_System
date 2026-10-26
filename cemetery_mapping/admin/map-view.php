@@ -18,18 +18,42 @@ $zoom = $_GET['zoom'] ?? 17;
 .leaflet-popup-content { color: var(--text-strong); }
 .leaflet-popup-tip { background: var(--surface); }
 button svg, a svg, button i, a i { pointer-events: none; }
+.mcc-toggle { display: none; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: #f8fafc; color: #475569; cursor: pointer; }
+.mcc-toggle svg { transition: transform 0.2s ease; }
+
+@media (max-width: 768px) {
+    #adminMap { height: calc(100dvh - 108px); border-radius: 12px; }
+    .map-controls-card {
+        top: auto !important;
+        right: 12px !important;
+        left: 12px;
+        bottom: 12px;
+        width: auto !important;
+        max-height: 46vh;
+        overflow-y: auto;
+        padding: 12px 14px;
+    }
+    .mcc-toggle { display: inline-flex; }
+    .map-controls-card .mcc-head { margin-bottom: 0 !important; }
+    .map-controls-card:not(.collapsed) .mcc-head { margin-bottom: 12px !important; }
+    .map-controls-card.collapsed > *:not(.mcc-head) { display: none; }
+    .map-controls-card.collapsed .mcc-toggle svg { transform: rotate(180deg); }
+}
 </style>
 
 <div class="relative">
  <div id="adminMap"></div>
 
  <!-- Map Controls Panel -->
- <div class="absolute top-5 right-5 z-[1000] bg-white rounded-xl border border-slate-200 shadow-lg p-5 w-72 max-w-[calc(100vw-40px)]">
- <div class="flex items-center gap-2 mb-4">
+ <div id="mapControlsCard" class="map-controls-card collapsed absolute top-5 right-5 z-[1000] bg-white rounded-xl border border-slate-200 shadow-lg p-5 w-72 max-w-[calc(100vw-40px)]">
+ <div class="mcc-head flex items-center gap-2 mb-4">
  <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
  <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
  </div>
  <h3 class="text-sm font-bold text-slate-900">Map Controls</h3>
+ <button type="button" class="mcc-toggle ml-auto" onclick="this.closest('.map-controls-card').classList.toggle('collapsed')" aria-label="Toggle map controls">
+ <i data-lucide="chevron-down" class="w-4 h-4"></i>
+ </button>
  </div>
 
  <!-- Rotation -->

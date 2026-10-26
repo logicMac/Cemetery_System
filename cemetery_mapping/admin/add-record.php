@@ -90,6 +90,11 @@ button svg, a svg, button i, a i { pointer-events: none; }
  class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
  </div>
  <div>
+ <label for="expiration_date" class="block text-sm font-medium text-slate-700 mb-1.5">Plot Expiration Date <span class="text-xs text-slate-400">— auto: burial date + 5 years</span></label>
+ <input type="date" id="expiration_date" name="expiration_date"
+ class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+ </div>
+ <div>
  <label for="is_buried" class="block text-sm font-medium text-slate-700 mb-1.5">Burial Status</label>
  <select id="is_buried" name="is_buried"
  class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition bg-white">
@@ -310,6 +315,29 @@ button svg, a svg, button i, a i { pointer-events: none; }
  }
  });
  
+ // Auto-calculate plot expiration: burial date + 5 years (defaults to today + 5 years)
+ function setExpirationFrom(date) {
+ const expInput = document.getElementById('expiration_date');
+ if (expInput.dataset.manual === '1') return;
+ const d = new Date(date + 'T00:00:00');
+ if (isNaN(d)) return;
+ d.setFullYear(d.getFullYear() + 5);
+ expInput.value = d.toISOString().slice(0, 10);
+ }
+ function autoFillExpiration() {
+ const burialInput = document.getElementById('burial_date');
+ if (burialInput.value) setExpirationFrom(burialInput.value);
+ }
+ document.getElementById('burial_date').addEventListener('change', autoFillExpiration);
+ document.getElementById('burial_date').addEventListener('input', autoFillExpiration);
+ // Pre-fill immediately: today + 5 years
+ const _now = new Date();
+ setExpirationFrom(_now.getFullYear() + '-' + String(_now.getMonth() + 1).padStart(2, '0') + '-' + String(_now.getDate()).padStart(2, '0'));
+ // If admin edits expiration manually, stop auto-overwriting
+ document.getElementById('expiration_date').addEventListener('input', function() {
+ if (this.value) { this.dataset.manual = '1'; } else { delete this.dataset.manual; }
+ });
+ 
  // Photo preview
  function previewPhoto(input) {
  const preview = document.getElementById('photoPreview');
@@ -330,6 +358,8 @@ button svg, a svg, button i, a i { pointer-events: none; }
  // Form submission
  document.getElementById('addRecordForm').addEventListener('submit', async function(e) {
  e.preventDefault();
+ 
+ autoFillExpiration();
  
  const formData = new FormData(this);
  

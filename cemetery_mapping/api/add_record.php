@@ -49,6 +49,11 @@ if (!empty($expiration_date) && $expiration_date === '1970-01-01') {
 $burial_date = !empty($burial_date) ? date('Y-m-d', strtotime($burial_date)) : null;
 $burial_time = !empty($burial_time) ? date('H:i:s', strtotime($burial_time)) : null;
 
+// Default plot expiration to burial date + 5 years when not provided
+if (empty($expiration_date) && !empty($burial_date)) {
+    $expiration_date = date('Y-m-d', strtotime($burial_date . ' +5 years'));
+}
+
 // Polygon is a JSON array of [lat, lng] points; validate it instead of sanitizing
 $polygon = null;
 if (!empty($_POST['polygon'])) {

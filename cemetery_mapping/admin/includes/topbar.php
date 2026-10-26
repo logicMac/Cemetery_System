@@ -80,7 +80,7 @@ if (isset($title_overrides[$current_page])) {
     position: absolute;
     top: 54px;
     right: 0;
-    width: 320px;
+    width: min(320px, calc(100vw - 24px));
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 16px;

@@ -41,6 +41,12 @@ button svg, a svg, button i, a i { pointer-events: none; }
 .suggestion-card { transition: all 0.25s ease; }
 .suggestion-card:hover { transform: translateY(-2px); }
 .shimmer-bg { background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+
+@media (max-width: 768px) {
+    #chatContainer { min-height: 0 !important; max-height: 52vh !important; }
+    .lg\:col-span-3 { min-height: 0 !important; }
+    #assistantInput { font-size: 16px !important; }
+}
 </style>
 
 <!-- Page Header -->
@@ -116,6 +122,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  <textarea
  id="assistantInput"
  rows="1"
+ enterkeyhint="send"
  placeholder="Ask me anything about the cemetery data..."
  oninput="autoResize(this); updateCharCount()"
  onkeydown="handleKeyDown(event)"

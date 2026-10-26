@@ -152,7 +152,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
 
 <!-- Print Report Modal -->
 <div id="printModal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background: rgba(15,23,42,0.5);">
- <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[94vh] flex flex-col overflow-hidden animate-fade">
+ <div class="bg-white rounded-xl shadow-lg w-full max-w-6xl max-h-[94vh] flex flex-col overflow-hidden animate-fade">
  <!-- Modal Header -->
  <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-gradient-to-r from-emerald-50/50 to-white">
  <div class="flex items-center gap-3">
@@ -259,6 +259,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  if (!form.checkValidity()) { form.reportValidity(); return; }
  const formData = new FormData(form);
  const params = new URLSearchParams(formData);
+ params.append('type', 'custom');
  params.append('format', format);
  try {
  themeUtils.showAlert('Generating custom report...', 'info');

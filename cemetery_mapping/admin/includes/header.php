@@ -22,14 +22,14 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <link rel="icon" type="image/x-icon" href="../assets/images/favicon.ico?v=2">
     <link rel="shortcut icon" type="image/x-icon" href="../assets/images/favicon.ico?v=2">
     <link rel="icon" type="image/png" href="../assets/images/favicon.png?v=2">
     <title><?php echo ucfirst(str_replace('-', ' ', $current_page)); ?> - Admin Panel</title>
 
     <script>
-    // Apply saved theme before first paint (prevents flash of wrong theme)
+    // Apply saved theme before first paint (prevents flash of wrong theme) 
     (function () {
         try {
             var t = localStorage.getItem('cm-theme');
@@ -71,7 +71,7 @@ $current_page = basename($_SERVER['PHP_SELF'], '.php');
     
     <!-- Custom Styles -->
     <link rel="stylesheet" href="../assets/css/theme.css?v=8">
-    <link rel="stylesheet" href="../assets/css/admin.css?v=20">
+    <link rel="stylesheet" href="../assets/css/admin.css?v=22">
     <link rel="stylesheet" href="../assets/css/mobile-responsive.css?v=2">
 </head>
 <body>

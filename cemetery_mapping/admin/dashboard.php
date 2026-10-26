@@ -2,9 +2,18 @@
 session_start();
 require_once 'includes/header.php';
 require_once '../config/database.php';
+// Send 30-day / expired plot email notices (deduplicated — sends each notice once)
+$__notifier = __DIR__ . '/../includes/expiry_notifier.php';
+if (file_exists($__notifier)) {
+    require_once $__notifier;
+    try { runExpiryNotices($pdo); } catch (Throwable $e) { error_log('Expiry notifier error: ' . $e->getMessage()); }
+}
 
 // Get statistics
 try {
+ // Auto-complete burials whose date has already passed
+ $pdo->exec("UPDATE burial_records SET is_buried = 1 WHERE is_buried = 0 AND burial_date IS NOT NULL AND burial_date < CURDATE()");
+
  // Total burial records
  $totalRecords = $pdo->query("SELECT COUNT(*) FROM burial_records")->fetchColumn();
 
@@ -21,12 +30,15 @@ try {
  $visitorsLastMonth = $pdo->query("SELECT COUNT(*) FROM visitors WHERE created_at >= DATE_FORMAT(CURRENT_DATE() - INTERVAL 1 MONTH, '%Y-%m-01') AND created_at < DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')")->fetchColumn();
 
  // Recent records (with barangay + burial status for the table)
- $recentRecords = $pdo->query("SELECT decedent_name, plot_number, barangay, is_buried, date_added FROM burial_records ORDER BY date_added DESC LIMIT 8")->fetchAll();
+ $recentRecords = $pdo->query("SELECT id, decedent_name, plot_number, barangay, is_buried, date_added FROM burial_records ORDER BY date_added DESC LIMIT 8")->fetchAll();
 
- // Burials added per day over the last 90 days (chart series)
+ // Burials added per day + burials scheduled per day, last 90 days (chart series)
  $burialSeries = [];
  $seriesRows = $pdo->query("SELECT DATE(date_added) AS d, COUNT(*) AS c FROM burial_records WHERE date_added >= CURDATE() - INTERVAL 89 DAY GROUP BY DATE(date_added)")->fetchAll();
  foreach ($seriesRows as $r) { $burialSeries[$r['d']] = (int)$r['c']; }
+ $burialDateSeries = [];
+ $seriesRows2 = $pdo->query("SELECT DATE(burial_date) AS d, COUNT(*) AS c FROM burial_records WHERE burial_date IS NOT NULL AND burial_date >= CURDATE() - INTERVAL 89 DAY GROUP BY DATE(burial_date)")->fetchAll();
+ foreach ($seriesRows2 as $r) { $burialDateSeries[$r['d']] = (int)$r['c']; }
 
  // Scheduled this week vs last week
  $schedLastWeek = $pdo->query("SELECT COUNT(*) FROM burial_records WHERE burial_date IS NOT NULL AND YEARWEEK(burial_date, 1) = YEARWEEK(CURDATE() - INTERVAL 1 WEEK, 1)")->fetchColumn();
@@ -318,6 +330,228 @@ $header_action = '<a href="add-record.php" class="header-action-btn"><i data-luc
 }
 
 .dv2-tab-link:hover { text-decoration: underline; }
+
+/* Tab count badge */
+.dv2-tab-count {
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ min-width: 17px;
+ height: 17px;
+ padding: 0 5px;
+ margin-left: 6px;
+ border-radius: 999px;
+ background: var(--border-subtle);
+ color: var(--text-body);
+ font-size: 0.62rem;
+ font-weight: 600;
+ font-variant-numeric: tabular-nums;
+ vertical-align: 1px;
+}
+
+/* Toolbar action buttons (right side of tabs row) */
+.dv2-tbl-actions {
+ display: inline-flex;
+ align-items: center;
+ gap: 8px;
+ position: relative;
+}
+
+.dv2-tbtn {
+ display: inline-flex;
+ align-items: center;
+ gap: 6px;
+ height: 32px;
+ padding: 0 12px;
+ border-radius: 7px;
+ border: 1px solid var(--glass-border);
+ background: var(--surface);
+ color: var(--text-body);
+ font-size: 0.75rem;
+ font-weight: 600;
+ font-family: 'Poppins', sans-serif;
+ text-decoration: none;
+ cursor: pointer;
+ transition: background 0.12s ease;
+ white-space: nowrap;
+}
+
+.dv2-tbtn:hover { background: var(--bg-subtle); }
+.dv2-tbtn svg { width: 14px; height: 14px; }
+
+.dv2-tbtn.primary {
+ background: #0f172a;
+ border-color: #0f172a;
+ color: #fff;
+}
+
+.dv2-tbtn.primary:hover { background: #1e293b; }
+
+/* Customize-columns dropdown */
+.dv2-cols-menu {
+ display: none;
+ position: absolute;
+ top: 38px;
+ right: 0;
+ min-width: 180px;
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
+ border-radius: 10px;
+ box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+ padding: 6px;
+ z-index: 50;
+}
+
+.dv2-cols-menu.open { display: block; }
+
+.dv2-cols-menu label {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ padding: 7px 10px;
+ border-radius: 6px;
+ font-size: 0.78rem;
+ color: var(--text-body);
+ cursor: pointer;
+}
+
+.dv2-cols-menu label:hover { background: var(--bg-subtle); }
+.dv2-cols-menu input { accent-color: #059669; }
+
+/* Table polish: grip, checkbox, kebab */
+.dv2-table .col-grip { width: 30px; }
+.dv2-table .col-check { width: 34px; }
+.dv2-table .col-kebab { width: 40px; text-align: right; }
+
+.dv2-table input[type="checkbox"] {
+ width: 15px;
+ height: 15px;
+ accent-color: #059669;
+ cursor: pointer;
+ vertical-align: -2px;
+}
+
+.dv2-grip {
+ color: var(--text-muted);
+ opacity: 0.5;
+ cursor: grab;
+}
+
+.dv2-grip svg { width: 14px; height: 14px; }
+
+.dv2-kebab-wrap { position: relative; display: inline-block; }
+
+.dv2-kebab {
+ border: none;
+ background: transparent;
+ width: 28px;
+ height: 28px;
+ border-radius: 6px;
+ color: var(--text-muted);
+ cursor: pointer;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+}
+
+.dv2-kebab:hover { background: var(--bg-subtle); color: var(--text-strong); }
+.dv2-kebab svg { width: 15px; height: 15px; }
+
+.dv2-kebab-menu {
+ display: none;
+ position: absolute;
+ right: 0;
+ top: 30px;
+ min-width: 140px;
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
+ border-radius: 10px;
+ box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+ padding: 4px;
+ z-index: 50;
+}
+
+.dv2-kebab-menu.open { display: block; }
+
+.dv2-kebab-menu a {
+ display: flex;
+ align-items: center;
+ gap: 8px;
+ padding: 7px 10px;
+ border-radius: 6px;
+ font-size: 0.78rem;
+ color: var(--text-body);
+ text-decoration: none;
+}
+
+.dv2-kebab-menu a:hover { background: var(--bg-subtle); }
+.dv2-kebab-menu a svg { width: 14px; height: 14px; color: var(--text-muted); }
+
+/* Outlined pill (plot column, like "Section Type" in the reference) */
+.dv2-pill {
+ display: inline-flex;
+ align-items: center;
+ padding: 2px 9px;
+ border-radius: 999px;
+ border: 1px solid var(--glass-border);
+ font-size: 0.7rem;
+ font-weight: 500;
+ color: var(--text-body);
+ white-space: nowrap;
+}
+
+/* Table footer: selection + pager */
+.dv2-tfoot {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 12px;
+ padding: 10px 18px;
+ border-top: 1px solid var(--border-subtle);
+ font-size: 0.75rem;
+ color: var(--text-muted);
+ flex-wrap: wrap;
+}
+
+.dv2-tfoot-right {
+ display: inline-flex;
+ align-items: center;
+ gap: 16px;
+}
+
+.dv2-rows-select {
+ height: 28px;
+ padding: 0 6px;
+ border-radius: 6px;
+ border: 1px solid var(--glass-border);
+ background: var(--surface);
+ color: var(--text-body);
+ font-size: 0.72rem;
+ font-family: 'Poppins', sans-serif;
+}
+
+.dv2-pager {
+ display: inline-flex;
+ align-items: center;
+ gap: 2px;
+}
+
+.dv2-pager button {
+ width: 26px;
+ height: 26px;
+ border: none;
+ background: transparent;
+ border-radius: 6px;
+ color: var(--text-muted);
+ cursor: pointer;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+}
+
+.dv2-pager button:hover:not(:disabled) { background: var(--bg-subtle); color: var(--text-strong); }
+.dv2-pager button:disabled { opacity: 0.35; cursor: default; }
+.dv2-pager svg { width: 14px; height: 14px; }
 
 /* Cards */
 .dv2-card {
@@ -757,9 +991,22 @@ html[data-theme="dark"] .dv2-status.done { color: #34d399; border-color: rgba(52
 html[data-theme="dark"] .dv2-status.sched { color: #fbbf24; border-color: rgba(251,191,36,0.3); }
 html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
 
+html[data-theme="dark"] .dv2-tbtn.primary {
+ background: #f1f5f9;
+ border-color: #f1f5f9;
+ color: #0f172a;
+}
+
+html[data-theme="dark"] .dv2-tbtn.primary:hover { background: #e2e8f0; }
+
+html[data-theme="dark"] .dv2-cols-menu,
+html[data-theme="dark"] .dv2-kebab-menu {
+ box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
 @media (max-width: 900px) {
  .admin-main {
- padding: 20px;
+ padding: 76px 16px 24px;
  }
  .burial-schedule-grid {
  grid-template-columns: 1fr !important;
@@ -769,6 +1016,25 @@ html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
  }
  .dv2-chart-head {
  flex-direction: column;
+ }
+ /* Table scrolls horizontally instead of squeezing columns */
+ .dv2-table-card {
+ overflow-x: auto;
+ }
+ .dv2-table-card .dv2-table {
+ min-width: 620px;
+ }
+ /* Calendar cells compact on narrow screens */
+ .dv2-cal-cell {
+ min-height: 40px;
+ padding: 2px;
+ }
+ .dv2-cal-pill {
+ font-size: 0.55rem;
+ padding: 0 3px;
+ }
+ .dv2-cal-dow {
+ font-size: 0.55rem;
  }
 }
 </style>
@@ -821,36 +1087,75 @@ html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
  <div class="dv2-card dv2-table-card">
  <div class="dv2-tabs">
  <div class="dv2-tab-group">
- <button type="button" class="dv2-tab active" data-tab="recent">Recent Records</button>
- <button type="button" class="dv2-tab" data-tab="barangay">By Barangay</button>
+ <button type="button" class="dv2-tab active" data-tab="recent">Recent Records<span class="dv2-tab-count"><?php echo count($recentRecords ?? []); ?></span></button>
+ <button type="button" class="dv2-tab" data-tab="barangay">By Barangay<span class="dv2-tab-count"><?php echo count($byBarangay ?? []); ?></span></button>
  </div>
- <a href="records.php" class="dv2-tab-link">View all records &rarr;</a>
+ <div class="dv2-tbl-actions">
+ <button type="button" class="dv2-tbtn" id="colsBtn" onclick="toggleColsMenu()">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+ Customize Columns
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+ </button>
+ <div class="dv2-cols-menu" id="colsMenu">
+ <label><input type="checkbox" data-col="name" checked> Name</label>
+ <label><input type="checkbox" data-col="plot" checked> Plot</label>
+ <label><input type="checkbox" data-col="barangay" checked> Barangay</label>
+ <label><input type="checkbox" data-col="date" checked> Date Added</label>
+ <label><input type="checkbox" data-col="status" checked> Status</label>
+ </div>
+ <a href="add-record.php" class="dv2-tbtn primary">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+ Add Record
+ </a>
+ </div>
  </div>
 
  <div class="dv2-tab-pane" data-pane="recent">
- <table class="dv2-table">
+ <table class="dv2-table" id="recentTable">
  <thead>
  <tr>
- <th>Name</th>
- <th>Plot</th>
- <th>Barangay</th>
- <th>Date Added</th>
- <th>Status</th>
+ <th class="col-grip"></th>
+ <th class="col-check"><input type="checkbox" id="checkAll" aria-label="Select all"></th>
+ <th data-col="name">Name</th>
+ <th data-col="plot">Plot</th>
+ <th data-col="barangay">Barangay</th>
+ <th data-col="date">Date Added</th>
+ <th data-col="status">Status</th>
+ <th class="col-kebab"></th>
  </tr>
  </thead>
  <tbody>
  <?php if (empty($recentRecords)): ?>
  <tr>
- <td colspan="5" class="dv2-empty">No records found</td>
+ <td colspan="8" class="dv2-empty">No records found</td>
  </tr>
  <?php else: ?>
  <?php foreach ($recentRecords as $record): ?>
  <tr>
- <td><?php echo htmlspecialchars($record['decedent_name'], ENT_QUOTES, 'UTF-8'); ?></td>
- <td><?php echo htmlspecialchars($record['plot_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?></td>
- <td><?php echo htmlspecialchars($record['barangay'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?></td>
- <td><?php echo date('M d, Y', strtotime($record['date_added'])); ?></td>
- <td><span class="dv2-status <?php echo ($record['is_buried'] ?? 0) == 1 ? 'done' : 'sched'; ?>"><?php echo ($record['is_buried'] ?? 0) == 1 ? 'Buried' : 'Scheduled'; ?></span></td>
+ <td class="col-grip"><span class="dv2-grip"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M8 6h.01M8 12h.01M8 18h.01M16 6h.01M16 12h.01M16 18h.01"/></svg></span></td>
+ <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select row"></td>
+ <td data-col="name" style="font-weight:600;"><?php echo htmlspecialchars($record['decedent_name'], ENT_QUOTES, 'UTF-8'); ?></td>
+ <td data-col="plot"><span class="dv2-pill"><?php echo htmlspecialchars($record['plot_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?></span></td>
+ <td data-col="barangay"><?php echo htmlspecialchars($record['barangay'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?></td>
+ <td data-col="date" style="font-variant-numeric:tabular-nums;"><?php echo date('M d, Y', strtotime($record['date_added'])); ?></td>
+ <td data-col="status"><span class="dv2-status <?php echo ($record['is_buried'] ?? 0) == 1 ? 'done' : 'sched'; ?>"><?php echo ($record['is_buried'] ?? 0) == 1 ? 'Buried' : 'Scheduled'; ?></span></td>
+ <td class="col-kebab">
+ <span class="dv2-kebab-wrap">
+ <button type="button" class="dv2-kebab" onclick="toggleKebab(this)" aria-label="Row actions">
+ <svg fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
+ </button>
+ <span class="dv2-kebab-menu">
+ <a href="edit-record.php?id=<?php echo (int)$record['id']; ?>">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+ Edit record
+ </a>
+ <a href="records.php">
+ <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+ All records
+ </a>
+ </span>
+ </span>
+ </td>
  </tr>
  <?php endforeach; ?>
  <?php endif; ?>
@@ -859,9 +1164,11 @@ html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
  </div>
 
  <div class="dv2-tab-pane" data-pane="barangay" style="display:none;">
- <table class="dv2-table">
+ <table class="dv2-table" id="barangayTable">
  <thead>
  <tr>
+ <th class="col-grip"></th>
+ <th class="col-check"><input type="checkbox" id="checkAllBrgy" aria-label="Select all"></th>
  <th>Barangay</th>
  <th>Records</th>
  <th>Share</th>
@@ -870,7 +1177,7 @@ html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
  <tbody>
  <?php if (empty($byBarangay)): ?>
  <tr>
- <td colspan="3" class="dv2-empty">No data available</td>
+ <td colspan="5" class="dv2-empty">No data available</td>
  </tr>
  <?php else: ?>
  <?php
@@ -878,8 +1185,10 @@ html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
  foreach ($byBarangay as $item): $pct = round($item['count'] / $brgyTotal * 100, 1);
  ?>
  <tr>
- <td><?php echo htmlspecialchars($item['barangay'], ENT_QUOTES, 'UTF-8'); ?></td>
- <td><?php echo number_format($item['count']); ?></td>
+ <td class="col-grip"><span class="dv2-grip"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-width="2" d="M8 6h.01M8 12h.01M8 18h.01M16 6h.01M16 12h.01M16 18h.01"/></svg></span></td>
+ <td class="col-check"><input type="checkbox" class="row-check" aria-label="Select row"></td>
+ <td style="font-weight:600;"><?php echo htmlspecialchars($item['barangay'], ENT_QUOTES, 'UTF-8'); ?></td>
+ <td style="font-variant-numeric:tabular-nums;"><?php echo number_format($item['count']); ?></td>
  <td>
  <div style="display:flex; align-items:center; gap:8px;">
  <div style="flex:1; max-width:140px; height:6px; border-radius:999px; background:var(--border-subtle); overflow:hidden;">
@@ -894,9 +1203,30 @@ html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
  </tbody>
  </table>
  </div>
+
+ <div class="dv2-tfoot">
+ <span id="selCount">0 of <?php echo count($recentRecords ?? []); ?> row(s) selected.</span>
+ <div class="dv2-tfoot-right">
+ <label style="display:inline-flex;align-items:center;gap:6px;">
+ Rows per page
+ <select class="dv2-rows-select" id="rowsPerPage">
+ <option value="10" selected>10</option>
+ <option value="20">20</option>
+ <option value="50">50</option>
+ </select>
+ </label>
+ <span id="pageInfo">Page 1 of 1</span>
+ <span class="dv2-pager">
+ <button type="button" disabled aria-label="First page"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg></button>
+ <button type="button" disabled aria-label="Previous page"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
+ <button type="button" disabled aria-label="Next page"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
+ <button type="button" disabled aria-label="Last page"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7m-8-14l7 7-7 7"/></svg></button>
+ </span>
+ </div>
+ </div>
  </div>
 
-  <div class="dv2-card" style="margin-bottom: 24px;">
+<div class="dv2-card" style="margin-bottom: 24px;">
  <h3>
  <span>
  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -1047,37 +1377,43 @@ html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
  <script>
  const burialSeries = <?php echo json_encode($burialSeries ?? []); ?>;
+ const burialDateSeries = <?php echo json_encode($burialDateSeries ?? []); ?>;
 
  // Build a contiguous day list for the last N days, zero-filling gaps
- function seriesFor(days) {
+ function seriesFor(src, days) {
  const labels = [], data = [];
  for (let i = days - 1; i >= 0; i--) {
  const d = new Date();
  d.setDate(d.getDate() - i);
  const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
- data.push(burialSeries[key] || 0);
+ data.push(src[key] || 0);
  labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
  }
  return { labels, data };
  }
 
- const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
  let burialChart = null;
 
  function renderBurialChart(days) {
- const { labels, data } = seriesFor(days);
+ const a = seriesFor(burialSeries, days);       // records added
+ const b = seriesFor(burialDateSeries, days);   // scheduled burials
  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
  const grid = dark ? 'rgba(148,163,184,0.12)' : 'rgba(15,23,42,0.06)';
- const tick = dark ? '#94a3b8' : '#94a3b8';
- const line = '#059669';
+ const tick = '#94a3b8';
  const ctx = document.getElementById('burialChart').getContext('2d');
- const fill = ctx.createLinearGradient(0, 0, 0, 240);
- fill.addColorStop(0, 'rgba(5,150,105,0.18)');
- fill.addColorStop(1, 'rgba(5,150,105,0)');
+ const fillA = ctx.createLinearGradient(0, 0, 0, 240);
+ fillA.addColorStop(0, dark ? 'rgba(226,232,240,0.16)' : 'rgba(15,23,42,0.14)');
+ fillA.addColorStop(1, 'rgba(15,23,42,0)');
+ const fillB = ctx.createLinearGradient(0, 0, 0, 240);
+ fillB.addColorStop(0, 'rgba(100,116,139,0.10)');
+ fillB.addColorStop(1, 'rgba(100,116,139,0)');
  if (burialChart) burialChart.destroy();
  burialChart = new Chart(ctx, {
  type: 'line',
- data: { labels, datasets: [{ data, borderColor: line, backgroundColor: fill, fill: true, tension: 0.35, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: line }] },
+ data: { labels: a.labels, datasets: [
+ { label: 'Records added', data: a.data, borderColor: dark ? '#e2e8f0' : '#0f172a', backgroundColor: fillA, fill: true, tension: 0.4, borderWidth: 1.8, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: dark ? '#e2e8f0' : '#0f172a' },
+ { label: 'Scheduled burials', data: b.data, borderColor: '#94a3b8', backgroundColor: fillB, fill: true, tension: 0.4, borderWidth: 1.8, pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: '#94a3b8' }
+ ] },
  options: {
  responsive: true,
  maintainAspectRatio: false,
@@ -1085,10 +1421,14 @@ html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
  plugins: {
  legend: { display: false },
  tooltip: {
- backgroundColor: dark ? '#1e293b' : '#0f172a',
- titleColor: '#fff', bodyColor: '#e2e8f0',
- padding: 10, cornerRadius: 8, displayColors: false,
- callbacks: { label: c => c.parsed.y + ' record' + (c.parsed.y === 1 ? '' : 's') }
+ backgroundColor: dark ? '#1e293b' : '#ffffff',
+ titleColor: dark ? '#f1f5f9' : '#0f172a',
+ bodyColor: dark ? '#cbd5e1' : '#334155',
+ borderColor: dark ? '#334155' : '#e2e8f0',
+ borderWidth: 1,
+ padding: 10, cornerRadius: 8,
+ boxWidth: 8, boxHeight: 8, usePointStyle: true,
+ callbacks: { label: c => ' ' + c.dataset.label + '  ' + c.parsed.y }
  }
  },
  scales: {
@@ -1115,6 +1455,7 @@ html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
  // Table card tabs
+ let activePane = document.querySelector('.dv2-tab-pane');
  document.querySelectorAll('.dv2-tab').forEach(tab => {
  tab.addEventListener('click', () => {
  document.querySelectorAll('.dv2-tab').forEach(t => t.classList.remove('active'));
@@ -1122,8 +1463,77 @@ html[data-theme="dark"] .dv2-tab-link { color: #34d399; }
  document.querySelectorAll('.dv2-tab-pane').forEach(p => {
  p.style.display = p.dataset.pane === tab.dataset.tab ? '' : 'none';
  });
+ activePane = document.querySelector('.dv2-tab-pane[data-pane="' + tab.dataset.tab + '"]');
+ updateSelCount();
  });
  });
+
+ // Customize columns dropdown
+ function toggleColsMenu() {
+ document.getElementById('colsMenu').classList.toggle('open');
+ }
+ document.addEventListener('click', e => {
+ const menu = document.getElementById('colsMenu');
+ const btn = document.getElementById('colsBtn');
+ if (menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+ menu.classList.remove('open');
+ }
+ // close any open kebab menus when clicking elsewhere
+ document.querySelectorAll('.dv2-kebab-menu.open').forEach(m => {
+ if (!m.parentElement.contains(e.target)) m.classList.remove('open');
+ });
+ });
+
+ document.querySelectorAll('#colsMenu input[data-col]').forEach(cb => {
+ cb.addEventListener('change', () => {
+ const col = cb.dataset.col;
+ const show = cb.checked ? '' : 'none';
+ document.querySelectorAll('#recentTable [data-col="' + col + '"]').forEach(el => {
+ el.style.display = show;
+ });
+ });
+ });
+
+ // Row kebab dropdowns
+ function toggleKebab(btn) {
+ const menu = btn.parentElement.querySelector('.dv2-kebab-menu');
+ const wasOpen = menu.classList.contains('open');
+ document.querySelectorAll('.dv2-kebab-menu.open').forEach(m => m.classList.remove('open'));
+ if (!wasOpen) menu.classList.add('open');
+ event.stopPropagation();
+ }
+
+ // Row selection counter (active pane only)
+ function updateSelCount() {
+ if (!activePane) return;
+ const rows = activePane.querySelectorAll('.row-check');
+ const total = rows.length;
+ const checked = activePane.querySelectorAll('.row-check:checked').length;
+ document.getElementById('selCount').textContent = checked + ' of ' + total + ' row(s) selected.';
+ }
+
+ document.querySelectorAll('.dv2-table .row-check').forEach(cb => cb.addEventListener('change', updateSelCount));
+ [['checkAll'], ['checkAllBrgy']].forEach(([id]) => {
+ const master = document.getElementById(id);
+ if (master) master.addEventListener('change', () => {
+ const pane = master.closest('.dv2-tab-pane');
+ pane.querySelectorAll('.row-check').forEach(cb => cb.checked = master.checked);
+ updateSelCount();
+ });
+ });
+
+ // Rows-per-page limiting
+ document.getElementById('rowsPerPage').addEventListener('change', function() {
+ applyRowLimit(this.value);
+ });
+ function applyRowLimit(limit) {
+ if (!activePane) return;
+ const tbody = activePane.querySelector('tbody');
+ const rows = [...tbody.querySelectorAll('tr')];
+ rows.forEach((r, idx) => {
+ r.style.display = (idx + 1) > limit && !r.querySelector('.dv2-empty') ? 'none' : '';
+ });
+ }
 
  async function markBurialDone(recordId, btn) {
  btn.disabled = true;

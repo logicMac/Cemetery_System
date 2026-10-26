@@ -3,6 +3,7 @@ session_start();
 require_once 'includes/header.php';
 require_once '../config/database.php';
 require_once '../config/groq_config.php';
+require_once '../includes/mailer.php';
 
 $success = '';
 $error = '';
@@ -52,8 +53,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  }
  
  $success = 'Database backup initiated. File will be saved to backups folder.';
+ } elseif ($action === 'save_mail_settings') {
+ try {
+ $stmt = $pdo->prepare("
+ INSERT INTO mail_settings (id, smtp_host, smtp_port, smtp_encryption, smtp_username, smtp_password, from_name, admin_notify_email, is_enabled)
+ VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?)
+ ON DUPLICATE KEY UPDATE
+ smtp_host = VALUES(smtp_host), smtp_port = VALUES(smtp_port), smtp_encryption = VALUES(smtp_encryption),
+ smtp_username = VALUES(smtp_username), smtp_password = VALUES(smtp_password),
+ from_name = VALUES(from_name), admin_notify_email = VALUES(admin_notify_email), is_enabled = VALUES(is_enabled)
+ ");
+ $stmt->execute([
+ trim($_POST['smtp_host'] ?? 'smtp.gmail.com'),
+ (int)($_POST['smtp_port'] ?? 587),
+ in_array($_POST['smtp_encryption'] ?? 'tls', ['tls', 'ssl'], true) ? $_POST['smtp_encryption'] : 'tls',
+ trim($_POST['smtp_username'] ?? ''),
+ trim($_POST['smtp_password'] ?? ''),
+ trim($_POST['from_name'] ?? 'Matinao Memorial Cemetery'),
+ trim($_POST['admin_notify_email'] ?? ''),
+ isset($_POST['is_enabled']) ? 1 : 0,
+ ]);
+ $success = 'Email settings saved';
+ } catch (PDOException $e) {
+ error_log("Mail settings save error: " . $e->getMessage());
+ $error = 'Could not save email settings';
+ }
+ } elseif ($action === 'send_test_email') {
+ $to = trim($_POST['test_email'] ?? '');
+ $ms = mail_settings($pdo);
+ if (empty($to) || !filter_var($to, FILTER_VALIDATE_EMAIL)) {
+ $error = 'Enter a valid email address for the test';
+ } elseif (!$ms['is_enabled']) {
+ $error = 'Email sending is disabled — enable it and save first';
+ } elseif (send_mail($pdo, $to, 'Test Recipient', 'Matinao Cemetery — Test Email',
+ '<div style="font-family:Arial,sans-serif;padding:20px;"><h2 style="color:#059669;margin:0 0 10px;">Test email works</h2><p style="color:#334155;font-size:14px;">SMTP settings for Matinao Memorial Cemetery are configured correctly.</p></div>')) {
+ $success = 'Test email sent to ' . htmlspecialchars($to, ENT_QUOTES, 'UTF-8');
+ } else {
+ $error = 'Test email failed — check credentials (see PHP error log for details)';
+ }
  }
 }
+
+// Load saved mail settings for the form
+$mailCfg = mail_settings($pdo);
 
 // Get system statistics
 try {
@@ -227,6 +269,69 @@ button svg, a svg, button i, a i { pointer-events: none; }
  <li>Store backups in a secure location</li>
  <li>Test backup restoration periodically</li>
  </ul>
+ </div>
+ </div>
+
+ <!-- Email (SMTP) Configuration -->
+ <div class="bg-white rounded-xl border border-slate-200 p-6">
+ <h3 class="text-sm font-bold uppercase tracking-wide text-slate-700 mb-1 flex items-center gap-2"><i data-lucide="mail" class="w-4 h-4 text-emerald-600"></i> Email Notifications (SMTP)</h3>
+ <p class="text-xs text-slate-500 mb-5">Gmail SMTP for plot expiration notices and admin digests — stored in the database</p>
+ <form method="POST" action="" class="space-y-4">
+ <input type="hidden" name="action" value="save_mail_settings">
+ <div class="flex items-center justify-between bg-slate-50 rounded-xl p-4">
+ <div>
+ <div class="text-sm font-semibold text-slate-800">Enable email sending</div>
+ <div class="text-xs text-slate-500">Master switch for all outgoing mail</div>
+ </div>
+ <label class="inline-flex items-center cursor-pointer">
+ <input type="checkbox" name="is_enabled" value="1" <?php echo $mailCfg['is_enabled'] ? 'checked' : ''; ?> class="w-5 h-5 accent-emerald-600">
+ </label>
+ </div>
+ <div class="grid grid-cols-2 gap-4">
+ <div class="col-span-2 sm:col-span-1">
+ <label class="block text-sm font-medium text-slate-700 mb-1.5">SMTP Host</label>
+ <input type="text" name="smtp_host" value="<?php echo htmlspecialchars($mailCfg['smtp_host'], ENT_QUOTES, 'UTF-8'); ?>" class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+ </div>
+ <div class="col-span-2 sm:col-span-1">
+ <label class="block text-sm font-medium text-slate-700 mb-1.5">Port / Encryption</label>
+ <div class="flex gap-2">
+ <input type="number" name="smtp_port" value="<?php echo (int)$mailCfg['smtp_port']; ?>" class="w-24 rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+ <select name="smtp_encryption" class="flex-1 rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+ <option value="tls" <?php echo $mailCfg['smtp_encryption'] === 'tls' ? 'selected' : ''; ?>>TLS (587)</option>
+ <option value="ssl" <?php echo $mailCfg['smtp_encryption'] === 'ssl' ? 'selected' : ''; ?>>SSL (465)</option>
+ </select>
+ </div>
+ </div>
+ <div class="col-span-2">
+ <label class="block text-sm font-medium text-slate-700 mb-1.5">Gmail Address (sender)</label>
+ <input type="email" name="smtp_username" value="<?php echo htmlspecialchars($mailCfg['smtp_username'], ENT_QUOTES, 'UTF-8'); ?>" placeholder="your-gmail@gmail.com" class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+ </div>
+ <div class="col-span-2">
+ <label class="block text-sm font-medium text-slate-700 mb-1.5">Gmail App Password</label>
+ <input type="password" name="smtp_password" value="<?php echo htmlspecialchars($mailCfg['smtp_password'], ENT_QUOTES, 'UTF-8'); ?>" placeholder="16-character app password" autocomplete="new-password" class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+ <p class="text-xs text-slate-400 mt-1">Google Account → Security → 2-Step Verification → App passwords. Not your normal Gmail password.</p>
+ </div>
+ <div class="col-span-2 sm:col-span-1">
+ <label class="block text-sm font-medium text-slate-700 mb-1.5">Sender Name</label>
+ <input type="text" name="from_name" value="<?php echo htmlspecialchars($mailCfg['from_name'], ENT_QUOTES, 'UTF-8'); ?>" class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+ </div>
+ <div class="col-span-2 sm:col-span-1">
+ <label class="block text-sm font-medium text-slate-700 mb-1.5">Admin Digest Email <span class="text-xs text-slate-400">(optional)</span></label>
+ <input type="email" name="admin_notify_email" value="<?php echo htmlspecialchars($mailCfg['admin_notify_email'], ENT_QUOTES, 'UTF-8'); ?>" placeholder="Fallback when admin accounts have no email" class="w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+ </div>
+ </div>
+ <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-2.5 transition">
+ <i data-lucide="save" class="w-4 h-4"></i> Save Email Settings
+ </button>
+ </form>
+ <div class="mt-4 pt-4 border-t border-slate-100">
+ <form method="POST" action="" class="flex gap-2">
+ <input type="hidden" name="action" value="send_test_email">
+ <input type="email" name="test_email" required placeholder="Send test email to…" class="flex-1 rounded-lg border border-slate-300 px-3.5 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+ <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold px-4 py-2 transition">
+ <i data-lucide="send" class="w-4 h-4"></i> Test
+ </button>
+ </form>
  </div>
  </div>
 

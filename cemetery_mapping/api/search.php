@@ -22,7 +22,7 @@ try {
     
     $stmt = $pdo->prepare("
         SELECT br.id, br.decedent_name, br.birth_date, br.death_date, br.burial_date, br.burial_time, br.expiration_date, br.barangay, br.plot_number,
-               br.memory_space, br.latitude, br.longitude, br.polygon, br.is_fenced, br.family_name, br.photo,
+               br.memory_space, br.latitude, br.longitude, br.polygon, br.is_fenced, br.is_relocated, br.family_name, br.photo,
                pg.id AS grid_id, pg.name AS grid_name,
                pgc.row_idx AS cell_row, pgc.col_idx AS cell_col,
                pg.center_lat AS grid_lat, pg.center_lng AS grid_lng,

@@ -88,6 +88,17 @@ try {
     if ($plot_type === 'burial') {
         $upd = $pdo->prepare("UPDATE burial_records SET expiration_date = ?, renewal_count = renewal_count + 1 WHERE id = ?");
         $upd->execute([$newExpiration, $record_id]);
+
+        // If the plot was relocated, restore it to its original location
+        $pdo->prepare("
+            UPDATE burial_records
+            SET is_relocated = 0,
+                latitude = orig_latitude,
+                longitude = orig_longitude,
+                orig_latitude = NULL, orig_longitude = NULL,
+                relocated_at = NULL
+            WHERE id = ? AND is_relocated = 1 AND orig_latitude IS NOT NULL
+        ")->execute([$record_id]);
     } else {
         $upd = $pdo->prepare("UPDATE available_plots SET expiration_date = ?, renewal_count = renewal_count + 1 WHERE id = ?");
         $upd->execute([$newExpiration, $plot_id]);

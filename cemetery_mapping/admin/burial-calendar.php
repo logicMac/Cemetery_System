@@ -12,6 +12,9 @@ if ($calYear < 2000 || $calYear > 2100) { $calYear = (int)date('Y'); }
 
 // Fetch scheduled burials for the selected month
 try {
+ // Auto-complete burials whose date has already passed
+ $pdo->exec("UPDATE burial_records SET is_buried = 1 WHERE is_buried = 0 AND burial_date IS NOT NULL AND burial_date < CURDATE()");
+
  $calStmt = $pdo->prepare("
  SELECT id, decedent_name, plot_number, barangay, burial_date, burial_time, is_buried
  FROM burial_records
@@ -67,17 +70,25 @@ $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
 ?>
 
 <style>
- /* ── Full-width, no padding ── */
+ /* ── Standard padded content area ── */
  .admin-layout { background: var(--bg-subtle) !important; }
  .admin-layout::after { display: none !important; }
  .admin-layout > .admin-main {
- padding: 84px 0 0 !important;
+ padding: 84px 28px 40px !important;
  max-width: none;
  min-width: 0;
  }
 
- /* ── Page ── */
- .cal-page { width: 100%; max-width: none; box-sizing: border-box; }
+ /* ── Page — calendar sits in a bordered card ── */
+ .cal-page {
+ width: 100%;
+ max-width: none;
+ box-sizing: border-box;
+ background: var(--surface);
+ border: 1px solid var(--glass-border);
+ border-radius: 12px;
+ overflow: hidden;
+ }
  .cal-grid { background: var(--surface); width: 100%; }
  .cal-bottom { display: flex; width: 100%; }
 
@@ -173,6 +184,7 @@ $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
 
  /* ── Mobile ── */
  @media (max-width: 900px) {
+ .admin-layout > .admin-main { padding-left: 16px !important; padding-right: 16px !important; }
  .cal-cell { min-height: 70px; padding: 4px 6px; font-size: 0.72rem; }
  .cal-ev { font-size: 0.52rem; padding: 1px 4px; }
  .cal-bottom { flex-direction: column; }

@@ -2429,26 +2429,48 @@ input[type="radio"] {
         padding: 76px 16px 32px;
     }
 
+    /* Keep the header a single 60px row so .admin-main top padding still clears it */
     .admin-header {
-        flex-direction: column;
-        height: auto;
-        gap: 10px;
-        text-align: center;
-        padding: 12px 16px;
+        height: 60px;
+        gap: 8px;
+        padding: 0 12px;
+    }
+
+    .admin-header-left {
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .admin-header-info {
+        min-width: 0;
     }
 
     .admin-header h1 {
         font-size: 1rem;
-        white-space: normal;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .admin-header-subtitle {
-        white-space: normal;
+        display: none;
     }
 
-    .admin-user {
-        width: 100%;
-        justify-content: center;
+    .admin-header-actions {
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    /* Page-level action (e.g. "Quick Create") collapses to an icon button on phones */
+    .header-action-btn {
+        font-size: 0;
+        gap: 0;
+        padding: 0 10px;
+    }
+
+    .header-action-btn svg {
+        width: 16px;
+        height: 16px;
     }
 
     .dashboard-grid {
@@ -2536,6 +2558,19 @@ input[type="radio"] {
     .modal-content {
         padding: 22px 18px;
         width: 94%;
+    }
+
+    /* Inline two-column grids collapse to one column on phones */
+    [style*="grid-template-columns: 1fr 1fr"],
+    [style*="grid-template-columns:1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Media never exceeds its container */
+    .admin-main img,
+    .admin-main video {
+        max-width: 100%;
+        height: auto;
     }
 
     h1 { font-size: 1.25rem; }
@@ -3983,4 +4018,67 @@ html[data-theme="dark"] .shadow-lg {
     html[data-theme="dark"] .text-slate-700 {
         color: #000000 !important;
     }
+}
+
+/* ── Shadcn-style normalization layer (applies to all admin pages) ── */
+
+/* Table headers: muted, medium weight, normal case — like shadcn data tables */
+.admin-main table thead th {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-weight: 500 !important;
+    font-size: 0.75rem !important;
+    color: var(--text-muted) !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+}
+
+/* Inputs: consistent 8px radius, slate border, emerald focus ring */
+.admin-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+.admin-main select,
+.admin-main textarea {
+    border-radius: 8px;
+    border-color: #cbd5e1;
+    background: var(--surface);
+    color: var(--text-strong);
+}
+
+.admin-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+.admin-main select:focus,
+.admin-main textarea:focus {
+    border-color: #059669 !important;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12) !important;
+    outline: none;
+}
+
+.admin-main input::placeholder,
+.admin-main textarea::placeholder {
+    color: var(--text-muted);
+}
+
+/* Checkboxes: single emerald accent */
+.admin-main input[type="checkbox"] { accent-color: #059669; }
+
+/* Cards inside admin-main: flat bordered surfaces */
+.admin-main .bg-white.rounded-xl,
+.admin-main .bg-white.rounded-lg {
+    border-color: var(--glass-border);
+}
+
+/* Selects: remove native arrow styling inconsistencies */
+.admin-main select { cursor: pointer; }
+
+/* Dark equivalents */
+html[data-theme="dark"] .admin-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]),
+html[data-theme="dark"] .admin-main select,
+html[data-theme="dark"] .admin-main textarea {
+    border-color: #334155;
+    background: #16202f;
+    color: #e2e8f0;
+}
+
+html[data-theme="dark"] .admin-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+html[data-theme="dark"] .admin-main select:focus,
+html[data-theme="dark"] .admin-main textarea:focus {
+    border-color: #34d399 !important;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15) !important;
 }

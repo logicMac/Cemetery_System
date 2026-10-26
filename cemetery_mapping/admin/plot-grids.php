@@ -49,9 +49,9 @@ button svg, a svg, button i, a i { pointer-events: none; }
  <!-- Stats -->
  <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-[fadeUp_0.6s_ease]">
  <div class="bg-white rounded-xl border border-slate-200 p-5"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600"><i data-lucide="grid" class="w-5 h-5"></i></div><div><p class="text-2xl font-bold text-slate-900"><?php echo $totalGrids; ?></p><p class="text-xs text-slate-500">Total Grids</p></div></div></div>
- <div class="bg-white rounded-xl border border-slate-200 p-5"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600"><i data-lucide="square" class="w-5 h-5"></i></div><div><p class="text-2xl font-bold text-slate-900"><?php echo $totalCells; ?></p><p class="text-xs text-slate-500">Total Cells</p></div></div></div>
+ <div class="bg-white rounded-xl border border-slate-200 p-5"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600"><i data-lucide="square" class="w-5 h-5"></i></div><div><p class="text-2xl font-bold text-slate-900"><?php echo $totalCells; ?></p><p class="text-xs text-slate-500">Total Cells</p></div></div></div>
  <div class="bg-white rounded-xl border border-slate-200 p-5"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600"><i data-lucide="check-square" class="w-5 h-5"></i></div><div><p class="text-2xl font-bold text-slate-900"><?php echo $totalOccupied; ?></p><p class="text-xs text-slate-500">Occupied</p></div></div></div>
- <div class="bg-white rounded-xl border border-slate-200 p-5"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600"><i data-lucide="grid-3x3" class="w-5 h-5"></i></div><div><p class="text-2xl font-bold text-slate-900"><?php echo $totalAvailable; ?></p><p class="text-xs text-slate-500">Available</p></div></div></div>
+ <div class="bg-white rounded-xl border border-slate-200 p-5"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600"><i data-lucide="grid-3x3" class="w-5 h-5"></i></div><div><p class="text-2xl font-bold text-slate-900"><?php echo $totalAvailable; ?></p><p class="text-xs text-slate-500">Available</p></div></div></div>
  </div>
 
  <!-- List -->
@@ -102,7 +102,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
 <!-- Grid Editor/Create Modal -->
 <div id="gridEditorModal" class="fixed inset-0 z-[9999] hidden" role="dialog" aria-modal="true">
  <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeGridEditor()"></div>
- <div class="absolute inset-4 md:inset-2 bg-white rounded-xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
+ <div class="absolute inset-4 md:inset-2 bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden">
  <!-- Header -->
  <div class="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-slate-50/60">
  <div class="flex items-center gap-3">
@@ -219,7 +219,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
 <div id="deleteConfirmModal" class="fixed inset-0 z-[10000] hidden" role="dialog" aria-modal="true">
  <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeDeleteConfirm()"></div>
  <div class="absolute inset-0 flex items-center justify-center p-4">
- <div class="bg-white rounded-xl shadow-2xl border border-slate-200 max-w-sm w-full overflow-hidden">
+ <div class="bg-white rounded-xl shadow-lg border border-slate-200 max-w-sm w-full overflow-hidden">
  <div class="p-6 text-center">
  <div class="w-14 h-14 mx-auto mb-4 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
  <i data-lucide="trash-2" class="w-7 h-7"></i>

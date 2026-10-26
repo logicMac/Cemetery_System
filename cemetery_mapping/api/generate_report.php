@@ -23,7 +23,37 @@ $report_type = $_GET['report_type'] ?? 'burials';
 $barangay = $_GET['barangay'] ?? null;
 
 try {
-    if ($type === 'all_records') {
+    if ($type === 'custom' && $start_date && $end_date) {
+        // Custom date range report
+        $sql = "SELECT decedent_name, family_name, birth_date, death_date, plot_number, barangay, date_added
+                FROM burial_records WHERE ";
+        
+        if ($report_type === 'burials') {
+            $sql .= "date_added BETWEEN ? AND ?";
+        } else {
+            $sql .= "death_date BETWEEN ? AND ?";
+        }
+        
+        $params = [$start_date, $end_date . ' 23:59:59'];
+        if ($report_type === 'deaths') {
+            $params[1] = $end_date;
+        }
+        
+        if ($barangay) {
+            $sql .= " AND barangay = ?";
+            $params[] = $barangay;
+        }
+        
+        $sql .= " ORDER BY date_added DESC";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        
+        $data = $stmt->fetchAll();
+        $filename = 'custom_report_' . $start_date . '_to_' . $end_date;
+        $headers = ['Name', 'Family', 'Birth Date', 'Death Date', 'Plot', 'Barangay', 'Date Added'];
+        
+    } elseif ($type === 'all_records') {
         $stmt = $pdo->query("
             SELECT decedent_name, family_name, birth_date, death_date, plot_number, 
                    barangay, latitude, longitude, is_fenced, date_added
@@ -58,33 +88,6 @@ try {
         $filename = 'available_plots';
         $headers = ['Plot Number', 'Latitude', 'Longitude', 'Notes', 'Has Grid', 'Rows', 'Cols', 'Compartments', 'Date Added'];
         
-    } elseif ($start_date && $end_date) {
-        // Custom date range report
-        $sql = "SELECT decedent_name, family_name, birth_date, death_date, plot_number, barangay, date_added
-                FROM burial_records WHERE ";
-        
-        if ($report_type === 'burials') {
-            $sql .= "date_added BETWEEN ? AND ?";
-        } else {
-            $sql .= "death_date BETWEEN ? AND ?";
-        }
-        
-        if ($barangay) {
-            $sql .= " AND barangay = ?";
-        }
-        
-        $sql .= " ORDER BY date_added DESC";
-        
-        $stmt = $pdo->prepare($sql);
-        $params = [$start_date, $end_date];
-        if ($barangay) {
-            $params[] = $barangay;
-        }
-        $stmt->execute($params);
-        
-        $data = $stmt->fetchAll();
-        $filename = 'custom_report_' . $start_date . '_to_' . $end_date;
-        $headers = ['Name', 'Family', 'Birth Date', 'Death Date', 'Plot', 'Barangay', 'Date Added'];
     } else {
         http_response_code(400);
         exit('Invalid report type');

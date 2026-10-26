@@ -10,7 +10,7 @@ require_once '../config/database.php';
 try {
     $stmt = $pdo->query("
         SELECT br.id, br.decedent_name, br.birth_date, br.death_date, br.burial_date, br.burial_time, br.expiration_date, br.barangay, br.plot_number,
-               br.memory_space, br.latitude, br.longitude, br.polygon, br.is_fenced, br.family_name, br.photo,
+               br.memory_space, br.latitude, br.longitude, br.polygon, br.is_fenced, br.is_relocated, br.family_name, br.photo,
                pg.id AS grid_id, pg.name AS grid_name,
                pgc.row_idx AS cell_row, pgc.col_idx AS cell_col,
                pg.center_lat AS grid_lat, pg.center_lng AS grid_lng,
@@ -32,11 +32,25 @@ try {
     ");
     
     $records = $stmt->fetchAll();
-    
+
+    // Expose the configured relocation area so the map can label it
+    $relocation = null;
+    try {
+        $rel = $pdo->query("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('relocation_lat','relocation_lng')")->fetchAll(PDO::FETCH_KEY_PAIR);
+        if (!empty($rel['relocation_lat']) && !empty($rel['relocation_lng'])) {
+            $relocation = [
+                'latitude' => (float)$rel['relocation_lat'],
+                'longitude' => (float)$rel['relocation_lng'],
+                'count' => (int)$pdo->query("SELECT COUNT(*) FROM burial_records WHERE is_relocated = 1")->fetchColumn(),
+            ];
+        }
+    } catch (Throwable $e) { /* settings table not migrated yet */ }
+
     echo json_encode([
         'success' => true,
         'records' => $records,
-        'count' => count($records)
+        'count' => count($records),
+        'relocation_area' => $relocation,
     ]);
 } catch (PDOException $e) {
     error_log("Get all records error: " . $e->getMessage());
