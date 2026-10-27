@@ -13,10 +13,11 @@ require_once 'includes/header.php';
  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
 
  <style>
- /* Full-height map layout under the visitor topbar */
+ /* Framed map layout under the visitor topbar (matches admin map-view) */
  html, body, .admin-layout, .admin-main { height: 100vh !important; overflow: hidden; }
  .admin-main { padding: 0 !important; }
- #map { position: absolute; top: 60px; left: 0; right: 0; bottom: 0; width: 100%; height: auto; }
+ .admin-layout { background: var(--surface); }
+ #map { position: absolute; top: 80px; left: 20px; right: 20px; bottom: 20px; width: auto; height: auto; border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); }
  .rotation-panel {
  top: 20px !important;
  right: 20px !important;
@@ -253,8 +254,8 @@ require_once 'includes/header.php';
  /* SEARCH BAR - Top left, compact */
  .search-bar-container {
  position: absolute;
- top: 90px;
- left: 20px;
+ top: 96px;
+ left: 36px;
  right: auto;
  transform: none;
  z-index: 1001;
@@ -449,8 +450,8 @@ require_once 'includes/header.php';
  /* FILTER PANEL - Below search bar */
  .filter-panel {
  position: absolute;
- top: 150px;
- left: 20px;
+ top: 156px;
+ left: 36px;
  z-index: 1000;
  background: var(--surface);
  border: 1px solid var(--glass-border);
@@ -540,8 +541,8 @@ require_once 'includes/header.php';
  /* SEARCH RESULTS - Below filter panel */
  .search-panel {
  position: absolute;
- top: 210px;
- left: 20px;
+ top: 216px;
+ left: 36px;
  right: auto;
  z-index: 1000;
  width: 340px;
@@ -581,8 +582,8 @@ require_once 'includes/header.php';
  /* MAP LEGEND - Bottom left */
  .map-legend {
  position: absolute;
- bottom: 20px;
- left: 20px;
+ bottom: 36px;
+ left: 36px;
  z-index: 1000;
  background: var(--surface);
  border: 1px solid var(--glass-border);
@@ -648,8 +649,8 @@ transform: rotate(180deg);
  /* AI CHAT TOGGLE - Bottom right */
  .chat-toggle {
  position: absolute;
- bottom: 20px;
- right: 20px;
+ bottom: 36px;
+ right: 36px;
  z-index: 999;
  width: 52px;
  height: 52px;
@@ -675,8 +676,8 @@ transform: rotate(180deg);
  /* AI CHAT CONTAINER - Bottom right, above toggle */
  .chat-container {
  position: absolute;
- bottom: 84px;
- right: 20px;
+ bottom: 100px;
+ right: 36px;
  z-index: 1000;
  width: 380px;
  max-width: calc(100vw - 40px);
@@ -694,11 +695,11 @@ transform: rotate(180deg);
  .leaflet-routing-container {
  position: fixed !important;
  top: auto !important;
- bottom: 140px !important;
- left: calc(var(--sidebar-width) + 20px) !important;
+ bottom: 160px !important;
+ left: calc(var(--sidebar-width) + 36px) !important;
  right: auto !important;
  max-width: 280px !important;
- max-height: calc(100vh - 300px) !important;
+ max-height: calc(100vh - 320px) !important;
  overflow-y: auto !important;
  background: var(--surface) !important;
  border: 1px solid var(--glass-border) !important;
@@ -884,14 +885,14 @@ transform: rotate(180deg);
  /* Search Bar - Move to bottom, above chat */
  .search-bar-container {
  top: auto;
- bottom: 85px;
- left: 10px;
- right: 10px;
+ bottom: 95px;
+ left: 20px;
+ right: 20px;
  transform: none;
  min-width: auto;
  max-width: none;
  padding: 8px 10px;
- width: calc(100vw - 20px);
+ width: calc(100vw - 40px);
  gap: 6px;
  }
  
@@ -916,10 +917,10 @@ transform: rotate(180deg);
  /* Search Results Panel - bottom sheet, anchored above the search bar */
  .search-panel {
  top: auto;
- bottom: 150px;
- bottom: calc(150px + env(safe-area-inset-bottom));
- left: 10px;
- right: 10px;
+ bottom: 160px;
+ bottom: calc(160px + env(safe-area-inset-bottom));
+ left: 20px;
+ right: 20px;
  width: auto;
  max-width: none;
  max-height: 42vh;
@@ -1285,7 +1286,7 @@ transform: rotate(180deg);
  }
  
  .filter-panel {
- top: 60px;
+ top: 76px;
  }
  
  #reservationModal > div,
@@ -1355,8 +1356,8 @@ transform: rotate(180deg);
  ========================================================= */
  #chatToggle {
  position: absolute;
- bottom: 24px;
- right: 24px;
+ bottom: 40px;
+ right: 36px;
  width: 46px;
  height: 46px;
  border-radius: 50%;
@@ -1900,6 +1901,9 @@ transform: rotate(180deg);
  }
 
  @media (max-width: 768px) {
+ /* Tighter map frame on phones */
+ #map { top: 68px; left: 10px; right: 10px; bottom: 10px; border-radius: 12px; }
+
  /* Keep the fixed header a compact single row — admin.css stacks it
     vertically on mobile, which would overlap the map UI */
  .admin-header {
@@ -1915,17 +1919,17 @@ transform: rotate(180deg);
 
  /* Map controls hug the edge and stay thumb-friendly
     (direct children only — the mode dropdown items keep their own size) */
- #mapControlsPanel { top: 66px !important; right: 10px !important; }
+ #mapControlsPanel { top: 78px !important; right: 20px !important; }
  #mapControlsPanel > button,
  #mapControlsPanel > div > button { width: 44px !important; height: 44px !important; }
 
  /* Welcome banner sits under the header, clear of the controls column */
- #welcomeBanner { top: 70px !important; left: 10px !important; right: 70px !important; transform: none !important; max-width: none !important; padding: 10px 14px !important; }
+ #welcomeBanner { top: 78px !important; left: 20px !important; right: 80px !important; transform: none !important; max-width: none !important; padding: 10px 14px !important; }
 
  /* Safe-area padding so bottom UI clears the phone home indicator */
- #chatToggle { bottom: calc(24px + env(safe-area-inset-bottom)) !important; right: 16px !important; }
- #clearRouteBtn { bottom: calc(24px + env(safe-area-inset-bottom)) !important; }
- .search-bar-container { bottom: calc(85px + env(safe-area-inset-bottom)) !important; }
+ #chatToggle { bottom: calc(34px + env(safe-area-inset-bottom)) !important; right: 26px !important; }
+ #clearRouteBtn { bottom: calc(34px + env(safe-area-inset-bottom)) !important; }
+ .search-bar-container { bottom: calc(95px + env(safe-area-inset-bottom)) !important; }
  body.mobile-navigating #welcomeBanner,
  body.mobile-navigating .search-bar-container,
  body.mobile-navigating #searchResultsPanel,
@@ -1942,9 +1946,9 @@ transform: rotate(180deg);
  #mobileNavigationStatus {
  display: none;
  position: fixed;
- top: 68px;
- left: 12px;
- right: 12px;
+ top: 76px;
+ left: 22px;
+ right: 22px;
  z-index: 1400;
  align-items: center;
  gap: 12px;
@@ -1968,7 +1972,7 @@ transform: rotate(180deg);
  </div>
  
  <!-- Welcome Banner -->
- <div id="welcomeBanner" style="position: absolute; top: 100px; left: 50%; transform: translateX(-50%); z-index: 1001; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 18px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); display: flex; align-items: center; gap: 12px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1; max-width: 400px;">
+ <div id="welcomeBanner" style="position: absolute; top: 108px; left: 50%; transform: translateX(-50%); z-index: 1001; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 12px; padding: 12px 18px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); display: flex; align-items: center; gap: 12px; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); opacity: 1; max-width: 400px;">
  <div style="width: 36px; height: 36px; border-radius: 8px; background: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
  <svg style="width: 22px; height: 22px; color: white;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
  </div>
@@ -2055,7 +2059,7 @@ transform: rotate(180deg);
 
  
  <!-- Map Controls Panel - Right side, below rotation -->
- <div id="mapControlsPanel" style="position: absolute; top: 72px; right: 20px; z-index: 1000; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 10px; padding: 4px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); display: flex; flex-direction: column; gap: 2px;">
+ <div id="mapControlsPanel" style="position: absolute; top: 96px; right: 36px; z-index: 1000; background: var(--surface); border: 1px solid var(--glass-border); border-radius: 10px; padding: 4px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); display: flex; flex-direction: column; gap: 2px;">
  <!-- Zoom buttons -->
  <button onclick="customZoomIn()" title="Zoom in" class="zoom-ctrl-btn" style="width: 34px; height: 34px; background: transparent; border: none; border-radius: 8px; padding: 0; cursor: pointer; color: var(--text-body); font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease, color 0.15s ease;" onmouseover="this.style.background='var(--bg-subtle)'; this.style.color='#059669'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-body)'">+</button>
  <button onclick="customZoomOut()" title="Zoom out" class="zoom-ctrl-btn" style="width: 34px; height: 34px; background: transparent; border: none; border-radius: 8px; padding: 0; cursor: pointer; color: var(--text-body); font-size: 1.05rem; font-weight: 600; display: flex; align-items: center; justify-content: center; transition: background 0.15s ease, color 0.15s ease;" onmouseover="this.style.background='var(--bg-subtle)'; this.style.color='#059669'" onmouseout="this.style.background='transparent'; this.style.color='var(--text-body)'">&minus;</button>
@@ -2132,7 +2136,7 @@ transform: rotate(180deg);
  <button id="chatToggle" onclick="toggleChat()" aria-label="Open AI Assistant">
  <img src="../assets/images/ai-assistant-logo.svg" alt="AI Assistant">
  </button>
- <div style="position: absolute; bottom: 32px; right: 96px; z-index: 999; background: rgba(15, 23, 42, 0.95); color: #fff; padding: 8px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); pointer-events: none; opacity: 0; transition: opacity 0.3s ease; white-space: nowrap;" id="chatTooltip">
+ <div style="position: absolute; bottom: 48px; right: 112px; z-index: 999; background: rgba(15, 23, 42, 0.95); color: #fff; padding: 8px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); pointer-events: none; opacity: 0; transition: opacity 0.3s ease; white-space: nowrap;" id="chatTooltip">
  Ask AI Assistant
  <span style="position: absolute; right: -5px; top: 50%; transform: translateY(-50%); width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 6px solid rgba(15, 23, 42, 0.95);"></span>
  </div>
@@ -2210,7 +2214,7 @@ transform: rotate(180deg);
  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
  
  <!-- Visitor map functionality -->
- <script src="../assets/js/visitor.js?v=35"></script>
+ <script src="../assets/js/visitor.js?v=36"></script>
  </main>
  </div>
  <script src="../assets/js/theme.js"></script>

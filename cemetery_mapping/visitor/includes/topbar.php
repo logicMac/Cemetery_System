@@ -299,7 +299,7 @@ function initLucideIcons() {
 }
 
 function initSidebarLinks() {
-    document.querySelectorAll('.visitor-nav-item a').forEach(link => {
+    document.querySelectorAll('.sidebar-group-menu a, .sidebar-group-label').forEach(link => {
         if (link.dataset.initialized === 'true') return;
         link.addEventListener('click', function() {
             if (window.innerWidth <= 900 && document.getElementById('adminSidebar').classList.contains('open')) toggleMobileMenu();
@@ -345,17 +345,14 @@ function initSidebarSearch() {
 
     input.addEventListener('input', function() {
         var q = input.value.trim().toLowerCase();
-        document.querySelectorAll('#sidebarNav .visitor-nav-item').forEach(function(item) {
-            item.style.display = !q || item.textContent.toLowerCase().includes(q) ? '' : 'none';
-        });
-        document.querySelectorAll('#sidebarNav .visitor-nav-heading').forEach(function(heading) {
-            var item = heading.nextElementSibling;
-            var visible = false;
-            while (item && !item.classList.contains('visitor-nav-heading')) {
-                if (item.style.display !== 'none') visible = true;
-                item = item.nextElementSibling;
-            }
-            heading.style.display = visible ? '' : 'none';
+        document.querySelectorAll('#sidebarNav .sidebar-group').forEach(function(group) {
+            var anyVisible = false;
+            group.querySelectorAll('.sidebar-group-menu > li').forEach(function(li) {
+                var show = q === '' || li.textContent.toLowerCase().indexOf(q) !== -1;
+                li.style.display = show ? '' : 'none';
+                if (show) anyVisible = true;
+            });
+            group.style.display = anyVisible ? '' : 'none';
         });
     });
 

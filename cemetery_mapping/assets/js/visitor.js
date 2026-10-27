@@ -460,6 +460,7 @@ async function drawStandaloneGrid(grid) {
     const centerLat = parseFloat(grid.center_lat);
     const centerLng = parseFloat(grid.center_lng);
     const cellSize = 2 * (parseFloat(grid.scale) || 1); // base 2m cells scaled by the saved editor scale
+    const debugGrid = new URLSearchParams(location.search).has('grid_debug');
     const rotationAngle = 45; // degrees (same as admin/visitor grid rendering)
     const angleRad = rotationAngle * Math.PI / 180;
     const metersPerLat = 111320;
@@ -520,6 +521,7 @@ async function drawStandaloneGrid(grid) {
                     <strong style="font-size:1rem;color:${isOccupied ? '#ef4444' : '#10b981'};display:block;margin-bottom:4px;">${gridName}</strong>
                     <span style="font-size:0.9rem;">Cell ${label} (#${compartmentNum})</span><br>
                     <span style="font-size:0.85rem;color:#475569;">Row ${row + 1}, Column ${col + 1}</span>
+                    ${debugGrid ? `<br><span>Grid #${grid.id} | API scale: ${grid.scale} | cell: ${cellSize.toFixed(2)}m</span>` : ''}
                     ${decedentInfo}
                     <div style="margin-top:6px;padding:3px 10px;background:${isOccupied ? 'rgba(239,68,68,0.15)' : 'rgba(16,185,129,0.15)'};border-radius:12px;display:inline-block;font-size:0.8rem;font-weight:600;color:${isOccupied ? '#ef4444' : '#10b981'};border:1px solid ${isOccupied ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'};">
                         ${statusText}
@@ -535,6 +537,21 @@ async function drawStandaloneGrid(grid) {
             });
 
             markers.grids.addLayer(cell);
+            if (debugGrid && row === 0 && col === 0) {
+                console.info('Visitor grid geometry', {
+                    id: grid.id, name: grid.name, scale: grid.scale, cellSize,
+                    edgeMeters: map.distance(latLngs[0], latLngs[1]),
+                    mapZoom: map.getZoom()
+                });
+                L.marker([centerLat, centerLng], {
+                    icon: L.divIcon({
+                        className: '',
+                        html: `<span style="display:inline-block;background:#fff;color:#064e3b;border:1px solid #059669;border-radius:4px;padding:2px 5px;font:12px monospace;white-space:nowrap;">Grid #${grid.id}: ${Math.round(parseFloat(grid.scale) * 100)}% (${cellSize.toFixed(2)}m/cell)</span>`,
+                        iconSize: [0, 0]
+                    }),
+                    interactive: false
+                }).addTo(markers.grids);
+            }
         }
     }
 }
@@ -1322,7 +1339,7 @@ function showClearRouteButton() {
         `;
         btn.style.cssText = `
             position: fixed;
-            bottom: 24px;
+            bottom: 44px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1500;

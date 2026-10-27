@@ -19,34 +19,55 @@
                 <kbd>/</kbd>
             </div>
 
-            <ul class="sidebar-nav visitor-nav" id="sidebarNav">
-                <li class="visitor-nav-heading">Workspace</li>
-                <li class="visitor-nav-item <?php echo (($_GET['open'] ?? '') !== 'chat' && $current_page === 'dashboard') ? 'active' : ''; ?>">
-                    <a href="dashboard.php" class="sidebar-link" title="Cemetery Map" <?php echo (($_GET['open'] ?? '') !== 'chat' && $current_page === 'dashboard') ? 'aria-current="page"' : ''; ?>>
-                        <i data-lucide="map" class="sidebar-link-icon" width="18" height="18"></i>
-                        <span class="sidebar-link-text">Cemetery Map</span>
-                    </a>
+            <?php
+            $isChat = (($_GET['open'] ?? '') === 'chat');
+            $groups = [
+                'Workspace' => [
+                    'icon' => 'layout-dashboard',
+                    'items' => [
+                        ['dashboard.php', 'map', 'Cemetery Map', 'map', !$isChat && $current_page === 'dashboard', null],
+                        ['dashboard.php?open=chat', 'chat', 'AI Assistant', 'bot', $isChat, 'AI'],
+                    ],
+                ],
+                'Information' => [
+                    'icon' => 'info',
+                    'items' => [
+                        ['../index.php#about', 'about', 'About', 'info', false, null],
+                        ['../index.php#contact', 'contact', 'Contact', 'mail', false, null],
+                    ],
+                ],
+            ];
+            ?>
+
+            <ul class="sidebar-nav" id="sidebarNav">
+                <?php foreach ($groups as $groupName => $group):
+                    $groupIcon = $group['icon'];
+                    $items = $group['items'];
+                    $hasActive = false;
+                    foreach ($items as $it) { if ($it[4]) { $hasActive = true; break; } }
+                ?>
+                <li class="sidebar-group <?php echo $hasActive ? 'has-active' : ''; ?>">
+                    <div class="sidebar-group-head">
+                        <a href="<?php echo $items[0][0]; ?>" class="sidebar-group-label" title="<?php echo htmlspecialchars($groupName, ENT_QUOTES, 'UTF-8'); ?>">
+                            <i data-lucide="<?php echo $groupIcon; ?>" class="sidebar-group-icon" width="17" height="17"></i>
+                            <span class="sidebar-group-title"><?php echo $groupName; ?></span>
+                        </a>
+                    </div>
+                    <ul class="sidebar-group-menu" data-group-label="<?php echo $groupName; ?>">
+                        <?php foreach ($items as $item): ?>
+                        <li>
+                            <a href="<?php echo $item[0]; ?>" class="<?php echo $item[4] ? 'active' : ''; ?>" <?php echo $item[4] ? 'aria-current="page"' : ''; ?>>
+                                <i data-lucide="<?php echo $item[3]; ?>" width="18" height="18"></i>
+                                <?php echo $item[2]; ?>
+                                <?php if ($item[5] !== null): ?>
+                                    <span class="sidebar-link-badge"><?php echo $item[5]; ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </li>
-                <li class="visitor-nav-item <?php echo (($_GET['open'] ?? '') === 'chat') ? 'active' : ''; ?>">
-                    <a href="dashboard.php?open=chat" class="sidebar-link" title="AI Assistant" <?php echo (($_GET['open'] ?? '') === 'chat') ? 'aria-current="page"' : ''; ?>>
-                        <i data-lucide="bot" class="sidebar-link-icon" width="18" height="18"></i>
-                        <span class="sidebar-link-text">AI Assistant</span>
-                        <span class="sidebar-link-badge">AI</span>
-                    </a>
-                </li>
-                <li class="visitor-nav-heading">Information</li>
-                <li class="visitor-nav-item">
-                    <a href="../index.php#about" class="sidebar-link" title="About">
-                        <i data-lucide="info" class="sidebar-link-icon" width="18" height="18"></i>
-                        <span class="sidebar-link-text">About</span>
-                    </a>
-                </li>
-                <li class="visitor-nav-item">
-                    <a href="../index.php#contact" class="sidebar-link" title="Contact">
-                        <i data-lucide="mail" class="sidebar-link-icon" width="18" height="18"></i>
-                        <span class="sidebar-link-text">Contact</span>
-                    </a>
-                </li>
+                <?php endforeach; ?>
             </ul>
         </aside>
 

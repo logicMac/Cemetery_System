@@ -142,7 +142,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  <div class="flex justify-between text-xs text-slate-600 mb-1"><span>Resize Whole Grid</span><span id="editorScaleVal">100%</span></div>
  <div class="flex items-center gap-2">
  <button type="button" onclick="editorShrink()" class="w-8 h-8 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold">&minus;</button>
- <input type="range" id="editorGridScale" min="25" max="200" value="100" step="5" oninput="editorUpdateScale(this.value)" class="flex-1 accent-emerald-600">
+ <input type="range" id="editorGridScale" min="10" max="500" value="100" step="5" oninput="editorUpdateScale(this.value)" class="flex-1 accent-emerald-600">
  <button type="button" onclick="editorEnlarge()" class="w-8 h-8 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold">+</button>
  </div>
  <p class="text-[10px] text-slate-400 mt-1">Drag the corner handle on the map to resize directly.</p>
@@ -712,7 +712,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  const rows = gridData.rows; const cols = gridData.cols;
  const baseHalfDiagonal = Math.sqrt(Math.pow(cols, 2) + Math.pow(rows, 2)) * GRID_CELL_METERS / 2;
  let newScale = distMeters / baseHalfDiagonal;
- newScale = Math.max(0.25, Math.min(2, newScale));
+ newScale = Math.max(0.1, Math.min(5, newScale));
  editorMapScale = newScale;
  const pct = Math.round(newScale * 100);
  document.getElementById('editorGridScale').value = pct;

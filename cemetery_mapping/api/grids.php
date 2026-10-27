@@ -461,7 +461,7 @@ function readGridScale(array $input, float $fallback): float {
     $s = isset($input['grid_scale']) && $input['grid_scale'] !== ''
         ? (float)$input['grid_scale']
         : $fallback;
-    return max(0.25, min(2.0, $s));
+    return max(0.1, min(5.0, $s));
 }
 
 function recordExists(PDO $pdo, int $id): bool {
