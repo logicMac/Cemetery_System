@@ -259,9 +259,26 @@ function handleUpdate(PDO $pdo) {
             $gridId
         ]);
 
-        // Remove old cells, insert new ones
+        // Remove old cells, insert new ones — preserve record assignments by row/col
+        $assigned = $pdo->prepare(
+            "SELECT row_idx, col_idx, record_id, is_selected
+             FROM plot_grid_cells WHERE grid_id = ? AND (record_id IS NOT NULL OR is_selected = 1)"
+        );
+        $assigned->execute([$gridId]);
+        $preserved = $assigned->fetchAll();
+
         $pdo->prepare("DELETE FROM plot_grid_cells WHERE grid_id = ?")->execute([$gridId]);
         insertCells($pdo, $gridId, $grid);
+
+        if ($preserved) {
+            $restore = $pdo->prepare(
+                "UPDATE plot_grid_cells SET record_id = ?, is_selected = ?
+                 WHERE grid_id = ? AND row_idx = ? AND col_idx = ?"
+            );
+            foreach ($preserved as $cell) {
+                $restore->execute([$cell['record_id'], $cell['is_selected'], $gridId, $cell['row_idx'], $cell['col_idx']]);
+            }
+        }
         $pdo->commit();
     } catch (Exception $e) {
         $pdo->rollBack();

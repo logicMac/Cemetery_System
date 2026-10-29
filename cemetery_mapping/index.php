@@ -414,12 +414,6 @@ $percentage = $counts['plots'] > 0 ? round(($available_count / $counts['plots'])
                     <h3 class="text-lg font-bold text-slate-900 mb-2">MemoryGuide AI Assistant</h3>
                     <p class="text-sm text-slate-500 leading-relaxed">Ask questions in plain language — "Where is my lola buried?" — and our AI assistant will search records and guide you to the exact location.</p>
                 </div>
-                <!-- 4 -->
-                <div class="feature-card group rounded-2xl bg-white border border-slate-200 p-7 overflow-hidden hover:shadow-xl hover:border-emerald-200 hover:-translate-y-1.5 transition-all duration-300">
-                    <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform"><i data-lucide="calendar-check" class="w-6 h-6"></i></div>
-                    <h3 class="text-lg font-bold text-slate-900 mb-2">Online Plot Reservations</h3>
-                    <p class="text-sm text-slate-500 leading-relaxed">Reserve available plots online and track the status of your request. Admins can review, approve, and manage reservations in one place.</p>
-                </div>
                 <!-- 5 -->
                 <div class="feature-card group rounded-2xl bg-white border border-slate-200 p-7 overflow-hidden hover:shadow-xl hover:border-emerald-200 hover:-translate-y-1.5 transition-all duration-300">
                     <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform"><i data-lucide="bar-chart-3" class="w-6 h-6"></i></div>
