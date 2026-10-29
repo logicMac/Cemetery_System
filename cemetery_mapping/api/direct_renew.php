@@ -18,6 +18,8 @@ header('Content-Type: application/json; charset=utf-8');
 
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/../renewal_errors.log');
 
 require_once '../config/database.php';
 
@@ -110,6 +112,11 @@ try {
         $vs = $pdo->prepare("SELECT visitor_id FROM burial_records WHERE id = ?");
         $vs->execute([$record_id]);
         $visitorId = $vs->fetchColumn() ?: null;
+    } else {
+        // For available plots, try to find the visitor via approved reservations
+        $vs = $pdo->prepare("SELECT visitor_id FROM plot_reservations WHERE plot_id = ? AND status = 'approved' ORDER BY created_at DESC LIMIT 1");
+        $vs->execute([$plot_id]);
+        $visitorId = $vs->fetchColumn() ?: null;
     }
 
     $logStmt = $pdo->prepare("
@@ -134,6 +141,20 @@ try {
     echo json_encode(['success' => true, 'message' => "Plot renewed successfully. New expiration date: {$newExpiration}", 'new_expiration' => $newExpiration]);
 } catch (PDOException $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();
-    error_log("Direct renewal error: " . $e->getMessage());
-    echo json_encode(['success' => false, 'message' => 'Database error']);
+    
+    $errorMsg = "Direct renewal error: " . $e->getMessage() . "\n";
+    $errorMsg .= "Plot type: {$plot_type}, ";
+    $errorMsg .= ($plot_type === 'burial' ? "Record ID: {$record_id}" : "Plot ID: {$plot_id}");
+    $errorMsg .= ", OR: {$or_number}\n";
+    $errorMsg .= "Stack trace: " . $e->getTraceAsString() . "\n";
+    
+    error_log($errorMsg);
+    
+    // Return more detailed error in development
+    $detailedError = (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false || strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false);
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Database error' . ($detailedError ? ': ' . $e->getMessage() : ''),
+        'error_code' => $e->getCode()
+    ]);
 }
