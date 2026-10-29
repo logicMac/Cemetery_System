@@ -166,6 +166,20 @@ button svg, a svg, button i, a i { pointer-events: none; }
  </div>
  </section>
 
+ <!-- Copy Location Feature -->
+ <section class="bg-sky-50 border-2 border-sky-200 rounded-xl p-5 animate-[fadeUp_0.85s_ease]">
+ <div class="flex items-center gap-2 mb-3">
+ <i data-lucide="copy" class="w-4 h-4 text-sky-600"></i>
+ <h3 class="text-sm font-semibold uppercase tracking-wide text-sky-700">Copy Location from Existing Burial</h3>
+ </div>
+ <p class="text-xs text-sky-600 mb-3">Adding another burial to the same plot? Search and click to copy coordinates.</p>
+ <div class="relative">
+ <input type="text" id="locationSearch" placeholder="Search by name or plot number..." 
+ class="w-full rounded-lg border-2 border-sky-300 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-100 focus:outline-none transition">
+ <div id="locationResults" class="absolute z-10 w-full mt-2 max-h-64 overflow-y-auto bg-white border-2 border-sky-200 rounded-lg shadow-lg hidden"></div>
+ </div>
+ </section>
+
  <!-- Location card -->
  <section class="bg-white rounded-xl border border-slate-200 p-6 animate-[fadeUp_0.9s_ease]">
  <div class="flex items-center gap-2 mb-2">
@@ -254,8 +268,16 @@ button svg, a svg, button i, a i { pointer-events: none; }
  [6.184703227248634, 125.08538436803683]
  ];
 
+ // Padded boundary used for click validation — graves/markers may sit slightly
+ // outside the drawn red box, so allow a ~30% margin around it.
+ const CEMETERY_CHECK_POLYGON = (function() {
+ const cx = CEMETERY_POLYGON.reduce((s, p) => s + p[0], 0) / CEMETERY_POLYGON.length;
+ const cy = CEMETERY_POLYGON.reduce((s, p) => s + p[1], 0) / CEMETERY_POLYGON.length;
+ return CEMETERY_POLYGON.map(p => [cx + (p[0] - cx) * 1.3, cy + (p[1] - cy) * 1.3]);
+ })();
+
  function isInsideCemetery(lat, lng) {
- const poly = CEMETERY_POLYGON;
+ const poly = CEMETERY_CHECK_POLYGON;
  let inside = false;
  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
  const xi = poly[i][1], yi = poly[i][0];
@@ -282,29 +304,74 @@ button svg, a svg, button i, a i { pointer-events: none; }
  dashArray: '5, 10'
  }).addTo(mapPicker);
  
+ // Load available plots (yellow markers) so user can click them
+ fetch('../api/get_available_plots.php')
+ .then(res => res.json())
+ .then(data => {
+ if (data.success && data.plots) {
+ data.plots.forEach(plot => {
+ if (plot.latitude && plot.longitude) {
+ const plotMarker = L.marker([plot.latitude, plot.longitude], {
+ icon: L.divIcon({
+ className: 'available-plot-marker',
+ html: `<div style="background: #facc15; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(250, 204, 21, 0.6); cursor: pointer;"></div>`,
+ iconSize: [20, 20],
+ iconAnchor: [10, 10]
+ }),
+ title: plot.plot_number || 'Available Plot'
+ }).addTo(mapPicker);
+ 
+ // Make yellow markers clickable to set coordinates
+ plotMarker.on('click', function(e) {
+ if (e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
+ setPickerLocation(L.latLng(parseFloat(plot.latitude), parseFloat(plot.longitude)));
+ });
+ }
+ 
+ // Also render compartments if they exist
+ if (plot.has_grid && plot.compartments) {
+ plot.compartments.forEach(comp => {
+ // Calculate compartment position based on grid
+ const latOffset = (comp.row_index - (plot.grid_rows / 2)) * 0.00001;
+ const lngOffset = (comp.col_index - (plot.grid_cols / 2)) * 0.00001;
+ const compLat = parseFloat(plot.latitude) + latOffset;
+ const compLng = parseFloat(plot.longitude) + lngOffset;
+ 
+ const compMarker = L.marker([compLat, compLng], {
+ icon: L.divIcon({
+ className: 'compartment-marker',
+ html: `<div style="background: ${comp.is_occupied ? '#f97316' : '#facc15'}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer;"></div>`,
+ iconSize: [16, 16],
+ iconAnchor: [8, 8]
+ }),
+ title: comp.compartment_number
+ }).addTo(mapPicker);
+ 
+ // Make compartments clickable too
+ compMarker.on('click', function(e) {
+ if (e.originalEvent) L.DomEvent.stopPropagation(e.originalEvent);
+ setPickerLocation(L.latLng(compLat, compLng));
+ });
+ });
+ }
+ });
+ }
+ })
+ .catch(err => console.error('Failed to load available plots:', err));
+ 
  let marker = null;
  
- // Click to set location
- mapPicker.on('click', function(e) {
- const lat = e.latlng.lat;
- const lng = e.latlng.lng;
-
- if (!isInsideCemetery(lat, lng)) {
- if (typeof themeUtils !== 'undefined' && themeUtils.showAlert) {
- themeUtils.showAlert('Please click inside the cemetery boundary (red box).', 'error');
- } else {
- alert('Please click inside the cemetery boundary (red box).');
- }
- return;
- }
+ function setPickerLocation(latlng) {
+ const lat = latlng.lat;
+ const lng = latlng.lng;
 
  document.getElementById('latitude').value = lat;
  document.getElementById('longitude').value = lng;
  
  if (marker) {
- marker.setLatLng(e.latlng);
+ marker.setLatLng(latlng);
  } else {
- marker = L.marker(e.latlng, {
+ marker = L.marker(latlng, {
  icon: L.divIcon({
  className: 'custom-marker',
  html: '<div style="background: #22c55e; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(74, 222, 128, 0.5);"></div>',
@@ -313,6 +380,11 @@ button svg, a svg, button i, a i { pointer-events: none; }
  })
  }).addTo(mapPicker);
  }
+ }
+
+ // Click to set location - ALLOW ANYWHERE, including yellow markers (compartments)
+ mapPicker.on('click', function(e) {
+ setPickerLocation(e.latlng);
  });
  
  // Auto-calculate plot expiration: burial date + 5 years (defaults to today + 5 years)
@@ -406,3 +478,101 @@ button svg, a svg, button i, a i { pointer-events: none; }
  </script>
 </body>
 </html>
+
+
+ // === Copy Location from Existing Burial Feature ===
+ let locationSearchTimeout = null;
+ const locationSearchInput = document.getElementById('locationSearch');
+ const locationResults = document.getElementById('locationResults');
+ 
+ locationSearchInput.addEventListener('input', function() {
+ clearTimeout(locationSearchTimeout);
+ const query = this.value.trim();
+ 
+ if (query.length < 2) {
+ locationResults.classList.add('hidden');
+ return;
+ }
+ 
+ locationSearchTimeout = setTimeout(async () => {
+ try {
+ const res = await fetch(`../api/search.php?q=${encodeURIComponent(query)}`);
+ const data = await res.json();
+ 
+ if (data.success && data.results && data.results.length > 0) {
+ locationResults.innerHTML = data.results.map(r => `
+ <div onclick="copyLocationFromRecord(${r.id}, ${r.latitude}, ${r.longitude}, '${(r.plot_number || '').replace(/'/g, "\\'")}', '${(r.barangay || '').replace(/'/g, "\\'")}')" 
+ class="p-3 border-b border-sky-100 last:border-0 hover:bg-sky-50 cursor-pointer transition">
+ <div class="font-semibold text-slate-900">${escapeHtml(r.decedent_name)}</div>
+ <div class="text-xs text-slate-500 mt-1">
+ <span class="inline-block mr-3">📍 Plot: <strong>${escapeHtml(r.plot_number || 'N/A')}</strong></span>
+ <span class="inline-block">🗺️ ${r.latitude}, ${r.longitude}</span>
+ </div>
+ ${r.barangay ? `<div class="text-xs text-sky-600 mt-1">Barangay: ${escapeHtml(r.barangay)}</div>` : ''}
+ </div>
+ `).join('');
+ locationResults.classList.remove('hidden');
+ } else {
+ locationResults.innerHTML = '<div class="p-3 text-sm text-slate-500 text-center">No records found</div>';
+ locationResults.classList.remove('hidden');
+ }
+ } catch (err) {
+ console.error('Location search error:', err);
+ locationResults.innerHTML = '<div class="p-3 text-sm text-rose-500 text-center">Search error</div>';
+ locationResults.classList.remove('hidden');
+ }
+ }, 300);
+ });
+ 
+ // Click outside to close results
+ document.addEventListener('click', function(e) {
+ if (!locationSearchInput.contains(e.target) && !locationResults.contains(e.target)) {
+ locationResults.classList.add('hidden');
+ }
+ });
+ 
+ function copyLocationFromRecord(recordId, lat, lng, plotNum, barangay) {
+ // Fill in coordinates
+ document.getElementById('latitude').value = lat;
+ document.getElementById('longitude').value = lng;
+ 
+ // Fill in plot number (suggest adding suffix)
+ const plotInput = document.getElementById('plot_number');
+ if (plotNum) {
+ plotInput.value = plotNum;
+ plotInput.focus();
+ plotInput.select();
+ }
+ 
+ // Fill in barangay if available
+ if (barangay) {
+ const barangaySelect = document.getElementById('barangay');
+ barangaySelect.value = barangay;
+ }
+ 
+ // Update map marker
+ const latlng = L.latLng(parseFloat(lat), parseFloat(lng));
+ setPickerLocation(latlng);
+ mapPicker.setView(latlng, 19);
+ 
+ // Hide results
+ locationResults.classList.add('hidden');
+ locationSearchInput.value = '';
+ 
+ // Show success message
+ if (typeof themeUtils !== 'undefined' && themeUtils.showAlert) {
+ themeUtils.showAlert('✓ Location copied! Update plot number if needed (e.g., add "-Level2" or "-B")', 'success');
+ } else {
+ alert('✓ Location copied from existing burial!\n\nTip: Update the plot number to indicate this is a different burial at the same location\n(e.g., "A1" → "A1-Level2" or "FamilyPlot-B")');
+ }
+ 
+ // Scroll to plot number field
+ plotInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+ }
+ 
+ function escapeHtml(str) {
+ if (!str) return '';
+ const div = document.createElement('div');
+ div.textContent = str;
+ return div.innerHTML;
+ }

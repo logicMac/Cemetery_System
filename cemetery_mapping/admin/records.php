@@ -243,11 +243,11 @@ button svg, a svg, button i, a i { pointer-events: none; }
 </div>
 
 <!-- Add Record Modal -->
-<div id="addRecordModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+<div id="addRecordModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 overflow-y-auto">
  <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeAddModal()"></div>
- <div class="relative bg-white rounded-xl shadow-lg w-full max-w-7xl max-h-[94vh] overflow-y-auto">
+ <div class="relative bg-white rounded-xl shadow-lg w-full max-w-7xl my-8 flex flex-col max-h-[calc(100vh-4rem)]">
  <!-- Modal header -->
- <div class="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+ <div class="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
  <div class="flex items-center gap-3">
  <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
  <i data-lucide="user-plus" class="w-5 h-5"></i>
@@ -263,6 +263,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  </div>
 
  <!-- Modal body -->
+ <div class="flex-1 overflow-y-auto">
  <form id="addRecordForm" enctype="multipart/form-data" class="p-6 space-y-5">
  <!-- Decedent details -->
  <div>
@@ -436,13 +437,14 @@ button svg, a svg, button i, a i { pointer-events: none; }
  </div>
  </form>
  </div>
+ </div>
 </div>
 
 <!-- View Record Modal -->
-<div id="viewRecordModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+<div id="viewRecordModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 overflow-y-auto">
  <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeViewModal()"></div>
- <div class="relative bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
- <div class="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+ <div class="relative bg-white rounded-xl shadow-lg w-full max-w-2xl my-8 flex flex-col max-h-[calc(100vh-4rem)]">
+ <div class="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
  <div class="flex items-center gap-3">
  <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
  <i data-lucide="eye" class="w-5 h-5"></i>
@@ -456,15 +458,17 @@ button svg, a svg, button i, a i { pointer-events: none; }
  <i data-lucide="x" class="w-5 h-5"></i>
  </button>
  </div>
+ <div class="flex-1 overflow-y-auto">
  <div id="viewModalBody" class="p-6"></div>
+ </div>
  </div>
 </div>
 
 <!-- Edit Record Modal -->
-<div id="editRecordModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
+<div id="editRecordModal" class="fixed inset-0 z-[200] hidden items-center justify-center p-4 overflow-y-auto">
  <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeEditModal()"></div>
- <div class="relative bg-white rounded-xl shadow-lg w-full max-w-7xl max-h-[94vh] overflow-y-auto">
- <div class="sticky top-0 z-10 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+ <div class="relative bg-white rounded-xl shadow-lg w-full max-w-7xl my-8 flex flex-col max-h-[calc(100vh-4rem)]">
+ <div class="flex-shrink-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
  <div class="flex items-center gap-3">
  <div class="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600">
  <i data-lucide="pencil" class="w-5 h-5"></i>
@@ -478,6 +482,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  <i data-lucide="x" class="w-5 h-5"></i>
  </button>
  </div>
+ <div class="flex-1 overflow-y-auto">
  <form id="editRecordForm" enctype="multipart/form-data" class="p-6 space-y-5">
  <input type="hidden" name="id">
  <div>
@@ -612,6 +617,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  </div>
  </form>
  </div>
+ </div>
 </div>
 
 <!-- Direct Renew Modal (Admin) -->
@@ -720,9 +726,17 @@ button svg, a svg, button i, a i { pointer-events: none; }
  let modalSelectedGridId = null;
  let modalSelectedCell = null;
 
+ // Padded boundary used for click validation — graves/markers may sit slightly
+ // outside the drawn red box, so allow a ~30% margin around it.
+ const CEMETERY_CHECK_POLYGON = (function() {
+ const cx = CEMETERY_POLYGON.reduce((s, p) => s + p[0], 0) / CEMETERY_POLYGON.length;
+ const cy = CEMETERY_POLYGON.reduce((s, p) => s + p[1], 0) / CEMETERY_POLYGON.length;
+ return CEMETERY_POLYGON.map(p => [cx + (p[0] - cx) * 1.3, cy + (p[1] - cy) * 1.3]);
+ })();
+
  // Check if a lat/lng point is inside the cemetery polygon (ray-casting)
  function isInsideCemetery(lat, lng) {
- const poly = CEMETERY_POLYGON;
+ const poly = CEMETERY_CHECK_POLYGON;
  let inside = false;
  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
  const xi = poly[i][1], yi = poly[i][0];
@@ -1006,7 +1020,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  }
 
  function initModalMap() {
- modalMap = L.map('modalMapPicker', { rotate: true, touchRotate: true, bearing: 315 }).setView(CEMETERY_CENTER, 17);
+ modalMap = L.map('modalMapPicker', { rotate: true, touchRotate: true, bearing: 315, scrollWheelZoom: false }).setView(CEMETERY_CENTER, 17);
 
  L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
  maxZoom: 20,
@@ -1019,12 +1033,60 @@ button svg, a svg, button i, a i { pointer-events: none; }
  fillOpacity: 0,
  dashArray: '5, 10'
  }).addTo(modalMap);
+ 
+ // Load available plots (yellow markers) for clicking
+ fetch('../api/get_available_plots.php')
+ .then(res => res.json())
+ .then(data => {
+ if (data.success && data.plots) {
+ data.plots.forEach(plot => {
+ if (plot.latitude && plot.longitude) {
+ const plotMarker = L.marker([plot.latitude, plot.longitude], {
+ icon: L.divIcon({
+ className: 'available-plot-marker',
+ html: `<div style="background: #facc15; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(250, 204, 21, 0.6); cursor: pointer; z-index: 1000;"></div>`,
+ iconSize: [20, 20],
+ iconAnchor: [10, 10]
+ }),
+ title: plot.plot_number || 'Available Plot'
+ }).addTo(modalMap);
+ 
+ plotMarker.on('click', function(e) {
+ L.DomEvent.stopPropagation(e);
+ snapModalTo(e.latlng.lat, e.latlng.lng);
+ });
+ }
+ 
+ // Also render compartments if they exist
+ if (plot.has_grid && plot.compartments) {
+ plot.compartments.forEach(comp => {
+ const latOffset = (comp.row_index - (plot.grid_rows / 2)) * 0.00001;
+ const lngOffset = (comp.col_index - (plot.grid_cols / 2)) * 0.00001;
+ const compLat = parseFloat(plot.latitude) + latOffset;
+ const compLng = parseFloat(plot.longitude) + lngOffset;
+ 
+ const compMarker = L.marker([compLat, compLng], {
+ icon: L.divIcon({
+ className: 'compartment-marker',
+ html: `<div style="background: ${comp.is_occupied ? '#f97316' : '#facc15'}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000;"></div>`,
+ iconSize: [16, 16],
+ iconAnchor: [8, 8]
+ }),
+ title: comp.compartment_number
+ }).addTo(modalMap);
+ 
+ compMarker.on('click', function(e) {
+ L.DomEvent.stopPropagation(e);
+ snapModalTo(e.latlng.lat, e.latlng.lng);
+ });
+ });
+ }
+ });
+ }
+ })
+ .catch(err => console.error('Failed to load available plots on modal:', err));
 
  modalMap.on('click', function(e) {
- if (!isInsideCemetery(e.latlng.lat, e.latlng.lng)) {
- showBoundsError();
- return;
- }
  document.getElementById('modalLat').value = e.latlng.lat;
  document.getElementById('modalLng').value = e.latlng.lng;
 
@@ -1072,6 +1134,25 @@ button svg, a svg, button i, a i { pointer-events: none; }
  loadExistingRecordsOnModalMap();
  }
 
+ // Snap the Add-Record picker to an exact coordinate (used by marker clicks + popup button)
+ function snapModalTo(lat, lng) {
+ document.getElementById('modalLat').value = lat;
+ document.getElementById('modalLng').value = lng;
+ if (modalMarker) {
+ modalMarker.setLatLng([lat, lng]);
+ } else {
+ modalMarker = L.marker([lat, lng], {
+ icon: L.divIcon({
+ className: 'custom-marker',
+ html: '<div style="background: #10b981; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(16,185,129,0.5);"></div>',
+ iconSize: [16, 16],
+ iconAnchor: [8, 8]
+ })
+ }).addTo(modalMap);
+ }
+ if (modalMap) modalMap.closePopup();
+ }
+
  // ---- Show existing deceased/burial records as markers on the Add Record map ----
  async function loadExistingRecordsOnModalMap() {
  if (!modalMap) return;
@@ -1095,6 +1176,8 @@ button svg, a svg, button i, a i { pointer-events: none; }
  }),
  zIndexOffset: 1000
  });
+ // Clicking an existing marker snaps the picker to that record's exact coordinates
+ marker.on('click', function() { snapModalTo(lat, lng); });
  const photoHtml = r.photo
  ? `<img src="../uploads/photos/${escapeHtml(r.photo)}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;margin-top:6px;">`
  : '';
@@ -1104,6 +1187,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  <span style="font-size:0.8rem;color:#666;">${escapeHtml(r.plot_number || 'No plot #')}</span><br>
  <span style="font-size:0.75rem;color:#999;">${escapeHtml(r.barangay || '')}</span>
  ${photoHtml}
+ <button type="button" onclick="snapModalTo(${lat}, ${lng})" style="margin-top:8px;width:100%;padding:6px 10px;background:#10b981;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">+ Add record at this location</button>
  </div>
  `);
  marker.addTo(modalMap);
@@ -1187,8 +1271,12 @@ button svg, a svg, button i, a i { pointer-events: none; }
  `);
 
  cellLayer.on('click', function(e) {
+ if (isOccupied) return; // let the click reach the map so a record can still be placed here
+ // Grid cells sit under the plot/compartment markers; if the click actually
+ // landed on a marker icon, let the marker's own click handler take it.
+ const domTarget = e.originalEvent && e.originalEvent.target;
+ if (domTarget && domTarget.closest && domTarget.closest('.available-plot-marker, .compartment-marker, .existing-record-marker')) return;
  L.DomEvent.stopPropagation(e);
- if (isOccupied) return;
  selectModalGridCell(grid.id, gridName, rowNum, colNum, cellLat, cellLng);
  });
 
@@ -1627,7 +1715,7 @@ button svg, a svg, button i, a i { pointer-events: none; }
  let editRecordLayers = [];
 
  function initEditMap() {
- editMap = L.map('editMapPicker', { rotate: true, touchRotate: true, bearing: 315 }).setView(CEMETERY_CENTER, 17);
+ editMap = L.map('editMapPicker', { rotate: true, touchRotate: true, bearing: 315, scrollWheelZoom: false }).setView(CEMETERY_CENTER, 17);
 
  L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
  maxZoom: 20,
@@ -1637,12 +1725,64 @@ button svg, a svg, button i, a i { pointer-events: none; }
  L.polygon(CEMETERY_POLYGON, {
  color: '#b55a5a', weight: 2, fillOpacity: 0, dashArray: '5, 10'
  }).addTo(editMap);
+ 
+ // Load available plots (yellow markers) for clicking
+ fetch('../api/get_available_plots.php')
+ .then(res => res.json())
+ .then(data => {
+ if (data.success && data.plots) {
+ data.plots.forEach(plot => {
+ if (plot.latitude && plot.longitude) {
+ const plotMarker = L.marker([plot.latitude, plot.longitude], {
+ icon: L.divIcon({
+ className: 'available-plot-marker',
+ html: `<div style="background: #facc15; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(250, 204, 21, 0.6); cursor: pointer; z-index: 1000;"></div>`,
+ iconSize: [20, 20],
+ iconAnchor: [10, 10]
+ }),
+ title: plot.plot_number || 'Available Plot'
+ }).addTo(editMap);
+ 
+ plotMarker.on('click', function(e) {
+ L.DomEvent.stopPropagation(e);
+ document.getElementById('editLat').value = e.latlng.lat;
+ document.getElementById('editLng').value = e.latlng.lng;
+ setEditMarker(e.latlng.lat, e.latlng.lng);
+ });
+ }
+ 
+ // Also render compartments
+ if (plot.has_grid && plot.compartments) {
+ plot.compartments.forEach(comp => {
+ const latOffset = (comp.row_index - (plot.grid_rows / 2)) * 0.00001;
+ const lngOffset = (comp.col_index - (plot.grid_cols / 2)) * 0.00001;
+ const compLat = parseFloat(plot.latitude) + latOffset;
+ const compLng = parseFloat(plot.longitude) + lngOffset;
+ 
+ const compMarker = L.marker([compLat, compLng], {
+ icon: L.divIcon({
+ className: 'compartment-marker',
+ html: `<div style="background: ${comp.is_occupied ? '#f97316' : '#facc15'}; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); cursor: pointer; z-index: 1000;"></div>`,
+ iconSize: [16, 16],
+ iconAnchor: [8, 8]
+ }),
+ title: comp.compartment_number
+ }).addTo(editMap);
+ 
+ compMarker.on('click', function(e) {
+ L.DomEvent.stopPropagation(e);
+ document.getElementById('editLat').value = e.latlng.lat;
+ document.getElementById('editLng').value = e.latlng.lng;
+ setEditMarker(e.latlng.lat, e.latlng.lng);
+ });
+ });
+ }
+ });
+ }
+ })
+ .catch(err => console.error('Failed to load available plots on edit map:', err));
 
  editMap.on('click', function(e) {
- if (!isInsideCemetery(e.latlng.lat, e.latlng.lng)) {
- showBoundsError();
- return;
- }
  document.getElementById('editLat').value = e.latlng.lat;
  document.getElementById('editLng').value = e.latlng.lng;
  setEditMarker(e.latlng.lat, e.latlng.lng);
@@ -1763,23 +1903,32 @@ button svg, a svg, button i, a i { pointer-events: none; }
  }),
  zIndexOffset: 1000
  });
- const photoHtml = r.photo
- ? `<img src="../uploads/photos/${escapeHtml(r.photo)}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;margin-top:6px;">`
- : '';
+ // Clicking an existing marker snaps the picker to that record's exact coordinates
+ (function(mLat, mLng) {
+ marker.on('click', function() { snapEditTo(mLat, mLng); });
  marker.bindPopup(`
  <div style="min-width:180px;">
  <strong style="font-size:0.95rem;color:#f59e0b;">${escapeHtml(r.decedent_name || 'Unknown')}</strong><br>
  <span style="font-size:0.8rem;color:#666;">${escapeHtml(r.plot_number || 'No plot #')}</span><br>
  <span style="font-size:0.75rem;color:#999;">${escapeHtml(r.barangay || '')}</span>
- ${photoHtml}
+ ${r.photo ? `<img src="../uploads/photos/${escapeHtml(r.photo)}" style="width:60px;height:60px;border-radius:8px;object-fit:cover;margin-top:6px;">` : ''}
+ <button type="button" onclick="snapEditTo(${mLat}, ${mLng})" style="margin-top:8px;width:100%;padding:6px 10px;background:#10b981;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;">+ Move record to this location</button>
  </div>
  `);
+ })(parseFloat(r.latitude), parseFloat(r.longitude));
  marker.addTo(editMap);
  editRecordLayers.push(marker);
  });
  } catch (e) {
  console.error('Error loading existing records on edit map:', e);
  }
+ }
+
+ function snapEditTo(lat, lng) {
+ document.getElementById('editLat').value = lat;
+ document.getElementById('editLng').value = lng;
+ setEditMarker(lat, lng);
+ if (editMap) editMap.closePopup();
  }
 
  function setEditMarker(lat, lng) {

@@ -10,19 +10,30 @@ $calYear = isset($_GET['cal_year']) ? (int)$_GET['cal_year'] : (int)date('Y');
 if ($calMonth < 1 || $calMonth > 12) { $calMonth = (int)date('n'); }
 if ($calYear < 2000 || $calYear > 2100) { $calYear = (int)date('Y'); }
 
+// Filters
+$filterStatus = isset($_GET['status']) ? $_GET['status'] : 'all';
+if (!in_array($filterStatus, ['all', 'scheduled', 'completed'], true)) { $filterStatus = 'all'; }
+$searchQ = isset($_GET['q']) ? trim($_GET['q']) : '';
+
 // Fetch scheduled burials for the selected month
 try {
  // Auto-complete burials whose date has already passed
  $pdo->exec("UPDATE burial_records SET is_buried = 1 WHERE is_buried = 0 AND burial_date IS NOT NULL AND burial_date < CURDATE()");
+
+ $statusSql = '';
+ $statusParams = [$calMonth, $calYear];
+ if ($filterStatus === 'scheduled') { $statusSql = ' AND is_buried = 0'; }
+ elseif ($filterStatus === 'completed') { $statusSql = ' AND is_buried = 1'; }
 
  $calStmt = $pdo->prepare("
  SELECT id, decedent_name, plot_number, barangay, burial_date, burial_time, is_buried
  FROM burial_records
  WHERE burial_date IS NOT NULL
  AND MONTH(burial_date) = ? AND YEAR(burial_date) = ?
+ $statusSql
  ORDER BY burial_date ASC, burial_time ASC
  ");
- $calStmt->execute([$calMonth, $calYear]);
+ $calStmt->execute($statusParams);
  $calendarBurials = [];
  $all = $calStmt->fetchAll();
  foreach ($all as $row) {
@@ -50,14 +61,38 @@ try {
  ");
  $upcomingBurials = $upcomingStmt->fetchAll();
 
+ // Search across all scheduled burials (any month)
+ $searchResults = [];
+ if ($searchQ !== '') {
+ $like = '%' . $searchQ . '%';
+ $searchSql = "
+ SELECT id, decedent_name, plot_number, barangay, burial_date, burial_time, is_buried
+ FROM burial_records
+ WHERE burial_date IS NOT NULL
+ AND (decedent_name LIKE ? OR plot_number LIKE ? OR barangay LIKE ?)
+ ";
+ $searchParams = [$like, $like, $like];
+ if ($filterStatus === 'scheduled') { $searchSql .= ' AND is_buried = 0'; }
+ elseif ($filterStatus === 'completed') { $searchSql .= ' AND is_buried = 1'; }
+ $searchSql .= ' ORDER BY burial_date ASC, burial_time ASC LIMIT 50';
+ $sStmt = $pdo->prepare($searchSql);
+ $sStmt->execute($searchParams);
+ $searchResults = $sStmt->fetchAll();
+ }
+
 } catch (PDOException $e) {
  $calendarBurials = [];
  $completed = 0;
  $upcoming = 0;
  $totalEvents = 0;
  $upcomingBurials = [];
+ $searchResults = [];
  error_log('Burial calendar error: ' . $e->getMessage());
 }
+
+// Query string helper preserving active filters
+$filterQS = ($filterStatus !== 'all' ? '&status=' . urlencode($filterStatus) : '')
+ . ($searchQ !== '' ? '&q=' . urlencode($searchQ) : '');
 
 $prevM = $calMonth - 1; $prevY = $calYear; if ($prevM < 1) { $prevM = 12; $prevY--; }
 $nextM = $calMonth + 1; $nextY = $calYear; if ($nextM > 12) { $nextM = 1; $nextY++; }
@@ -116,6 +151,32 @@ $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
  .cal-legend { display: flex; align-items: center; gap: 12px; }
  .cal-legend span { display: flex; align-items: center; gap: 5px; font-size: 0.7rem; color: var(--text-muted); font-weight: 500; }
  .cal-legend .swatch { width: 9px; height: 9px; border-radius: 3px; }
+
+ /* ── Filter bar ── */
+ .cal-filters { display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding: 12px 24px; background: var(--bg-subtle); border-bottom: 1px solid var(--glass-border); }
+ .cal-search { position: relative; flex: 1; min-width: 220px; max-width: 360px; }
+ .cal-search input { width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--surface); color: var(--text-body); font-size: 0.78rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+ .cal-search input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,0.12); }
+ .cal-filter-group { display: flex; flex-direction: column; gap: 4px; }
+ .cal-filter-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #94a3b8; padding-left: 2px; }
+ .cal-filter-fields { display: flex; gap: 6px; }
+ .cal-filters select { padding: 8px 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: var(--surface); color: var(--text-body); font-size: 0.78rem; font-weight: 600; cursor: pointer; outline: none; }
+ .cal-filters select:focus { border-color: #10b981; }
+ .cal-filter-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+ .cal-filter-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px; border-radius: 8px; border: none; background: #10b981; color: #fff; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+ .cal-filter-btn:hover { background: #059669; }
+ .cal-filter-clear { display: inline-flex; align-items: center; gap: 4px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--glass-border); color: var(--text-muted); font-size: 0.72rem; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+ .cal-filter-clear:hover { border-color: #fca5a5; color: #dc2626; }
+
+ /* ── Search results ── */
+ .cal-results { border-bottom: 1px solid var(--glass-border); background: var(--surface); }
+ .cal-results-head { display: flex; align-items: center; gap: 7px; padding: 10px 24px; font-size: 0.75rem; font-weight: 700; color: var(--text-body); border-bottom: 1px solid var(--border-subtle); }
+ .cal-results-list { max-height: 280px; overflow-y: auto; padding: 10px 24px 14px; }
+ .cal-result-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-subtle); margin-bottom: 6px; text-decoration: none; transition: all 0.2s; }
+ .cal-result-item:hover, .cal-result-item:target { border-color: #d1fae5; background: #f0fdf4; }
+ .up-date.done { background: #f0fdf4; border-color: #bbf7d0; }
+ .up-date.done .d { color: #059669; }
+ .up-date.done .m { color: #10b981; }
 
  /* ── Calendar ── */
  .cal-row { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--border-subtle); }
@@ -189,6 +250,9 @@ $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
  .cal-ev { font-size: 0.52rem; padding: 1px 4px; }
  .cal-bottom { flex-direction: column; }
  .cal-actions { width: 100%; border-left: none; }
+ .cal-filters { flex-direction: column; align-items: stretch; gap: 10px; }
+ .cal-search { max-width: none; }
+ .cal-filter-actions { margin-left: 0; justify-content: flex-end; }
  }
 
  /* ── Dark mode ── */
@@ -220,6 +284,12 @@ $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
  html[data-theme="dark"] .dm-status.done { color: #a7f3d0; background: rgba(16, 185, 129, 0.2); }
  html[data-theme="dark"] .dm-status.pend { color: #fcd34d; background: rgba(245, 158, 11, 0.15); }
  html[data-theme="dark"] .day-modal { background: rgba(2, 6, 23, 0.65); }
+ html[data-theme="dark"] .cal-result-item:hover,
+ html[data-theme="dark"] .cal-result-item:target { border-color: rgba(52, 211, 153, 0.4); background: rgba(16, 185, 129, 0.08); }
+ html[data-theme="dark"] .up-date.done { background: rgba(16, 185, 129, 0.14); border-color: rgba(52, 211, 153, 0.3); }
+ html[data-theme="dark"] .up-date.done .d,
+ html[data-theme="dark"] .up-date.done .m { color: #34d399; }
+ html[data-theme="dark"] .cal-filter-clear:hover { border-color: rgba(248, 113, 113, 0.5); color: #f87171; }
 </style>
 
 <div class="cal-page">
@@ -238,7 +308,7 @@ $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
  <!-- Toolbar -->
  <div class="cal-toolbar">
  <div class="cal-toolbar-left">
- <a href="?cal_month=<?php echo $prevM; ?>&cal_year=<?php echo $prevY; ?>" class="cal-nav-btn">
+ <a href="?cal_month=<?php echo $prevM; ?>&cal_year=<?php echo $prevY; ?><?php echo $filterQS; ?>" class="cal-nav-btn">
  <i data-lucide="chevron-left" style="width:15px;height:15px;"></i>
  </a>
  <div>
@@ -248,7 +318,7 @@ $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
  <?php if ($isCurrentMonth): ?><span class="live">This month</span><?php endif; ?>
  </div>
  </div>
- <a href="?cal_month=<?php echo $nextM; ?>&cal_year=<?php echo $nextY; ?>" class="cal-nav-btn">
+ <a href="?cal_month=<?php echo $nextM; ?>&cal_year=<?php echo $nextY; ?><?php echo $filterQS; ?>" class="cal-nav-btn">
  <i data-lucide="chevron-right" style="width:15px;height:15px;"></i>
  </a>
  </div>
@@ -261,6 +331,83 @@ $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
  </div>
  </div>
  </div>
+
+ <!-- Filter bar -->
+ <form method="get" class="cal-filters" id="calFilterForm">
+ <div class="cal-search">
+ <input type="text" name="q" id="calSearchInput" value="<?php echo htmlspecialchars($searchQ, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Search name, plot, or barangay…" autocomplete="off">
+ </div>
+
+ <div class="cal-filter-group">
+ <span class="cal-filter-label">Jump to</span>
+ <div class="cal-filter-fields">
+ <select name="cal_month" onchange="this.form.submit()" aria-label="Month">
+ <?php for ($m = 1; $m <= 12; $m++): ?>
+ <option value="<?php echo $m; ?>" <?php echo $m === $calMonth ? 'selected' : ''; ?>><?php echo date('F', mktime(0,0,0,$m,1)); ?></option>
+ <?php endfor; ?>
+ </select>
+ <select name="cal_year" onchange="this.form.submit()" aria-label="Year">
+ <?php for ($y = (int)date('Y') - 5; $y <= (int)date('Y') + 5; $y++): ?>
+ <option value="<?php echo $y; ?>" <?php echo $y === $calYear ? 'selected' : ''; ?>><?php echo $y; ?></option>
+ <?php endfor; ?>
+ </select>
+ </div>
+ </div>
+
+ <div class="cal-filter-group">
+ <span class="cal-filter-label">Status</span>
+ <div class="cal-filter-fields">
+ <select name="status" onchange="this.form.submit()" aria-label="Status">
+ <option value="all" <?php echo $filterStatus === 'all' ? 'selected' : ''; ?>>All</option>
+ <option value="scheduled" <?php echo $filterStatus === 'scheduled' ? 'selected' : ''; ?>>Scheduled</option>
+ <option value="completed" <?php echo $filterStatus === 'completed' ? 'selected' : ''; ?>>Completed</option>
+ </select>
+ </div>
+ </div>
+
+ <div class="cal-filter-actions">
+ <button type="submit" class="cal-filter-btn"><i data-lucide="filter" style="width:13px;height:13px;"></i> Filter</button>
+ <?php if ($searchQ !== '' || $filterStatus !== 'all'): ?>
+ <a href="?cal_month=<?php echo $calMonth; ?>&cal_year=<?php echo $calYear; ?>" class="cal-filter-clear"><i data-lucide="x" style="width:12px;height:12px;"></i> Clear</a>
+ <?php endif; ?>
+ </div>
+ </form>
+
+ <?php if ($searchQ !== ''): ?>
+ <!-- Search results across all months -->
+ <div class="cal-results">
+ <div class="cal-results-head">
+ <i data-lucide="search" style="width:14px;height:14px;color:#10b981;"></i>
+ <span><?php echo count($searchResults); ?> result<?php echo count($searchResults) !== 1 ? 's' : ''; ?> for “<?php echo htmlspecialchars($searchQ, ENT_QUOTES, 'UTF-8'); ?>”</span>
+ </div>
+ <?php if (empty($searchResults)): ?>
+ <div style="padding:16px 24px;font-size:0.8rem;color:#94a3b8;">No scheduled burials match your search.</div>
+ <?php else: ?>
+ <div class="cal-results-list">
+ <?php foreach ($searchResults as $r):
+ $rDate = strtotime($r['burial_date']);
+ $rDone = $r['is_buried'] == 1;
+ ?>
+ <a href="?cal_month=<?php echo (int)date('n', $rDate); ?>&cal_year=<?php echo (int)date('Y', $rDate); ?><?php echo $filterQS; ?>#r<?php echo (int)$r['id']; ?>" class="cal-result-item" id="r<?php echo (int)$r['id']; ?>">
+ <div class="up-date <?php echo $rDone ? 'done' : ''; ?>">
+ <div class="d"><?php echo date('j', $rDate); ?></div>
+ <div class="m"><?php echo date('M', $rDate); ?></div>
+ </div>
+ <div style="flex:1;min-width:0;">
+ <div style="font-weight:700;font-size:0.84rem;color:var(--text-strong);"><?php echo htmlspecialchars($r['decedent_name'], ENT_QUOTES, 'UTF-8'); ?></div>
+ <div style="font-size:0.72rem;color:var(--text-muted);">
+ <?php echo date('Y', $rDate); ?><?php echo $r['burial_time'] ? ' · ' . date('g:i A', strtotime($r['burial_time'])) : ''; ?> · Plot <?php echo htmlspecialchars($r['plot_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?>
+ <?php if ($r['barangay']): ?> · <?php echo htmlspecialchars($r['barangay'], ENT_QUOTES, 'UTF-8'); ?><?php endif; ?>
+ </div>
+ </div>
+ <span class="dm-status <?php echo $rDone ? 'done' : 'pend'; ?>"><?php echo $rDone ? 'Completed' : 'Scheduled'; ?></span>
+ <i data-lucide="chevron-right" style="width:14px;height:14px;color:#94a3b8;flex-shrink:0;"></i>
+ </a>
+ <?php endforeach; ?>
+ </div>
+ <?php endif; ?>
+ </div>
+ <?php endif; ?>
 
  <!-- Calendar grid — CSS grid, fills full width -->
  <div class="cal-grid">
@@ -395,6 +542,20 @@ $isCurrentMonth = ($calMonth === (int)date('n') && $calYear === (int)date('Y'));
 
 <script>
 const calendarData = <?php echo json_encode($calendarBurials); ?>;
+
+// Live search — auto-submits the filter form after a short pause
+const searchInput = document.getElementById('calSearchInput');
+let searchTimer;
+searchInput.addEventListener('input', () => {
+ clearTimeout(searchTimer);
+ searchTimer = setTimeout(() => document.getElementById('calFilterForm').submit(), 500);
+});
+
+// Keep focus in the search box after the page reloads
+if (searchInput.value !== '') {
+ searchInput.focus();
+ searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+}
 const monthName = <?php echo json_encode($monthName); ?>;
 
 function openDayDetail(day) {

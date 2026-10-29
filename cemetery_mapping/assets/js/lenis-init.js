@@ -9,7 +9,15 @@
     var lenis = new Lenis({
         duration: 1.1,
         easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); },
-        smoothWheel: true
+        smoothWheel: true,
+        // Let wheel events through inside scrollable containers (modals, maps,
+        // dropdown panels) so their own overflow scrolling still works.
+        prevent: function (node) {
+            return !!node.closest(
+                '.overflow-y-auto, .overflow-auto, .overflow-y-scroll, ' +
+                '.modal-overlay, .modal-content, [id$="Modal"], .leaflet-container'
+            );
+        }
     });
 
     function raf(time) {

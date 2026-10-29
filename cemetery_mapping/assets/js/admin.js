@@ -239,6 +239,9 @@ function initAdminMap(containerId, options = {}) {
         mapOpts.touchRotate = true;
         mapOpts.bearing = options.bearing;
     }
+    if (options.scrollWheelZoom === false) {
+        mapOpts.scrollWheelZoom = false;
+    }
 
     const map = L.map(containerId, mapOpts);
 
@@ -255,8 +258,11 @@ function initAdminMap(containerId, options = {}) {
         dashArray: '5, 10'
     }).addTo(map);
 
-    // Expose cemetery polygon on the map instance for boundary validation
-    map._cemeteryPolygon = CEMETERY_POLYGON;
+    // Expose a padded polygon for boundary validation — graves/markers may sit
+    // slightly outside the drawn red box, so allow a ~30% margin around it.
+    const cx = CEMETERY_POLYGON.reduce((s, p) => s + p[0], 0) / CEMETERY_POLYGON.length;
+    const cy = CEMETERY_POLYGON.reduce((s, p) => s + p[1], 0) / CEMETERY_POLYGON.length;
+    map._cemeteryPolygon = CEMETERY_POLYGON.map(p => [cx + (p[0] - cx) * 1.3, cy + (p[1] - cy) * 1.3]);
 
     // Hide the plugin's default rotate control if present
     if (options.bearing !== undefined) {

@@ -525,7 +525,7 @@ $expiring = count(array_filter($plots, function($p) use ($today) { return $p['ex
 
  setTimeout(() => {
  if (typeof lucide !== 'undefined') lucide.createIcons();
- const map = adminUtils.initAdminMap('modalMap', { bearing: 315 });
+ const map = adminUtils.initAdminMap('modalMap', { bearing: 315, scrollWheelZoom: false });
  let marker = null;
 
  // Show existing plots on the map so admin can avoid duplicates
@@ -536,7 +536,8 @@ $expiring = count(array_filter($plots, function($p) use ($today) { return $p['ex
  // Draw grid cells for plots with grids
  drawExistingPlotGrid(map, p);
  } else {
- const m = L.marker([parseFloat(p.latitude), parseFloat(p.longitude)], {
+ const mLat = parseFloat(p.latitude), mLng = parseFloat(p.longitude);
+ const m = L.marker([mLat, mLng], {
  icon: L.divIcon({
  className: 'existing-plot-marker',
  html: '<div style="width:12px;height:12px;background:#f59e0b;border:2px solid #fff;border-radius:50%;box-shadow:0 0 6px rgba(0,0,0,0.5);"></div>',
@@ -544,6 +545,23 @@ $expiring = count(array_filter($plots, function($p) use ($today) { return $p['ex
  iconAnchor: [6, 6]
  })
  }).addTo(map);
+ // Clicking an existing marker snaps the picker to that plot's exact coordinates
+ m.on('click', function() {
+ document.getElementById('latitude').value = mLat;
+ document.getElementById('longitude').value = mLng;
+ if (marker) {
+ marker.setLatLng([mLat, mLng]);
+ } else {
+ marker = L.marker([mLat, mLng], {
+ icon: L.divIcon({
+ className: 'custom-marker',
+ html: '<div style="background:#10b981;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 3px 8px rgba(16,185,129,0.5);"></div>',
+ iconSize: [16, 16],
+ iconAnchor: [8, 8]
+ })
+ }).addTo(map);
+ }
+ });
  m.bindPopup(`<strong>${escapeHtml(p.plot_number || 'Plot #' + p.id)}</strong><br><span style="color:#b45309;font-size:11px;">Already created</span>`);
  }
  }
@@ -696,7 +714,7 @@ $expiring = count(array_filter($plots, function($p) use ($today) { return $p['ex
 
  setTimeout(() => {
  if (typeof lucide !== 'undefined') lucide.createIcons();
- const editMap = adminUtils.initAdminMap('editModalMap', { bearing: 315 });
+ const editMap = adminUtils.initAdminMap('editModalMap', { bearing: 315, scrollWheelZoom: false });
  editMap.setView([plot.latitude, plot.longitude], 19);
 
  // Show other existing plots on the map (exclude current)
@@ -708,6 +726,7 @@ $expiring = count(array_filter($plots, function($p) use ($today) { return $p['ex
  drawExistingPlotGrid(editMap, p);
  } else {
  const m = L.marker([parseFloat(p.latitude), parseFloat(p.longitude)], {
+ bubblingMouseEvents: true,
  icon: L.divIcon({
  className: 'existing-plot-marker',
  html: '<div style="width:12px;height:12px;background:#f59e0b;border:2px solid #fff;border-radius:50%;box-shadow:0 0 6px rgba(0,0,0,0.5);"></div>',

@@ -42,6 +42,7 @@
                         ['map-view.php', 'map-view', 'Map View', 'map'],
                         ['available-plots.php', 'available-plots', 'Available Plots', 'map-pin'],
                         ['plot-grids.php', 'plot-grids', 'Plot Grids', 'grid'],
+                        ['compartment-manager.php', 'compartment-manager', 'Compartment Records', 'layers'],
                     ],
                 ],
                 'Renewals' => [
